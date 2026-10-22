@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_quiz_intro_scroll"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:fillViewport="true"
+    android:scrollbars="none"
+    tools:context=".QuizIntroActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="24dp">
+
+        <!-- Top Header Navigation -->
+        <RelativeLayout
+            android:id="@+id/header_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true">
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_toStartOf="@id/btn_close">
+
+                <TextView
+                    android:id="@+id/tv_header_subtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.05"
+                    android:text="@string/quiz_intro_step"
+                    android:textColor="@color/primary_maroon"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_header_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/tv_header_subtitle"
+                    android:layout_alignParentStart="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="@string/quiz_intro_title"
+                    android:textColor="@color/text_dark"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+            </RelativeLayout>
+
+            <!-- Close Button -->
+            <ImageButton
+                android:id="@+id/btn_close"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/ic_close_circle"
+                android:contentDescription="Close" />
+
+        </RelativeLayout>
+
+        <!-- Step Indicator Progress Dots (Step 3 active) -->
+        <LinearLayout
+            android:id="@+id/layout_step_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/header_layout"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="16dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <View
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:background="@drawable/bg_circle_button" />
+
+            <View
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/bg_circle_button" />
+
+            <!-- Step 3 Active Pill -->
+            <View
+                android:layout_width="22dp"
+                android:layout_height="8dp"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/bg_button_primary" />
+
+            <View
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/bg_circle_button" />
+
+        </LinearLayout>
+
+        <!-- Dark Maroon Banner Card -->
+        <RelativeLayout
+            android:id="@+id/card_banner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/layout_step_indicator"
+            android:layout_marginTop="24dp"
+            android:background="@drawable/bg_card_maroon"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="28dp">
+
+            <!-- Center Icons Row -->
+            <LinearLayout
+                android:id="@+id/layout_banner_icons"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="Moon"
+                    android:src="@drawable/ic_moon" />
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="16dp"
+                    android:contentDescription="Sparkles"
+                    android:src="@drawable/ic_sparkles" />
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="16dp"
+                    android:contentDescription="People"
+                    android:src="@drawable/ic_people" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_banner_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/layout_banner_icons"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="16dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/quiz_intro_banner_text"
+                android:textColor="@color/text_white"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_banner_sub"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_banner_title"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:lineSpacingExtra="2dp"
+                android:text="@string/quiz_intro_banner_sub"
+                android:textColor="@color/roomie_text_pink"
+                android:textSize="12sp" />
+
+        </RelativeLayout>
+
+        <!-- Title & Subtext below banner -->
+        <TextView
+            android:id="@+id/tv_quiz_heading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/card_banner"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="24dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/quiz_intro_heading"
+            android:textColor="@color/text_dark"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_quiz_subtext"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_quiz_heading"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="8dp"
+            android:lineSpacingExtra="2dp"
+            android:text="@string/quiz_intro_desc"
+            android:textColor="@color/text_subtitle"
+            android:textSize="14sp" />
+
+        <!-- Re-test Info Card -->
+        <RelativeLayout
+            android:id="@+id/card_retest_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_quiz_subtext"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/bg_card_outlined"
+            android:padding="16dp">
+
+            <ImageView
+                android:id="@+id/img_icon_refresh"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:contentDescription="Refresh Icon"
+                android:src="@drawable/ic_refresh" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="12dp"
+                android:layout_toEndOf="@id/img_icon_refresh">
+
+                <TextView
+                    android:id="@+id/tv_retest_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="@string/quiz_retest_title"
+                    android:textColor="@color/text_title"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_retest_sub"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/tv_retest_title"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/quiz_retest_subtext"
+                    android:textColor="@color/text_subtitle"
+                    android:textSize="12sp" />
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+        <!-- Primary Action Button (Bắt đầu bài kiểm tra) -->
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_start_quiz"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_below="@id/card_retest_info"
+            android:layout_marginTop="32dp"
+            android:background="@drawable/bg_button_primary"
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/btn_start_quiz"
+            android:textAllCaps="false"
+            android:textColor="@color/text_white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <!-- Footer Link (Để sau — kết quả sẽ chính xác hơn khi hoàn tất) -->
+        <TextView
+            android:id="@+id/tv_skip_quiz"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/btn_start_quiz"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:text="@string/btn_skip_quiz"
+            android:textColor="@color/text_subtitle"
+            android:textSize="12sp" />
+
+    </RelativeLayout>
+
+</ScrollView>

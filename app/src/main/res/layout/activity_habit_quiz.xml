@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_quiz_scroll"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:fillViewport="true"
+    android:scrollbars="none"
+    tools:context=".HabitQuizActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="24dp">
+
+        <!-- Top Header Navigation -->
+        <RelativeLayout
+            android:id="@+id/header_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true">
+
+            <ImageButton
+                android:id="@+id/btn_back"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/bg_circle_button"
+                android:contentDescription="@string/back"
+                android:padding="10dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_arrow_back" />
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="16dp"
+                android:layout_toStartOf="@id/btn_close"
+                android:layout_toEndOf="@id/btn_back">
+
+                <TextView
+                    android:id="@+id/tv_header_subtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.05"
+                    android:text="@string/quiz_header_subtitle"
+                    android:textColor="@color/primary_maroon"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_header_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/tv_header_subtitle"
+                    android:layout_alignParentStart="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="@string/quiz_header_title"
+                    android:textColor="@color/text_dark"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+            </RelativeLayout>
+
+            <ImageButton
+                android:id="@+id/btn_close"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/ic_close_circle"
+                android:contentDescription="Close" />
+
+        </RelativeLayout>
+
+        <!-- Question Progress Bar Row -->
+        <RelativeLayout
+            android:id="@+id/layout_progress_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/header_layout"
+            android:layout_marginTop="20dp">
+
+            <TextView
+                android:id="@+id/tv_question_number"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:fontFamily="sans-serif-medium"
+                android:text="Câu 1 / 8"
+                android:textColor="@color/text_title"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_time_left"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:text="@string/quiz_time_left"
+                android:textColor="@color/text_subtitle"
+                android:textSize="12sp" />
+
+            <ProgressBar
+                android:id="@+id/pb_quiz_progress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="6dp"
+                android:layout_below="@id/tv_question_number"
+                android:layout_marginTop="8dp"
+                android:max="8"
+                android:progress="1"
+                android:progressDrawable="@drawable/bg_button_primary" />
+
+        </RelativeLayout>
+
+        <!-- Category Icon Banner Card -->
+        <RelativeLayout
+            android:id="@+id/card_category_banner"
+            android:layout_width="match_parent"
+            android:layout_height="110dp"
+            android:layout_below="@id/layout_progress_row"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/bg_card_maroon">
+
+            <ImageView
+                android:id="@+id/img_category_icon"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_centerInParent="true"
+                android:contentDescription="Category Icon"
+                android:src="@drawable/ic_moon" />
+
+        </RelativeLayout>
+
+        <!-- Question Title & Subtext -->
+        <TextView
+            android:id="@+id/tv_question_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/card_category_banner"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="20dp"
+            android:fontFamily="sans-serif-medium"
+            android:lineSpacingExtra="2dp"
+            android:text="Bạn thường đi ngủ lúc mấy giờ?"
+            android:textColor="@color/text_dark"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_question_instruction"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_question_title"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="6dp"
+            android:text="@string/quiz_instruction"
+            android:textColor="@color/text_subtitle"
+            android:textSize="13sp" />
+
+        <!-- Options Container -->
+        <LinearLayout
+            android:id="@+id/layout_options_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_question_instruction"
+            android:layout_marginTop="20dp"
+            android:orientation="vertical">
+
+            <!-- Dynamic Option Card 1 -->
+            <RelativeLayout
+                android:id="@+id/card_option_1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_option_unselected"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="16dp">
+
+                <ImageView
+                    android:id="@+id/img_opt1_badge"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/bg_badge_mint" />
+
+                <TextView
+                    android:id="@+id/tv_opt1_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="12dp"
+                    android:layout_toStartOf="@id/img_opt1_radio"
+                    android:layout_toEndOf="@id/img_opt1_badge"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="Trước 23:00"
+                    android:textColor="@color/text_title"
+                    android:textSize="14sp" />
+
+                <ImageView
+                    android:id="@+id/img_opt1_radio"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/ic_radio_circle" />
+
+            </RelativeLayout>
+
+            <!-- Dynamic Option Card 2 -->
+            <RelativeLayout
+                android:id="@+id/card_option_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_option_selected"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="16dp">
+
+                <ImageView
+                    android:id="@+id/img_opt2_badge"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/bg_badge_mint" />
+
+                <TextView
+                    android:id="@+id/tv_opt2_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="12dp"
+                    android:layout_toStartOf="@id/img_opt2_radio"
+                    android:layout_toEndOf="@id/img_opt2_badge"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="Từ 23:00 đến 00:00"
+                    android:textColor="@color/text_title"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:id="@+id/img_opt2_radio"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/ic_check_circle" />
+
+            </RelativeLayout>
+
+            <!-- Dynamic Option Card 3 -->
+            <RelativeLayout
+                android:id="@+id/card_option_3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_option_unselected"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="16dp">
+
+                <ImageView
+                    android:id="@+id/img_opt3_badge"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/bg_badge_mint" />
+
+                <TextView
+                    android:id="@+id/tv_opt3_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="12dp"
+                    android:layout_toStartOf="@id/img_opt3_radio"
+                    android:layout_toEndOf="@id/img_opt3_badge"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="Sau 00:00, mình là cú đêm"
+                    android:textColor="@color/text_title"
+                    android:textSize="14sp" />
+
+                <ImageView
+                    android:id="@+id/img_opt3_radio"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/ic_radio_circle" />
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+        <!-- Bottom Action Buttons Row -->
+        <RelativeLayout
+            android:id="@+id/layout_bottom_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/layout_options_container"
+            android:layout_marginTop="28dp"
+            android:layout_marginBottom="16dp">
+
+            <!-- Back Button -->
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btn_quiz_prev"
+                android:layout_width="110dp"
+                android:layout_height="50dp"
+                android:layout_alignParentStart="true"
+                android:background="@drawable/bg_button_secondary"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/back"
+                android:textAllCaps="false"
+                android:textColor="@color/button_secondary_text"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <!-- Next Button -->
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btn_quiz_next"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginStart="12dp"
+                android:layout_toEndOf="@id/btn_quiz_prev"
+                android:background="@drawable/bg_button_primary"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/btn_next"
+                android:textAllCaps="false"
+                android:textColor="@color/text_white"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+</ScrollView>

@@ -1,0 +1,537 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_profile_scroll"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:fillViewport="true"
+    android:scrollbars="none"
+    tools:context=".ProfileSetupActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="24dp">
+
+        <!-- Top Header Navigation -->
+        <RelativeLayout
+            android:id="@+id/header_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true">
+
+            <ImageButton
+                android:id="@+id/btn_back"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/bg_circle_button"
+                android:contentDescription="@string/back"
+                android:padding="10dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_arrow_back" />
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="16dp"
+                android:layout_toEndOf="@id/btn_back">
+
+                <TextView
+                    android:id="@+id/tv_header_subtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.05"
+                    android:text="@string/profile_setup_subtitle"
+                    android:textColor="@color/primary_maroon"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_header_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/tv_header_subtitle"
+                    android:layout_alignParentStart="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="@string/profile_setup_title"
+                    android:textColor="@color/text_dark"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+        <!-- Avatar Selection Section -->
+        <RelativeLayout
+            android:id="@+id/layout_avatar_section"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/header_layout"
+            android:layout_marginTop="24dp">
+
+            <ImageView
+                android:id="@+id/img_avatar"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:contentDescription="@string/change_avatar"
+                android:src="@drawable/ic_avatar_placeholder" />
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="16dp"
+                android:layout_toEndOf="@id/img_avatar">
+
+                <TextView
+                    android:id="@+id/tv_change_avatar_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="@string/change_avatar"
+                    android:textColor="@color/primary_maroon"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_change_avatar_subtext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/tv_change_avatar_btn"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/change_avatar_subtext"
+                    android:textColor="@color/text_subtitle"
+                    android:textSize="12sp" />
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+        <!-- Field 1: Display Name -->
+        <TextView
+            android:id="@+id/tv_label_display_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/layout_avatar_section"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="20dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/label_display_name"
+            android:textColor="@color/text_title"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <RelativeLayout
+            android:id="@+id/layout_input_display_name"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_below="@id/tv_label_display_name"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_edittext_outlined"
+            android:paddingHorizontal="14dp">
+
+            <EditText
+                android:id="@+id/et_display_name"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:autofillHints="name"
+                android:background="@null"
+                android:hint="@string/hint_display_name"
+                android:inputType="textPersonName"
+                android:textColor="@color/text_title"
+                android:textColorHint="@color/text_subtitle"
+                android:textSize="14sp" />
+
+        </RelativeLayout>
+
+        <!-- Two-Column Row 1: Occupation & Location -->
+        <RelativeLayout
+            android:id="@+id/layout_row1_dropdowns"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/layout_input_display_name"
+            android:layout_marginTop="16dp">
+
+            <!-- Left Col: Occupation -->
+            <RelativeLayout
+                android:id="@+id/col_occupation"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_marginEnd="6dp"
+                android:layout_toStartOf="@id/view_center_divider1">
+
+                <TextView
+                    android:id="@+id/tv_label_occupation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="@string/label_occupation"
+                    android:textColor="@color/text_title"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <RelativeLayout
+                    android:id="@+id/layout_spinner_occupation"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_below="@id/tv_label_occupation"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_edittext_outlined"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingHorizontal="12dp">
+
+                    <ImageView
+                        android:id="@+id/img_arrow_occ"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:contentDescription="@string/label_occupation"
+                        android:src="@drawable/ic_chevron_down" />
+
+                    <TextView
+                        android:id="@+id/tv_val_occupation"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="8dp"
+                        android:layout_toEndOf="@id/img_arrow_occ"
+                        android:text="Sinh viên"
+                        android:textColor="@color/text_title"
+                        android:textSize="14sp" />
+
+                </RelativeLayout>
+
+            </RelativeLayout>
+
+            <!-- Center Divider Dummy View -->
+            <View
+                android:id="@+id/view_center_divider1"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:layout_centerHorizontal="true" />
+
+            <!-- Right Col: Location -->
+            <RelativeLayout
+                android:id="@+id/col_location"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginStart="6dp"
+                android:layout_toEndOf="@id/view_center_divider1">
+
+                <TextView
+                    android:id="@+id/tv_label_location"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="@string/label_location"
+                    android:textColor="@color/text_title"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <RelativeLayout
+                    android:id="@+id/layout_spinner_location"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_below="@id/tv_label_location"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_edittext_outlined"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingHorizontal="12dp">
+
+                    <ImageView
+                        android:id="@+id/img_arrow_loc"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:contentDescription="@string/label_location"
+                        android:src="@drawable/ic_chevron_down" />
+
+                    <TextView
+                        android:id="@+id/tv_val_location"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="8dp"
+                        android:layout_toEndOf="@id/img_arrow_loc"
+                        android:text="Quận 10"
+                        android:textColor="@color/text_title"
+                        android:textSize="14sp" />
+
+                </RelativeLayout>
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+        <!-- Field 3: Bio / Short Intro -->
+        <TextView
+            android:id="@+id/tv_label_bio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/layout_row1_dropdowns"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="16dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/label_bio"
+            android:textColor="@color/text_title"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <RelativeLayout
+            android:id="@+id/layout_input_bio"
+            android:layout_width="match_parent"
+            android:layout_height="90dp"
+            android:layout_below="@id/tv_label_bio"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_edittext_outlined"
+            android:padding="12dp">
+
+            <EditText
+                android:id="@+id/et_bio"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:autofillHints="none"
+                android:background="@null"
+                android:gravity="top|start"
+                android:hint="@string/hint_bio"
+                android:inputType="textMultiLine"
+                android:textColor="@color/text_title"
+                android:textColorHint="@color/text_subtitle"
+                android:textSize="14sp" />
+
+        </RelativeLayout>
+
+        <!-- Two-Column Row 2: Budget & Move-in Date -->
+        <RelativeLayout
+            android:id="@+id/layout_row2_inputs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/layout_input_bio"
+            android:layout_marginTop="16dp">
+
+            <!-- Left Col: Budget -->
+            <RelativeLayout
+                android:id="@+id/col_budget"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_marginEnd="6dp"
+                android:layout_toStartOf="@id/view_center_divider2">
+
+                <TextView
+                    android:id="@+id/tv_label_budget"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="@string/label_budget"
+                    android:textColor="@color/text_title"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <RelativeLayout
+                    android:id="@+id/layout_input_budget"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_below="@id/tv_label_budget"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_edittext_outlined"
+                    android:paddingHorizontal="12dp">
+
+                    <EditText
+                        android:id="@+id/et_budget"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:autofillHints="none"
+                        android:background="@null"
+                        android:hint="@string/hint_budget"
+                        android:inputType="text"
+                        android:textColor="@color/text_title"
+                        android:textColorHint="@color/text_subtitle"
+                        android:textSize="14sp" />
+
+                </RelativeLayout>
+
+            </RelativeLayout>
+
+            <!-- Center Divider Dummy View -->
+            <View
+                android:id="@+id/view_center_divider2"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:layout_centerHorizontal="true" />
+
+            <!-- Right Col: Move-in Date -->
+            <RelativeLayout
+                android:id="@+id/col_move_date"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginStart="6dp"
+                android:layout_toEndOf="@id/view_center_divider2">
+
+                <TextView
+                    android:id="@+id/tv_label_move_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="@string/label_move_in_date"
+                    android:textColor="@color/text_title"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <RelativeLayout
+                    android:id="@+id/layout_input_move_date"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_below="@id/tv_label_move_date"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_edittext_outlined"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingHorizontal="12dp">
+
+                    <EditText
+                        android:id="@+id/et_move_in_date"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:autofillHints="none"
+                        android:background="@null"
+                        android:focusable="false"
+                        android:hint="@string/hint_move_in_date"
+                        android:inputType="date"
+                        android:textColor="@color/text_title"
+                        android:textColorHint="@color/text_subtitle"
+                        android:textSize="14sp" />
+
+                </RelativeLayout>
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+        <!-- Selection Pills Row: Looking for -->
+        <TextView
+            android:id="@+id/tv_label_looking_for"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/layout_row2_inputs"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="20dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/label_looking_for"
+            android:textColor="@color/text_title"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:id="@+id/layout_pills_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_label_looking_for"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/btn_pill_find_room"
+                android:layout_width="wrap_content"
+                android:layout_height="42dp"
+                android:background="@drawable/bg_pill_selected"
+                android:clickable="true"
+                android:focusable="true"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:paddingHorizontal="16dp"
+                android:text="@string/opt_find_room"
+                android:textColor="@color/text_white"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/btn_pill_find_roommate"
+                android:layout_width="wrap_content"
+                android:layout_height="42dp"
+                android:layout_marginStart="10dp"
+                android:background="@drawable/bg_pill_unselected"
+                android:clickable="true"
+                android:focusable="true"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:paddingHorizontal="16dp"
+                android:text="@string/opt_find_roommate"
+                android:textColor="@color/text_title"
+                android:textSize="13sp" />
+
+        </LinearLayout>
+
+        <!-- Quiz Intro Link Section -->
+        <RelativeLayout
+            android:id="@+id/layout_quiz_intro"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/layout_pills_row"
+            android:layout_marginTop="20dp">
+
+            <TextView
+                android:id="@+id/tv_next_quiz_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/next_quiz_intro"
+                android:textColor="@color/primary_maroon"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_quiz_subtext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_next_quiz_title"
+                android:layout_alignParentStart="true"
+                android:layout_marginTop="4dp"
+                android:text="@string/quiz_subtext"
+                android:textColor="@color/text_subtitle"
+                android:textSize="12sp" />
+
+        </RelativeLayout>
+
+        <!-- Primary Action Button (Lưu & khám phá thói quen) -->
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_save_profile"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_below="@id/layout_quiz_intro"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/bg_button_primary"
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/btn_save_and_explore"
+            android:textAllCaps="false"
+            android:textColor="@color/text_white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+    </RelativeLayout>
+
+</ScrollView>

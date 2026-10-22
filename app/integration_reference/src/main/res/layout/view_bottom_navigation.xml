@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout_bottom_navigation"
+    android:layout_width="match_parent"
+    android:layout_height="64dp"
+    android:background="@drawable/bg_bottom_nav"
+    android:baselineAligned="false"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingHorizontal="8dp"
+    android:paddingVertical="4dp">
+
+    <!-- Tab 1: Khám phá (Selected) -->
+    <LinearLayout
+        android:id="@+id/nav_explore"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@drawable/bg_nav_item_selected"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/img_nav_explore"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:contentDescription="@string/nav_explore"
+            android:src="@drawable/ic_nav_explore" />
+
+        <TextView
+            android:id="@+id/tv_nav_explore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="@string/nav_explore"
+            android:textColor="@color/white"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Tab 2: Đã lưu -->
+    <LinearLayout
+        android:id="@+id/nav_saved"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/img_nav_saved"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:contentDescription="@string/nav_saved"
+            android:src="@drawable/ic_nav_saved" />
+
+        <TextView
+            android:id="@+id/tv_nav_saved"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="@string/nav_saved"
+            android:textColor="@color/nav_inactive"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+    <!-- Tab 3: Bài đăng -->
+    <LinearLayout
+        android:id="@+id/nav_post"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/img_nav_post"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:contentDescription="@string/nav_post"
+            android:src="@drawable/ic_nav_post" />
+
+        <TextView
+            android:id="@+id/tv_nav_post"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="@string/nav_post"
+            android:textColor="@color/nav_inactive"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+    <!-- Tab 4: Hồ sơ -->
+    <LinearLayout
+        android:id="@+id/nav_profile"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/img_nav_profile"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:contentDescription="@string/nav_profile"
+            android:src="@drawable/ic_nav_profile" />
+
+        <TextView
+            android:id="@+id/tv_nav_profile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="@string/nav_profile"
+            android:textColor="@color/nav_inactive"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+</LinearLayout>

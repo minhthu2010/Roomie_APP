@@ -1,0 +1,19 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.Roomie" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    </style>
+
+    <style name="Theme.Roomie" parent="Base.Theme.Roomie" />
+
+    <style name="Base.Theme.Roomie.PostFlow" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/roomie_primary</item>
+        <item name="colorSurface">@color/roomie_surface</item>
+        <item name="android:colorBackground">@color/roomie_background</item>
+        <item name="elevationOverlayEnabled">false</item>
+        <item name="android:windowBackground">@color/roomie_background</item>
+    </style>
+
+    <style name="Theme.Roomie.PostFlow" parent="Base.Theme.Roomie.PostFlow" />
+</resources>

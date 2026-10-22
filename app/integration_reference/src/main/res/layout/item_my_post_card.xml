@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_card_outline"
+    android:orientation="vertical"
+    android:padding="9dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="86dp">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/img_my_post"
+            android:layout_width="86dp"
+            android:layout_height="86dp"
+            android:layout_alignParentStart="true"
+            android:scaleType="centerCrop"
+            android:src="@drawable/img_room1"
+            app:shapeAppearanceOverlay="@style/cr8" />
+
+        <TextView
+            android:id="@+id/btn_post_menu"
+            android:layout_width="18dp"
+            android:layout_height="24dp"
+            android:layout_alignParentEnd="true"
+            android:gravity="center"
+            android:text="⋮"
+            android:textColor="@color/text_secondary"
+            android:textSize="18sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="10dp"
+            android:layout_toEndOf="@id/img_my_post"
+            android:layout_toStartOf="@id/btn_post_menu"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_my_post_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_badge_sage"
+                android:paddingHorizontal="9dp"
+                android:paddingVertical="3dp"
+                android:text="@string/my_post_status_searching"
+                android:textColor="@color/text_primary"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/tv_my_post_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:maxLines="2"
+                android:text="@string/my_post1_title"
+                android:textColor="@color/text_primary"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/tv_my_post_price"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="@string/my_post1_price"
+                android:textColor="@color/primary_maroon"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_my_post_address"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="2"
+                android:text="@string/my_post1_address"
+                android:textColor="@color/text_secondary"
+                android:textSize="9sp" />
+
+            <TextView
+                android:id="@+id/tv_my_post_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/my_post1_interest"
+                android:textColor="@color/text_secondary"
+                android:textSize="9sp" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="26dp"
+        android:layout_marginTop="7dp"
+        android:orientation="horizontal">
+
+        <TextView android:id="@+id/btn_my_post_view" style="@style/MyPostAction" android:text="@string/my_post_action_view" />
+        <TextView style="@style/MyPostAction" android:text="@string/my_post_action_edit" />
+        <TextView style="@style/MyPostAction" android:layout_weight="2" android:text="@string/my_post_action_status" />
+        <TextView style="@style/MyPostAction" android:text="@string/my_post_action_hide" />
+        <TextView style="@style/MyPostAction" android:background="@drawable/bg_btn_cancel" android:text="@string/my_post_action_delete" android:textColor="@color/status_error" />
+    </LinearLayout>
+</LinearLayout>

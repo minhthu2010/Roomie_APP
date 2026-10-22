@@ -1,0 +1,38 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="100dp"
+    android:height="100dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+    <!-- Wall background -->
+    <path
+        android:fillColor="#EFECE6"
+        android:pathData="M0,0h100v100h-100z" />
+    <!-- Floor -->
+    <path
+        android:fillColor="#C69C6D"
+        android:pathData="M0,70h100v30h-100z" />
+    <!-- Window -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M40,15h30v35h-30z" />
+    <path
+        android:strokeColor="#A09386"
+        android:strokeWidth="1.5"
+        android:pathData="M40,15h30v35h-30z M55,15v35 M40,32h30" />
+    <!-- Greenery outside window -->
+    <path
+        android:fillColor="#93A987"
+        android:pathData="M45,25 Q55,20 65,28 Q60,38 45,35 Z" />
+    <!-- Loft Bed Beam -->
+    <path
+        android:fillColor="#5A4B41"
+        android:pathData="M0,10h100v8h-100z M80,18h6v52h-6z" />
+    <!-- Desk & Chair -->
+    <path
+        android:fillColor="#7A685A"
+        android:pathData="M10,55h30v18h-30z M15,48h10v7h-10z" />
+    <!-- Chair -->
+    <path
+        android:fillColor="#2D121B"
+        android:pathData="M22,58h8v15h-8z M20,52h12v6h-12z" />
+</vector>

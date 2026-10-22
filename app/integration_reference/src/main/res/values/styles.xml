@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="cr999">
+        <item name="cornerSize">999dp</item>
+    </style>
+    <style name="cr8">
+        <item name="cornerSize">8dp</item>
+    </style>
+    <style name="cr12">
+        <item name="cornerSize">12dp</item>
+    </style>
+    <style name="CompatibilityCriterionCard">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:background">@drawable/bg_card_outline</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:padding">12dp</item>
+    </style>
+    <style name="CompatibilityCriterionTitle" parent="@android:style/Widget.TextView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="CompatibilityDetail" parent="@android:style/Widget.TextView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+    <style name="CompatibilityStatusGood" parent="@android:style/Widget.TextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">6dp</item>
+        <item name="android:background">@drawable/bg_badge_sage</item>
+        <item name="android:paddingHorizontal">9dp</item>
+        <item name="android:paddingVertical">4dp</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">11sp</item>
+    </style>
+    <style name="CompatibilityStatusDiscuss" parent="@android:style/Widget.TextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">6dp</item>
+        <item name="android:background">@drawable/bg_chip_unselected</item>
+        <item name="android:paddingHorizontal">9dp</item>
+        <item name="android:paddingVertical">4dp</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">11sp</item>
+    </style>
+    <style name="CompatibilityStatusUnknown" parent="@android:style/Widget.TextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">6dp</item>
+        <item name="android:background">@drawable/bg_card_outline</item>
+        <item name="android:paddingHorizontal">9dp</item>
+        <item name="android:paddingVertical">4dp</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">11sp</item>
+    </style>
+    <style name="MyPostAction" parent="@android:style/Widget.TextView">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginEnd">3dp</item>
+        <item name="android:background">@drawable/bg_badge_sage</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingHorizontal">1dp</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">8sp</item>
+    </style>
+</resources>

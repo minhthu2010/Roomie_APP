@@ -1,0 +1,66 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="180dp"
+    android:height="225dp"
+    android:viewportWidth="360"
+    android:viewportHeight="450">
+    <!-- Map Base Background -->
+    <path
+        android:fillColor="@color/map_bg"
+        android:pathData="M0,0h360v450h-360z" />
+
+    <!-- Parks / Greenery Areas -->
+    <path
+        android:fillColor="@color/map_park"
+        android:pathData="M120,20 L240,10 L300,70 L280,140 L160,110 Z
+                          M220,180 L350,210 L350,330 L230,290 Z
+                          M10,250 L80,230 L110,320 L20,340 Z" />
+
+    <!-- Grid / Minor Streets -->
+    <path
+        android:strokeColor="@color/map_grid"
+        android:strokeWidth="3"
+        android:pathData="M0,40 L360,120
+                          M0,100 L360,180
+                          M0,170 L360,250
+                          M0,240 L360,320
+                          M0,310 L360,390
+                          M0,380 L360,450
+                          M40,0 L180,450
+                          M110,0 L250,450
+                          M180,0 L320,450
+                          M260,0 L360,320" />
+
+    <!-- Main Road 1 (Đường 3/2) -->
+    <path
+        android:strokeColor="@color/white"
+        android:strokeWidth="14"
+        android:pathData="M0,130 L360,310" />
+    <path
+        android:strokeColor="@color/map_road_stroke"
+        android:strokeWidth="16"
+        android:pathData="M0,130 L360,310" />
+
+    <!-- Main Road 2 (Lý Thường Kiệt) -->
+    <path
+        android:strokeColor="@color/white"
+        android:strokeWidth="14"
+        android:pathData="M120,450 L260,0" />
+
+    <path
+        android:strokeColor="@color/map_road_stroke"
+        android:strokeWidth="16"
+        android:pathData="M120,450 L260,0" />
+
+    <!-- Orange/Red Polygon Boundary Outlines -->
+    <path
+        android:strokeColor="@color/map_polygon"
+        android:strokeWidth="3"
+        android:fillColor="#15E87455"
+        android:pathData="M178,235 L232,185 L292,205 L215,262 Z" />
+
+    <path
+        android:strokeColor="@color/map_polygon"
+        android:strokeWidth="3"
+        android:fillColor="#15E87455"
+        android:pathData="M73,328 L130,283 L152,310 L95,342 Z" />
+</vector>

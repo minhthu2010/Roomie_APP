@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_screen"
+    tools:context=".ui.post.PostFlowActivity">
+
+    <!-- Top Navigation Bar -->
+    <LinearLayout
+        android:id="@+id/header_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="8dp">
+
+        <ImageButton
+            android:id="@+id/btn_back_icon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_circle_button"
+            android:contentDescription="@string/btn_back"
+            android:src="@drawable/ic_arrow_back" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_header_caption"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/caption_posted"
+                android:textColor="@color/maroon_primary"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tv_header_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/title_create_post"
+                android:textColor="@color/roomie_text_primary"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_header_subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/auto_save_draft"
+                android:textColor="@color/roomie_text_secondary"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_read_all"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:background="@drawable/bg_chip_outline"
+            android:paddingHorizontal="12dp"
+            android:text="@string/btn_read_all"
+            android:textAllCaps="false"
+            android:textColor="@color/roomie_text_primary"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <!-- Header Divider Line -->
+    <View
+        android:id="@+id/header_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/header_bar"
+        android:background="@color/card_stroke" />
+
+    <!-- Step Progress Section -->
+    <LinearLayout
+        android:id="@+id/progress_section"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/header_divider"
+        android:orientation="vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="12dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/tv_step_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_toStartOf="@id/tv_step_percent"
+                android:text="@string/step_progress_text"
+                android:textColor="@color/roomie_text_primary"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_step_percent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:text="@string/step_progress_percent"
+                android:textColor="@color/text_muted"
+                android:textSize="13sp" />
+        </RelativeLayout>
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:max="100"
+            android:progress="60"
+            android:progressDrawable="@drawable/progress_bar_custom" />
+    </LinearLayout>
+
+    <!-- Bottom Action Buttons Bar -->
+    <LinearLayout
+        android:id="@+id/bottom_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@color/bg_screen"
+        android:orientation="horizontal"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="16dp">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_back"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_button_secondary"
+            android:text="@string/btn_back"
+            android:textAllCaps="false"
+            android:textColor="@color/text_button_secondary"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_next"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1.2"
+            android:background="@drawable/bg_button_primary"
+            android:text="@string/btn_next"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- ViewFlipper holding all screens -->
+    <ViewFlipper
+        android:id="@+id/view_flipper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottom_bar"
+        android:layout_below="@id/progress_section">
+
+        <include
+            android:id="@+id/layout_step_3"
+            layout="@layout/layout_step_roommate" />
+
+        <include
+            android:id="@+id/layout_step_4"
+            layout="@layout/layout_step_pin_location" />
+
+        <include
+            android:id="@+id/layout_step_5"
+            layout="@layout/layout_step_add_photos" />
+
+        <include
+            android:id="@+id/layout_preview"
+            layout="@layout/layout_preview_post" />
+
+        <include
+            android:id="@+id/layout_success"
+            layout="@layout/layout_post_success" />
+
+        <include
+            android:id="@+id/layout_my_post"
+            layout="@layout/layout_my_post_detail" />
+
+        <include
+            android:id="@+id/layout_edit"
+            layout="@layout/layout_edit_post" />
+
+        <include
+            android:id="@+id/layout_manage_status"
+            layout="@layout/layout_manage_status" />
+
+        <include
+            android:id="@+id/layout_delete_post"
+            layout="@layout/layout_delete_post" />
+
+        <include
+            android:id="@+id/layout_drafts"
+            layout="@layout/layout_draft_posts" />
+
+        <include
+            android:id="@+id/layout_profile"
+            layout="@layout/layout_my_profile" />
+
+        <include
+            android:id="@+id/layout_notif"
+            layout="@layout/layout_notifications" />
+
+        <include
+            android:id="@+id/layout_edit_prof"
+            layout="@layout/layout_edit_profile" />
+
+        <include
+            android:id="@+id/layout_verification"
+            layout="@layout/layout_verification_safety" />
+
+        <include
+            android:id="@+id/layout_settings_screen"
+            layout="@layout/layout_settings" />
+
+        <include
+            android:id="@+id/layout_change_pass"
+            layout="@layout/layout_change_password" />
+
+        <include
+            android:id="@+id/layout_notif_set"
+            layout="@layout/layout_notification_settings" />
+
+        <include
+            android:id="@+id/layout_help_screen"
+            layout="@layout/layout_help_support" />
+
+        <include
+            android:id="@+id/layout_feedback"
+            layout="@layout/layout_send_feedback" />
+
+        <include
+            android:id="@+id/layout_priv_account"
+            layout="@layout/layout_privacy_account" />
+
+    </ViewFlipper>
+
+</RelativeLayout>

@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_verify_reg_scroll"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:fillViewport="true"
+    android:scrollbars="none"
+    tools:context=".VerifyRegisterActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="24dp">
+
+        <!-- Top Header Navigation -->
+        <RelativeLayout
+            android:id="@+id/header_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true">
+
+            <ImageButton
+                android:id="@+id/btn_back"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/bg_circle_button"
+                android:contentDescription="@string/back"
+                android:padding="10dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_arrow_back" />
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="16dp"
+                android:layout_toEndOf="@id/btn_back">
+
+                <TextView
+                    android:id="@+id/tv_header_subtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.05"
+                    android:text="@string/register_step2_subtitle"
+                    android:textColor="@color/primary_maroon"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_header_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/tv_header_subtitle"
+                    android:layout_alignParentStart="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="@string/register_step2_title"
+                    android:textColor="@color/text_dark"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+        <!-- Step Indicator Progress Dots (Step 2 active) -->
+        <LinearLayout
+            android:id="@+id/layout_step_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/header_layout"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="20dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <View
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:background="@drawable/bg_circle_button" />
+
+            <!-- Step 2 Active Pill -->
+            <View
+                android:layout_width="22dp"
+                android:layout_height="8dp"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/bg_button_primary" />
+
+            <View
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/bg_circle_button" />
+
+            <View
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/bg_circle_button" />
+
+        </LinearLayout>
+
+        <!-- Center Badge Container (Message Lock icon inside mint box) -->
+        <RelativeLayout
+            android:id="@+id/layout_badge"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_below="@id/layout_step_indicator"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="32dp"
+            android:background="@drawable/bg_badge_mint">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_centerInParent="true"
+                android:contentDescription="@string/register_step2_title"
+                android:src="@drawable/ic_message_lock" />
+
+        </RelativeLayout>
+
+        <!-- Title & Description -->
+        <TextView
+            android:id="@+id/tv_verify_heading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/layout_badge"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="24dp"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center"
+            android:text="@string/verify_code_heading"
+            android:textColor="@color/text_dark"
+            android:textSize="26sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_verify_subtext"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_verify_heading"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:lineSpacingExtra="2dp"
+            android:textColor="@color/text_subtitle"
+            android:textSize="14sp" />
+
+        <!-- 6 OTP Input Boxes Row -->
+        <LinearLayout
+            android:id="@+id/layout_otp_inputs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_verify_subtext"
+            android:layout_marginTop="24dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/et_otp_1"
+                android:layout_width="48dp"
+                android:layout_height="52dp"
+                android:layout_marginEnd="6dp"
+                android:autofillHints="oneTimeCode"
+                android:background="@drawable/bg_otp_box"
+                android:gravity="center"
+                android:hint=""
+                android:inputType="number"
+                android:maxLength="1"
+                android:textColor="@color/text_title"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/et_otp_2"
+                android:layout_width="48dp"
+                android:layout_height="52dp"
+                android:layout_marginEnd="6dp"
+                android:autofillHints="oneTimeCode"
+                android:background="@drawable/bg_otp_box"
+                android:gravity="center"
+                android:hint=""
+                android:inputType="number"
+                android:maxLength="1"
+                android:textColor="@color/text_title"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/et_otp_3"
+                android:layout_width="48dp"
+                android:layout_height="52dp"
+                android:layout_marginEnd="6dp"
+                android:autofillHints="oneTimeCode"
+                android:background="@drawable/bg_otp_box"
+                android:gravity="center"
+                android:hint=""
+                android:inputType="number"
+                android:maxLength="1"
+                android:textColor="@color/text_title"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/et_otp_4"
+                android:layout_width="48dp"
+                android:layout_height="52dp"
+                android:layout_marginEnd="6dp"
+                android:autofillHints="oneTimeCode"
+                android:background="@drawable/bg_otp_box"
+                android:gravity="center"
+                android:hint=""
+                android:inputType="number"
+                android:maxLength="1"
+                android:textColor="@color/text_title"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/et_otp_5"
+                android:layout_width="48dp"
+                android:layout_height="52dp"
+                android:layout_marginEnd="6dp"
+                android:autofillHints="oneTimeCode"
+                android:background="@drawable/bg_otp_box"
+                android:gravity="center"
+                android:hint=""
+                android:inputType="number"
+                android:maxLength="1"
+                android:textColor="@color/text_title"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/et_otp_6"
+                android:layout_width="48dp"
+                android:layout_height="52dp"
+                android:autofillHints="oneTimeCode"
+                android:background="@drawable/bg_otp_box"
+                android:gravity="center"
+                android:hint=""
+                android:inputType="number"
+                android:maxLength="1"
+                android:textColor="@color/text_title"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <!-- Timer & Resend Link -->
+        <TextView
+            android:id="@+id/tv_resend_code"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/layout_otp_inputs"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp"
+            android:text="@string/otp_resend_timer"
+            android:textColor="@color/text_subtitle"
+            android:textSize="13sp" />
+
+        <!-- Primary Action Button (Xác thực) -->
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_verify"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_below="@id/tv_resend_code"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp"
+            android:background="@drawable/bg_button_primary"
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/btn_verify"
+            android:textAllCaps="false"
+            android:textColor="@color/text_white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+    </RelativeLayout>
+
+</ScrollView>
