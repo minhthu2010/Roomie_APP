@@ -149,6 +149,12 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
+        <!-- Create Post Flow Activity -->
+        <activity
+            android:name=".ui.post.PostFlowActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
         <!-- Matching Results Activity -->
         <activity
             android:name=".ui.matching.KetQuaTuongThichActivity"

@@ -14,6 +14,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.roomie.R;
 import com.example.roomie.common.BottomNavHelper;
+import com.example.roomie.ui.post.PostFlowActivity;
 import com.example.roomie.ui.room.ChiTietPhongActivity;
 
 public class BaiDangCuaToiActivity extends AppCompatActivity {
@@ -48,6 +49,15 @@ public class BaiDangCuaToiActivity extends AppCompatActivity {
         if (p2 != null && p2.findViewById(R.id.btn_my_post_view) != null) p2.findViewById(R.id.btn_my_post_view).setOnClickListener(openRoom);
         View p3 = findViewById(R.id.my_post3);
         if (p3 != null && p3.findViewById(R.id.btn_my_post_view) != null) p3.findViewById(R.id.btn_my_post_view).setOnClickListener(openRoom);
+
+        View btnCreatePost = findViewById(R.id.btn_create_post);
+        if (btnCreatePost != null) {
+            btnCreatePost.setOnClickListener(v -> {
+                Intent intent = new Intent(this, PostFlowActivity.class);
+                intent.putExtra(PostFlowActivity.EXTRA_STEP, 3);
+                startActivity(intent);
+            });
+        }
     }
 
     private void bindPost(int cardId, int imageRes, int statusRes, int titleRes, int priceRes,
