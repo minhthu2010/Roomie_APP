@@ -54,7 +54,7 @@ public class BaiDangCuaToiActivity extends AppCompatActivity {
         if (btnCreatePost != null) {
             btnCreatePost.setOnClickListener(v -> {
                 Intent intent = new Intent(this, PostFlowActivity.class);
-                intent.putExtra(PostFlowActivity.EXTRA_STEP, 3);
+                intent.putExtra(PostFlowActivity.EXTRA_STEP, 1);
                 startActivity(intent);
             });
         }

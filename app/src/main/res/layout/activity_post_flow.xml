@@ -179,6 +179,14 @@
         android:layout_below="@id/progress_section">
 
         <include
+            android:id="@+id/layout_step_1"
+            layout="@layout/layout_step_basic_info" />
+
+        <include
+            android:id="@+id/layout_step_2"
+            layout="@layout/layout_step_price_amenities" />
+
+        <include
             android:id="@+id/layout_step_3"
             layout="@layout/layout_step_roommate" />
 

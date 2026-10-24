@@ -100,7 +100,9 @@ public class PostFlowActivity extends AppCompatActivity {
         });
 
         if (getIntent() != null && getIntent().hasExtra(EXTRA_STEP)) {
-            currentStep = getIntent().getIntExtra(EXTRA_STEP, 3);
+            currentStep = getIntent().getIntExtra(EXTRA_STEP, 1);
+        } else {
+            currentStep = 1;
         }
 
         initViews();
@@ -489,7 +491,7 @@ public class PostFlowActivity extends AppCompatActivity {
     }
 
     private void handleBackNavigation() {
-        if (currentStep > 3) {
+        if (currentStep > 1) {
             if (currentStep == 9 || currentStep == 10 || currentStep == 12 || currentStep == 13) {
                 currentStep = 8;
             } else if (currentStep == 11) {
@@ -516,7 +518,35 @@ public class PostFlowActivity extends AppCompatActivity {
             bottomNavEdit.setVisibility(View.GONE);
         }
 
-        if (currentStep == 3) {
+        if (currentStep == 1) {
+            tvHeaderCaption.setVisibility(View.GONE);
+            tvHeaderTitle.setText(R.string.title_create_post);
+            tvHeaderSubtitle.setText(R.string.auto_save_draft);
+            tvHeaderSubtitle.setVisibility(View.VISIBLE);
+            progressSection.setVisibility(View.VISIBLE);
+            bottomBar.setVisibility(View.VISIBLE);
+            tvStepTitle.setText(R.string.step1_progress_text);
+            tvStepPercent.setText(R.string.step1_progress_percent);
+            progressBar.setProgress(20);
+            btnBack.setVisibility(View.VISIBLE);
+            btnBack.setText(R.string.btn_back);
+            btnNext.setText(R.string.btn_next);
+            viewFlipper.setDisplayedChild(0);
+        } else if (currentStep == 2) {
+            tvHeaderCaption.setVisibility(View.GONE);
+            tvHeaderTitle.setText(R.string.title_create_post);
+            tvHeaderSubtitle.setText(R.string.auto_save_draft);
+            tvHeaderSubtitle.setVisibility(View.VISIBLE);
+            progressSection.setVisibility(View.VISIBLE);
+            bottomBar.setVisibility(View.VISIBLE);
+            tvStepTitle.setText(R.string.step2_progress_text);
+            tvStepPercent.setText(R.string.step2_progress_percent);
+            progressBar.setProgress(40);
+            btnBack.setVisibility(View.VISIBLE);
+            btnBack.setText(R.string.btn_back);
+            btnNext.setText(R.string.btn_next);
+            viewFlipper.setDisplayedChild(1);
+        } else if (currentStep == 3) {
             tvHeaderCaption.setVisibility(View.GONE);
             tvHeaderTitle.setText(R.string.title_create_post);
             tvHeaderSubtitle.setText(R.string.auto_save_draft);
@@ -529,7 +559,7 @@ public class PostFlowActivity extends AppCompatActivity {
             btnBack.setVisibility(View.VISIBLE);
             btnBack.setText(R.string.btn_back);
             btnNext.setText(R.string.btn_next);
-            viewFlipper.setDisplayedChild(0);
+            viewFlipper.setDisplayedChild(2);
         } else if (currentStep == 4) {
             tvHeaderCaption.setVisibility(View.GONE);
             tvHeaderTitle.setText(R.string.title_create_post);
@@ -543,7 +573,7 @@ public class PostFlowActivity extends AppCompatActivity {
             btnBack.setVisibility(View.VISIBLE);
             btnBack.setText(R.string.btn_back);
             btnNext.setText(R.string.btn_next);
-            viewFlipper.setDisplayedChild(1);
+            viewFlipper.setDisplayedChild(3);
         } else if (currentStep == 5) {
             tvHeaderCaption.setVisibility(View.GONE);
             tvHeaderTitle.setText(R.string.title_create_post);
@@ -557,7 +587,7 @@ public class PostFlowActivity extends AppCompatActivity {
             btnBack.setVisibility(View.VISIBLE);
             btnBack.setText(R.string.btn_back);
             btnNext.setText(R.string.btn_preview);
-            viewFlipper.setDisplayedChild(2);
+            viewFlipper.setDisplayedChild(4);
         } else if (currentStep == 6) {
             tvHeaderCaption.setVisibility(View.GONE);
             tvHeaderTitle.setText(R.string.title_preview_post);
@@ -568,7 +598,7 @@ public class PostFlowActivity extends AppCompatActivity {
             btnBack.setVisibility(View.VISIBLE);
             btnBack.setText(R.string.btn_edit);
             btnNext.setText(R.string.btn_publish);
-            viewFlipper.setDisplayedChild(3);
+            viewFlipper.setDisplayedChild(5);
         } else if (currentStep == 7) {
             tvHeaderCaption.setVisibility(View.GONE);
             tvHeaderTitle.setText(R.string.title_post_success_header);
@@ -577,7 +607,7 @@ public class PostFlowActivity extends AppCompatActivity {
             bottomBar.setVisibility(View.VISIBLE);
             btnBack.setVisibility(View.GONE);
             btnNext.setText(R.string.btn_my_posts);
-            viewFlipper.setDisplayedChild(4);
+            viewFlipper.setDisplayedChild(6);
         } else if (currentStep == 8) {
             tvHeaderCaption.setVisibility(View.VISIBLE);
             tvHeaderCaption.setText(R.string.caption_posted);
@@ -585,7 +615,7 @@ public class PostFlowActivity extends AppCompatActivity {
             tvHeaderSubtitle.setVisibility(View.GONE);
             progressSection.setVisibility(View.GONE);
             bottomBar.setVisibility(View.GONE);
-            viewFlipper.setDisplayedChild(5);
+            viewFlipper.setDisplayedChild(7);
         } else if (currentStep == 9) {
             tvHeaderCaption.setVisibility(View.VISIBLE);
             tvHeaderCaption.setText(R.string.caption_draft_saved);
@@ -596,7 +626,7 @@ public class PostFlowActivity extends AppCompatActivity {
             if (bottomNavEdit != null) {
                 bottomNavEdit.setVisibility(View.VISIBLE);
             }
-            viewFlipper.setDisplayedChild(6);
+            viewFlipper.setDisplayedChild(8);
         } else if (currentStep == 10) {
             tvHeaderCaption.setVisibility(View.GONE);
             tvHeaderTitle.setText(R.string.title_manage_status);
@@ -606,21 +636,21 @@ public class PostFlowActivity extends AppCompatActivity {
             btnBack.setVisibility(View.VISIBLE);
             btnBack.setText(R.string.btn_cancel);
             btnNext.setText(R.string.btn_save_status);
-            viewFlipper.setDisplayedChild(7);
+            viewFlipper.setDisplayedChild(9);
         } else if (currentStep == 11) {
             tvHeaderCaption.setVisibility(View.GONE);
             tvHeaderTitle.setText(R.string.title_delete_post_header);
             tvHeaderSubtitle.setVisibility(View.GONE);
             progressSection.setVisibility(View.GONE);
             bottomBar.setVisibility(View.GONE);
-            viewFlipper.setDisplayedChild(8);
+            viewFlipper.setDisplayedChild(10);
         } else if (currentStep == 12) {
             tvHeaderCaption.setVisibility(View.GONE);
             tvHeaderTitle.setText(R.string.title_drafts_header);
             tvHeaderSubtitle.setVisibility(View.GONE);
             progressSection.setVisibility(View.GONE);
             bottomBar.setVisibility(View.GONE);
-            viewFlipper.setDisplayedChild(9);
+            viewFlipper.setDisplayedChild(11);
         } else if (currentStep == 13) {
             tvHeaderCaption.setVisibility(View.VISIBLE);
             tvHeaderCaption.setText(R.string.caption_member_since);
@@ -628,7 +658,7 @@ public class PostFlowActivity extends AppCompatActivity {
             tvHeaderSubtitle.setVisibility(View.GONE);
             progressSection.setVisibility(View.GONE);
             bottomBar.setVisibility(View.GONE);
-            viewFlipper.setDisplayedChild(10);
+            viewFlipper.setDisplayedChild(12);
         } else if (currentStep == 14) {
             tvHeaderCaption.setVisibility(View.VISIBLE);
             tvHeaderCaption.setText(R.string.caption_inbox);
@@ -637,28 +667,28 @@ public class PostFlowActivity extends AppCompatActivity {
             btnReadAll.setVisibility(View.VISIBLE);
             progressSection.setVisibility(View.GONE);
             bottomBar.setVisibility(View.GONE);
-            viewFlipper.setDisplayedChild(11);
+            viewFlipper.setDisplayedChild(13);
         } else if (currentStep == 15) {
             tvHeaderCaption.setVisibility(View.GONE);
             tvHeaderTitle.setText(R.string.title_edit_profile);
             tvHeaderSubtitle.setVisibility(View.GONE);
             progressSection.setVisibility(View.GONE);
             bottomBar.setVisibility(View.GONE);
-            viewFlipper.setDisplayedChild(12);
+            viewFlipper.setDisplayedChild(14);
         } else if (currentStep == 16) {
             tvHeaderCaption.setVisibility(View.GONE);
             tvHeaderTitle.setText(R.string.title_verification_safety);
             tvHeaderSubtitle.setVisibility(View.GONE);
             progressSection.setVisibility(View.GONE);
             bottomBar.setVisibility(View.GONE);
-            viewFlipper.setDisplayedChild(13);
+            viewFlipper.setDisplayedChild(15);
         } else if (currentStep == 17) {
             tvHeaderCaption.setVisibility(View.GONE);
             tvHeaderTitle.setText(R.string.title_settings);
             tvHeaderSubtitle.setVisibility(View.GONE);
             progressSection.setVisibility(View.GONE);
             bottomBar.setVisibility(View.GONE);
-            viewFlipper.setDisplayedChild(14);
+            viewFlipper.setDisplayedChild(16);
         } else if (currentStep == 18) {
             tvHeaderCaption.setVisibility(View.VISIBLE);
             tvHeaderCaption.setText(R.string.caption_account_security);
@@ -666,35 +696,35 @@ public class PostFlowActivity extends AppCompatActivity {
             tvHeaderSubtitle.setVisibility(View.GONE);
             progressSection.setVisibility(View.GONE);
             bottomBar.setVisibility(View.GONE);
-            viewFlipper.setDisplayedChild(15);
+            viewFlipper.setDisplayedChild(17);
         } else if (currentStep == 19) {
             tvHeaderCaption.setVisibility(View.GONE);
             tvHeaderTitle.setText(R.string.title_notif_settings_header);
             tvHeaderSubtitle.setVisibility(View.GONE);
             progressSection.setVisibility(View.GONE);
             bottomBar.setVisibility(View.GONE);
-            viewFlipper.setDisplayedChild(16);
+            viewFlipper.setDisplayedChild(18);
         } else if (currentStep == 20) {
             tvHeaderCaption.setVisibility(View.GONE);
             tvHeaderTitle.setText(R.string.title_help_header);
             tvHeaderSubtitle.setVisibility(View.GONE);
             progressSection.setVisibility(View.GONE);
             bottomBar.setVisibility(View.GONE);
-            viewFlipper.setDisplayedChild(17);
+            viewFlipper.setDisplayedChild(19);
         } else if (currentStep == 21) {
             tvHeaderCaption.setVisibility(View.GONE);
             tvHeaderTitle.setText(R.string.title_send_feedback_header);
             tvHeaderSubtitle.setVisibility(View.GONE);
             progressSection.setVisibility(View.GONE);
             bottomBar.setVisibility(View.GONE);
-            viewFlipper.setDisplayedChild(18);
+            viewFlipper.setDisplayedChild(20);
         } else if (currentStep == 22) {
             tvHeaderCaption.setVisibility(View.GONE);
             tvHeaderTitle.setText(R.string.title_privacy_account_header);
             tvHeaderSubtitle.setVisibility(View.GONE);
             progressSection.setVisibility(View.GONE);
             bottomBar.setVisibility(View.GONE);
-            viewFlipper.setDisplayedChild(19);
+            viewFlipper.setDisplayedChild(21);
         }
     }
 }
