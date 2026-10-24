@@ -37,6 +37,21 @@ public class ChiTietPhongActivity extends AppCompatActivity {
             btnBack.setOnClickListener(v -> finish());
         }
 
+        View viewAllPhotos = findViewById(R.id.btn_view_all_photos);
+        if (viewAllPhotos != null) {
+            viewAllPhotos.setOnClickListener(v ->
+                startActivity(new Intent(this, ThuVienAnhPhongActivity.class))
+            );
+        }
+
+        // Nhấn vào địa chỉ phòng -> Mở màn hình Vị trí phòng
+        View addressLocation = findViewById(R.id.layout_address_location);
+        if (addressLocation != null) {
+            addressLocation.setOnClickListener(v ->
+                startActivity(new Intent(this, ViTriPhongActivity.class))
+            );
+        }
+
         // Tương thích với phòng -> Mở màn hình Chi tiết tương thích với phòng
         View roomCompat = findViewById(R.id.layout_room_compatibility);
         if (roomCompat != null) {

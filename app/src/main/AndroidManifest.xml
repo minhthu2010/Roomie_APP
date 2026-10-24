@@ -119,9 +119,27 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
+        <!-- Map Screen / Room Price Map -->
+        <activity
+            android:name=".ui.home.BanDoGiaPhongActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
         <!-- Room Detail Activity -->
         <activity
             android:name=".ui.room.ChiTietPhongActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Room Location Map Activity -->
+        <activity
+            android:name=".ui.room.ViTriPhongActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Room Photo Gallery Activity -->
+        <activity
+            android:name=".ui.room.ThuVienAnhPhongActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 

@@ -13,6 +13,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.roomie.R;
 import com.example.roomie.ui.home.HomeActivity;
+import com.example.roomie.ui.room.ChiTietPhongActivity;
 
 public class DaGuiBaoCaoActivity extends AppCompatActivity {
 
@@ -28,6 +29,13 @@ public class DaGuiBaoCaoActivity extends AppCompatActivity {
             return insets;
         });
 
+        View.OnClickListener openPostListener = v -> {
+            Intent intent = new Intent(DaGuiBaoCaoActivity.this, ChiTietPhongActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intent);
+            finish();
+        };
+
         View headerBar = findViewById(R.id.header_bar);
         if (headerBar != null) {
             TextView tvTitle = headerBar.findViewById(R.id.tv_header_title);
@@ -36,13 +44,13 @@ public class DaGuiBaoCaoActivity extends AppCompatActivity {
             }
             View btnBack = headerBar.findViewById(R.id.btn_back);
             if (btnBack != null) {
-                btnBack.setOnClickListener(v -> finish());
+                btnBack.setOnClickListener(openPostListener);
             }
         }
 
         View btnBackToPost = findViewById(R.id.btn_back_to_post);
         if (btnBackToPost != null) {
-            btnBackToPost.setOnClickListener(v -> finish());
+            btnBackToPost.setOnClickListener(openPostListener);
         }
 
         View btnBackToExplore = findViewById(R.id.btn_back_to_explore);

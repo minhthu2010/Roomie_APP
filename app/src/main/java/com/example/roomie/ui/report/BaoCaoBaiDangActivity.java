@@ -49,6 +49,7 @@ public class BaoCaoBaiDangActivity extends AppCompatActivity {
             btnSubmit.setOnClickListener(v -> {
                 Intent intent = new Intent(BaoCaoBaiDangActivity.this, DaGuiBaoCaoActivity.class);
                 startActivity(intent);
+                finish();
             });
         }
     }

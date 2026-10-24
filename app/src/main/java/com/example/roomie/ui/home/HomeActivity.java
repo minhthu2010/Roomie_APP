@@ -49,6 +49,15 @@ public class HomeActivity extends AppCompatActivity {
             });
         }
 
+        // "Xem bản đồ" button click opens "Bản đồ giá phòng" screen
+        View btnViewMap = findViewById(R.id.btn_view_map);
+        if (btnViewMap != null) {
+            btnViewMap.setOnClickListener(v -> {
+                Intent intent = new Intent(HomeActivity.this, BanDoGiaPhongActivity.class);
+                startActivity(intent);
+            });
+        }
+
         // Clicking any room card opens "Chi tiết phòng" screen
         View.OnClickListener openDetailListener = v -> {
             Intent intent = new Intent(HomeActivity.this, ChiTietPhongActivity.class);
