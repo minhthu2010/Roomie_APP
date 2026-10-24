@@ -1,90 +1,168 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Core Roomie Brand Palette -->
-    <color name="roomie_primary">#50152B</color>
-    <color name="roomie_primary_dark">#3B0D1B</color>
-    <color name="roomie_primary_badge">#4D1021</color>
-    <color name="roomie_primary_badge_dark">#2B0A13</color>
-    <color name="roomie_accent_rose">#C24C65</color>
+    <!-- ================================================================= -->
+    <!-- SEMANTIC COLOR PALETTE (Centralized Single Source of Truth)       -->
+    <!-- ================================================================= -->
 
-    <!-- Neutral & Background Palette -->
-    <color name="roomie_background">#FFFFFF</color>
-    <color name="roomie_surface">#FFFFFF</color>
-    <color name="roomie_white">#FFFFFF</color>
-    <color name="roomie_black">#000000</color>
+    <!-- Primary Brand Colors -->
+    <color name="color_primary">#50152B</color>
+    <color name="color_primary_dark">#3B0D1B</color>
+    <color name="color_on_primary">#FFFFFF</color>
+    <color name="color_primary_container">#FDE8ED</color>
+    <color name="color_on_primary_container">#50152B</color>
+    <color name="color_accent_rose">#C24C65</color>
 
-    <!-- Text Colors -->
-    <color name="roomie_text_primary">#1D1D1D</color>
-    <color name="roomie_text_title">#1A1A1A</color>
-    <color name="roomie_text_secondary">#6E6E6E</color>
-    <color name="roomie_text_muted">#757575</color>
-    <color name="roomie_text_white">#FFFFFF</color>
-    <color name="roomie_text_pink">#E0C2CB</color>
-    <color name="roomie_text_dark_green">#2D3B32</color>
+    <!-- Secondary & Accent Colors -->
+    <color name="color_secondary">#E2EDE5</color>
+    <color name="color_on_secondary">#224233</color>
+    <color name="color_button_secondary_text">#28362D</color>
 
-    <!-- Button & Badge Accents -->
-    <color name="roomie_button_secondary_bg">#E2EDE5</color>
-    <color name="roomie_button_secondary_text">#224233</color>
-    <color name="roomie_badge_mint">#E8F0EA</color>
-    <color name="roomie_badge_pink_sub">#FDE8ED</color>
+    <!-- Surface & Background Colors -->
+    <color name="color_background">#FFFFFF</color>
+    <color name="color_surface">#FFFFFF</color>
+    <color name="color_on_surface">#1D1D1D</color>
+    <color name="color_white">#FFFFFF</color>
+    <color name="color_black">#000000</color>
 
-    <!-- Borders & Dividers -->
-    <color name="roomie_card_border">#E0E0E0</color>
-    <color name="roomie_card_maroon_bg">#3B0D1B</color>
-    <color name="roomie_otp_border">#E08B9B</color>
+    <!-- Typography & Text Colors -->
+    <color name="color_text_primary">#1D1D1D</color>
+    <color name="color_text_title">#1A1A1A</color>
+    <color name="color_text_secondary">#6E6E6E</color>
+    <color name="color_text_muted">#757575</color>
+    <color name="color_text_subtle_muted">#9A8D93</color>
+    <color name="color_text_white">#FFFFFF</color>
+    <color name="color_text_pink">#E0C2CB</color>
+    <color name="color_text_dark_green">#2D3B32</color>
+    <color name="color_text_dark_green_alt">#3D4A41</color>
 
-    <!-- Status & Alert Colors -->
-    <color name="roomie_error">#D32F2F</color>
-    <color name="roomie_success">#388E3C</color>
+    <!-- Status & Feedback Colors -->
+    <color name="color_error">#D32F2F</color>
+    <color name="color_error_bg">#FCE8E6</color>
+    <color name="color_error_dark">#C53030</color>
+    <color name="color_error_text_dark">#662222</color>
 
-    <!-- Backward Compatibility Aliases -->
-    <color name="primary_maroon">@color/roomie_primary</color>
-    <color name="primary_maroon_dark">@color/roomie_primary_dark</color>
-    <color name="text_dark">@color/roomie_text_primary</color>
-    <color name="text_primary">@color/roomie_text_primary</color>
-    <color name="text_secondary">@color/roomie_text_secondary</color>
-    <color name="text_title">@color/roomie_text_title</color>
-    <color name="text_subtitle">@color/roomie_text_secondary</color>
-    <color name="text_white">@color/roomie_text_white</color>
-    <color name="button_secondary_bg">@color/roomie_button_secondary_bg</color>
-    <color name="button_secondary_text">@color/roomie_button_secondary_text</color>
-    <color name="white">@color/roomie_white</color>
-    <color name="black">@color/roomie_black</color>
-    <color name="card_border">@color/roomie_card_border</color>
-    <color name="card_maroon_bg">@color/roomie_card_maroon_bg</color>
-
-    <!-- Member 2 Color Definitions -->
-    <color name="bg_selected">#E1ECE6</color>
-    <color name="border_light">#E6DADF</color>
-    <color name="btn_cancel_bg">#DDE8E0</color>
-    <color name="nav_inactive">#C49AAA</color>
-    <color name="match_success">#68D970</color>
-    <color name="gauge_success">#52B755</color>
-    <color name="status_error">#D96060</color>
-    <color name="price_highlight">#B04B6D</color>
-    <color name="upload_border">#D6C8CE</color>
-
-    <color name="maroon_primary">#531326</color>
-    <color name="maroon_primary_dark">#3D0B1B</color>
-    <color name="text_muted">#9A8D93</color>
-    <color name="bg_screen">#FFFFFF</color>
-    <color name="card_bg">#FFFFFF</color>
-    <color name="bg_progress_track">#E3ECE5</color>
-    <color name="bg_button_secondary">#E2EAE4</color>
-    <color name="text_button_secondary">#28362D</color>
-    <color name="card_stroke">#E2E8F0</color>
-    <color name="card_stroke_focused">#531326</color>
-    <color name="color_danger">#C53030</color>
-    <color name="color_danger_bg">#FCE8E6</color>
-    <color name="color_danger_text_dark">#662222</color>
+    <color name="color_danger">@color/color_error_dark</color>
+    <color name="color_danger_bg">@color/color_error_bg</color>
+    <color name="color_danger_text_dark">@color/color_error_text_dark</color>
+    <color name="color_status_error">#D96060</color>
+    <color name="color_success">#388E3C</color>
+    <color name="color_success_match">#68D970</color>
+    <color name="color_success_gauge">#52B755</color>
     <color name="color_success_outer">#FFF8EE</color>
     <color name="color_success_inner_stroke">#F5EBE1</color>
+    <color name="color_price_highlight">#B04B6D</color>
+
+    <!-- Navigation & Component State Colors -->
+    <color name="color_bottom_nav_selected">@color/color_primary</color>
+    <color name="color_bottom_nav_unselected">#8A8A8E</color>
+    <color name="color_nav_inactive">#C49AAA</color>
+    <color name="color_chip_selected_background">@color/color_primary</color>
+    <color name="color_chip_unselected_background">@color/color_white</color>
+    <color name="color_chip_selected_text">@color/color_white</color>
+    <color name="color_chip_unselected_text">@color/color_text_primary</color>
     <color name="color_chip_highlight_bg">#F8EFF2</color>
+
+    <!-- Borders, Dividers & Controls -->
+    <color name="color_border">#E0E0E0</color>
+    <color name="color_border_light">#E6DADF</color>
+    <color name="color_card_stroke">#E2E8F0</color>
+    <color name="color_otp_border">#E08B9B</color>
+    <color name="color_upload_border">#D6C8CE</color>
     <color name="color_dashed_stroke">#78887C</color>
     <color name="color_switch_track_off">#D1C4C7</color>
+    <color name="color_progress_track">#E3ECE5</color>
+    <color name="color_ripple">#20000000</color>
+
+    <!-- Badges & Tinted Containers -->
+    <color name="color_badge_mint">#E8F0EA</color>
+    <color name="color_badge_mint_bg">#D6EFE0</color>
+    <color name="color_card_mint_bg">#F2F9F5</color>
+    <color name="color_card_mint_stroke">#D6ECE0</color>
+    <color name="color_badge_peach_bg">#FFE4DD</color>
+    <color name="color_card_peach_bg">#FFF5F2</color>
+    <color name="color_card_peach_stroke">#FFE2DA</color>
+    <color name="color_badge_pink_sub">#FDE8ED</color>
+
+    <!-- Gradient Maroon Palette -->
+    <color name="color_maroon_gradient_start">#4A0E17</color>
+    <color name="color_maroon_gradient_center">#6D1B32</color>
+    <color name="color_maroon_gradient_end">#8F2746</color>
+
+    <!-- Map Custom Colors -->
     <color name="map_bg">#F4F1EA</color>
     <color name="map_park">#D8E8D5</color>
     <color name="map_grid">#E3DDD3</color>
     <color name="map_road_stroke">#E8DFD1</color>
     <color name="map_polygon">#E87455</color>
+
+    <!-- ================================================================= -->
+    <!-- LEGACY ALIASES (Preserved for Backward Compatibility)             -->
+    <!-- ================================================================= -->
+
+    <color name="roomie_primary">@color/color_primary</color>
+    <color name="roomie_primary_dark">@color/color_primary_dark</color>
+    <color name="roomie_primary_badge">#4D1021</color>
+    <color name="roomie_primary_badge_dark">#2B0A13</color>
+    <color name="roomie_accent_rose">@color/color_accent_rose</color>
+
+    <color name="roomie_background">@color/color_background</color>
+    <color name="roomie_surface">@color/color_surface</color>
+    <color name="roomie_white">@color/color_white</color>
+    <color name="roomie_black">@color/color_black</color>
+
+    <color name="roomie_text_primary">@color/color_text_primary</color>
+    <color name="roomie_text_title">@color/color_text_title</color>
+    <color name="roomie_text_secondary">@color/color_text_secondary</color>
+    <color name="roomie_text_muted">@color/color_text_muted</color>
+    <color name="roomie_text_white">@color/color_text_white</color>
+    <color name="roomie_text_pink">@color/color_text_pink</color>
+    <color name="roomie_text_dark_green">@color/color_text_dark_green</color>
+
+    <color name="roomie_button_secondary_bg">@color/color_secondary</color>
+    <color name="roomie_button_secondary_text">@color/color_on_secondary</color>
+    <color name="roomie_badge_mint">@color/color_badge_mint</color>
+    <color name="roomie_badge_pink_sub">@color/color_badge_pink_sub</color>
+
+    <color name="roomie_card_border">@color/color_border</color>
+    <color name="roomie_card_maroon_bg">@color/color_primary_dark</color>
+    <color name="roomie_otp_border">@color/color_otp_border</color>
+
+    <color name="roomie_error">@color/color_error</color>
+    <color name="roomie_success">@color/color_success</color>
+
+    <color name="primary_maroon">@color/color_primary</color>
+    <color name="primary_maroon_dark">@color/color_primary_dark</color>
+    <color name="text_dark">@color/color_text_primary</color>
+    <color name="text_primary">@color/color_text_primary</color>
+    <color name="text_secondary">@color/color_text_secondary</color>
+    <color name="text_title">@color/color_text_title</color>
+    <color name="text_subtitle">@color/color_text_secondary</color>
+    <color name="text_white">@color/color_text_white</color>
+    <color name="button_secondary_bg">@color/color_secondary</color>
+    <color name="button_secondary_text">@color/color_on_secondary</color>
+    <color name="white">@color/color_white</color>
+    <color name="black">@color/color_black</color>
+    <color name="card_border">@color/color_border</color>
+    <color name="card_maroon_bg">@color/color_primary_dark</color>
+
+    <color name="bg_selected">#E1ECE6</color>
+    <color name="border_light">@color/color_border_light</color>
+    <color name="btn_cancel_bg">#DDE8E0</color>
+    <color name="nav_inactive">@color/color_nav_inactive</color>
+    <color name="match_success">@color/color_success_match</color>
+    <color name="gauge_success">@color/color_success_gauge</color>
+    <color name="status_error">@color/color_status_error</color>
+    <color name="price_highlight">@color/color_price_highlight</color>
+    <color name="upload_border">@color/color_upload_border</color>
+
+    <color name="maroon_primary">@color/color_primary</color>
+    <color name="maroon_primary_dark">@color/color_primary_dark</color>
+    <color name="text_muted">@color/color_text_subtle_muted</color>
+    <color name="bg_screen">@color/color_background</color>
+    <color name="card_bg">@color/color_surface</color>
+    <color name="bg_progress_track">@color/color_progress_track</color>
+    <color name="bg_button_secondary">@color/color_secondary</color>
+    <color name="text_button_secondary">@color/color_button_secondary_text</color>
+    <color name="card_stroke">@color/color_card_stroke</color>
+    <color name="card_stroke_focused">@color/color_primary</color>
 </resources>

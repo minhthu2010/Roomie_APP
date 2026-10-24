@@ -13,6 +13,7 @@ import android.widget.TextView;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -107,10 +108,10 @@ public class ResetPasswordActivity extends AppCompatActivity {
                 if (!p1.isEmpty() && !p2.isEmpty()) {
                     if (p1.equals(p2)) {
                         tvMatchStatus.setText(R.string.passwords_match);
-                        tvMatchStatus.setTextColor(0xFF388E3C);
+                        tvMatchStatus.setTextColor(ContextCompat.getColor(ResetPasswordActivity.this, R.color.color_success));
                     } else {
                         tvMatchStatus.setText(R.string.passwords_not_match);
-                        tvMatchStatus.setTextColor(0xFFD32F2F);
+                        tvMatchStatus.setTextColor(ContextCompat.getColor(ResetPasswordActivity.this, R.color.color_error));
                     }
                 }
             }

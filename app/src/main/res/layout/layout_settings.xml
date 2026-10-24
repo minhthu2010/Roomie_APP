@@ -531,7 +531,7 @@
                     android:layout_centerVertical="true"
                     android:layout_toEndOf="@id/iv_logout_icon_set"
                     android:text="@string/btn_logout"
-                    android:textColor="#C53030"
+                    android:textColor="@color/color_error_dark"
                     android:textSize="15sp"
                     android:textStyle="bold" />
             </RelativeLayout>

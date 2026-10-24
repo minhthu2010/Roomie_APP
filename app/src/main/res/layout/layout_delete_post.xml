@@ -119,7 +119,7 @@
                 android:layout_height="wrap_content"
                 android:lineSpacingExtra="2dp"
                 android:text="@string/warning_delete_body"
-                android:textColor="#662222"
+                android:textColor="@color/color_error_text_dark"
                 android:textSize="13sp" />
         </LinearLayout>
 

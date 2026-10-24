@@ -223,7 +223,7 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="12dp"
             android:text="@string/otp_error_msg"
-            android:textColor="#D32F2F"
+            android:textColor="@color/color_error"
             android:textSize="12sp"
             android:visibility="visible" />
 

@@ -248,7 +248,7 @@
                     android:focusable="true"
                     android:padding="6dp"
                     android:text="@string/btn_discard_draft"
-                    android:textColor="#C53030"
+                    android:textColor="@color/color_error_dark"
                     android:textSize="13sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -342,7 +342,7 @@
                     android:focusable="true"
                     android:padding="6dp"
                     android:text="@string/btn_discard_draft"
-                    android:textColor="#C53030"
+                    android:textColor="@color/color_error_dark"
                     android:textSize="13sp"
                     android:textStyle="bold" />
             </LinearLayout>

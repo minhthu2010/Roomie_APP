@@ -5,7 +5,7 @@
     android:viewportHeight="58">
   <!-- Diamond Pointer -->
   <path
-      android:fillColor="#531326"
+      android:fillColor="@color/color_primary"
       android:pathData="M24,54 L16,42 L32,42 Z" />
   <!-- Circle Outer Border -->
   <path
@@ -13,7 +13,7 @@
       android:pathData="M24,2A22,22 0,1 0,24,46A22,22 0,1 0,24,2Z" />
   <!-- Circle Inner Fill Maroon -->
   <path
-      android:fillColor="#531326"
+      android:fillColor="@color/color_primary"
       android:pathData="M24,5A19,19 0,1 0,24,43A19,19 0,1 0,24,5Z" />
   <!-- House Icon inside -->
   <path
