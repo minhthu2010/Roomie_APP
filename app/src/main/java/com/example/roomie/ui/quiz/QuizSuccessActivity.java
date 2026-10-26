@@ -15,7 +15,13 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.roomie.R;
 import com.example.roomie.ui.home.HomeActivity;
 
+import java.util.Locale;
+
 public class QuizSuccessActivity extends AppCompatActivity {
+
+    public static final String EXTRA_ANSWERED = "ANSWERED_COUNT";
+    public static final String EXTRA_TOTAL = "TOTAL_QUESTIONS";
+    public static final String EXTRA_DURATION_SEC = "DURATION_SEC";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,9 +35,10 @@ public class QuizSuccessActivity extends AppCompatActivity {
             return insets;
         });
 
+        // TODO: lấy tên hiển thị từ API hồ sơ khi A làm xong
         String userName = getIntent().getStringExtra("USER_NAME");
         if (userName == null || userName.isEmpty()) {
-            userName = "Linh";
+            userName = "bạn";
         }
 
         ImageButton btnClose = findViewById(R.id.btn_close);
@@ -40,6 +47,19 @@ public class QuizSuccessActivity extends AppCompatActivity {
 
         if (tvSuccessHeading != null) {
             tvSuccessHeading.setText(getString(R.string.quiz_success_heading, userName));
+        }
+
+        int total = getIntent().getIntExtra(EXTRA_TOTAL, 0);
+        int answered = getIntent().getIntExtra(EXTRA_ANSWERED, total);
+        long durationSec = getIntent().getLongExtra(EXTRA_DURATION_SEC, -1);
+
+        TextView tvAnswered = findViewById(R.id.tv_stat1_val);
+        if (tvAnswered != null && total > 0) {
+            tvAnswered.setText(String.format(Locale.getDefault(), "%d/%d", answered, total));
+        }
+        TextView tvDuration = findViewById(R.id.tv_stat2_val);
+        if (tvDuration != null && durationSec >= 0) {
+            tvDuration.setText(String.format(Locale.getDefault(), "%d:%02d", durationSec / 60, durationSec % 60));
         }
 
         Runnable goToHome = () -> {

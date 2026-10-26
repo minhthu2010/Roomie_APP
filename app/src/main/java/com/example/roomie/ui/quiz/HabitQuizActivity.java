@@ -3,6 +3,8 @@ package com.example.roomie.ui.quiz;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -18,38 +20,59 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.roomie.R;
 import com.example.roomie.common.AppNotificationHelper;
+import com.example.roomie.data.discovery.DiscoveryApi;
+import com.example.roomie.data.discovery.QuizModels;
+import com.example.roomie.data.remote.ApiCallback;
+import com.example.roomie.data.remote.ApiClient;
 import com.example.roomie.ui.auth.MainActivity;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
+/**
+ * Bài kiểm tra thói quen. Câu hỏi lấy từ API, mỗi lần bấm "Tiếp" lưu câu trả lời lên server.
+ *
+ * Extra:
+ *  - EXTRA_MODE: DiscoveryApi.MODE_PERSONAL (mặc định) hoặc MODE_ROOM (bước 6 đăng bài)
+ *  - EXTRA_POST_ID: bắt buộc khi MODE_ROOM. Xong bài test phòng sẽ setResult(RESULT_OK) rồi đóng.
+ *  - EXTRA_START_QUESTION_ID + EXTRA_SINGLE_QUESTION: mở thẳng một câu để sửa riêng câu đó
+ *    (dùng ở LifestyleReviewActivity); lưu xong thì đóng màn hình.
+ */
 public class HabitQuizActivity extends AppCompatActivity {
 
+    public static final String EXTRA_MODE = "MODE";
+    public static final String EXTRA_POST_ID = "POST_ID";
+    public static final String EXTRA_START_QUESTION_ID = "START_QUESTION_ID";
+    public static final String EXTRA_SINGLE_QUESTION = "SINGLE_QUESTION";
+
+    private DiscoveryApi api;
+    private String mode;
+    private String postId;
+    private long startQuestionId;
+    private boolean singleQuestion;
+    // Bắt đầu tính giờ khi câu hỏi hiện ra, không tính thời gian chờ tải.
+    private long startedAtMs = 0;
+
+    private List<QuizModels.Question> questions = Collections.emptyList();
+    // questionId -> optionKey đã chọn
+    private final Map<Long, String> selected = new HashMap<>();
     private int currentQuestion = 0;
-    private final int[] selectedOptions = new int[]{-1, -1, -1, -1, -1, -1, -1, -1};
-
-    private static class QuestionModel {
-        String title;
-        int categoryIconRes;
-        String[] options;
-
-        QuestionModel(String title, int categoryIconRes, String[] options) {
-            this.title = title;
-            this.categoryIconRes = categoryIconRes;
-            this.options = options;
-        }
-    }
-
-    private QuestionModel[] questions;
+    private boolean saving = false;
 
     private TextView tvQuestionNumber;
+    private TextView tvTimeLeft;
     private ProgressBar pbQuizProgress;
     private ImageView imgCategoryIcon;
     private TextView tvQuestionTitle;
 
-    private RelativeLayout cardOpt1, cardOpt2, cardOpt3;
-    private TextView tvOpt1Text, tvOpt2Text, tvOpt3Text;
-    private ImageView imgOpt1Radio, imgOpt2Radio, imgOpt3Radio;
+    private RelativeLayout[] optionCards;
+    private TextView[] optionTexts;
+    private ImageView[] optionRadios;
 
+    private AppCompatButton btnQuizPrev;
     private AppCompatButton btnQuizNext;
 
     @Override
@@ -64,48 +87,45 @@ public class HabitQuizActivity extends AppCompatActivity {
             return insets;
         });
 
-        initQuestions();
+        api = ApiClient.create(this, DiscoveryApi.class);
+        mode = getIntent().getStringExtra(EXTRA_MODE);
+        if (mode == null) mode = DiscoveryApi.MODE_PERSONAL;
+        postId = getIntent().getStringExtra(EXTRA_POST_ID);
+        startQuestionId = getIntent().getLongExtra(EXTRA_START_QUESTION_ID, -1);
+        singleQuestion = getIntent().getBooleanExtra(EXTRA_SINGLE_QUESTION, false) && startQuestionId >= 0;
 
         ImageButton btnBack = findViewById(R.id.btn_back);
         ImageButton btnClose = findViewById(R.id.btn_close);
 
         tvQuestionNumber = findViewById(R.id.tv_question_number);
+        tvTimeLeft = findViewById(R.id.tv_time_left);
         pbQuizProgress = findViewById(R.id.pb_quiz_progress);
         imgCategoryIcon = findViewById(R.id.img_category_icon);
         tvQuestionTitle = findViewById(R.id.tv_question_title);
 
-        cardOpt1 = findViewById(R.id.card_option_1);
-        cardOpt2 = findViewById(R.id.card_option_2);
-        cardOpt3 = findViewById(R.id.card_option_3);
+        optionCards = new RelativeLayout[]{
+                findViewById(R.id.card_option_1), findViewById(R.id.card_option_2), findViewById(R.id.card_option_3)};
+        optionTexts = new TextView[]{
+                findViewById(R.id.tv_opt1_text), findViewById(R.id.tv_opt2_text), findViewById(R.id.tv_opt3_text)};
+        optionRadios = new ImageView[]{
+                findViewById(R.id.img_opt1_radio), findViewById(R.id.img_opt2_radio), findViewById(R.id.img_opt3_radio)};
 
-        tvOpt1Text = findViewById(R.id.tv_opt1_text);
-        tvOpt2Text = findViewById(R.id.tv_opt2_text);
-        tvOpt3Text = findViewById(R.id.tv_opt3_text);
-
-        imgOpt1Radio = findViewById(R.id.img_opt1_radio);
-        imgOpt2Radio = findViewById(R.id.img_opt2_radio);
-        imgOpt3Radio = findViewById(R.id.img_opt3_radio);
-
-        AppCompatButton btnQuizPrev = findViewById(R.id.btn_quiz_prev);
+        btnQuizPrev = findViewById(R.id.btn_quiz_prev);
         btnQuizNext = findViewById(R.id.btn_quiz_next);
 
-        Runnable exitQuiz = () -> {
-            Intent intent = new Intent(HabitQuizActivity.this, MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            finish();
-        };
-
         if (btnBack != null) btnBack.setOnClickListener(v -> finish());
-        if (btnClose != null) btnClose.setOnClickListener(v -> exitQuiz.run());
+        if (btnClose != null) btnClose.setOnClickListener(v -> exitQuiz());
 
-        if (cardOpt1 != null) cardOpt1.setOnClickListener(v -> selectOption(0));
-        if (cardOpt2 != null) cardOpt2.setOnClickListener(v -> selectOption(1));
-        if (cardOpt3 != null) cardOpt3.setOnClickListener(v -> selectOption(2));
+        for (int i = 0; i < optionCards.length; i++) {
+            final int index = i;
+            if (optionCards[i] != null) optionCards[i].setOnClickListener(v -> selectOption(index));
+        }
 
         if (btnQuizPrev != null) {
             btnQuizPrev.setOnClickListener(v -> {
-                if (currentQuestion > 0) {
+                if (singleQuestion) {
+                    finish();
+                } else if (currentQuestion > 0) {
                     currentQuestion--;
                     renderQuestion();
                 } else {
@@ -114,122 +134,160 @@ public class HabitQuizActivity extends AppCompatActivity {
             });
         }
 
-        if (btnQuizNext != null) {
-            btnQuizNext.setOnClickListener(v -> {
-                if (selectedOptions[currentQuestion] == -1) {
-                    selectedOptions[currentQuestion] = 0;
-                }
+        if (btnQuizNext != null) btnQuizNext.setOnClickListener(v -> saveCurrentAndContinue());
 
-                if (currentQuestion < questions.length - 1) {
-                    currentQuestion++;
-                    renderQuestion();
-                } else {
-                    AppNotificationHelper.showSuccess(HabitQuizActivity.this, "Hoàn thành bài kiểm tra thói quen!");
-                    Intent intent = new Intent(HabitQuizActivity.this, QuizSuccessActivity.class);
-                    intent.putExtra("USER_NAME", "Linh");
-                    startActivity(intent);
-                    finish();
-                }
-            });
+        if (DiscoveryApi.MODE_ROOM.equals(mode) && postId == null) {
+            AppNotificationHelper.showError(this, "Thiếu mã bài đăng cho bài test của phòng");
+            finish();
+            return;
         }
+        loadQuestions();
+    }
 
+    private void exitQuiz() {
+        if (DiscoveryApi.MODE_ROOM.equals(mode)) {
+            finish();
+            return;
+        }
+        Intent intent = new Intent(HabitQuizActivity.this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    // ---------- Tải dữ liệu ----------
+
+    private void loadQuestions() {
+        showLoading("Đang tải câu hỏi...");
+        api.getQuestionnaire(mode).enqueue(new ApiCallback<QuizModels.Questionnaire>(this) {
+            @Override
+            public void onSuccess(QuizModels.Questionnaire data) {
+                if (data == null || data.questions.isEmpty()) {
+                    showLoadError("Chưa có câu hỏi nào. Chạm để thử lại.");
+                    return;
+                }
+                questions = data.questions;
+                if (pbQuizProgress != null) pbQuizProgress.setMax(questions.size());
+                loadSavedAnswers();
+            }
+
+            @Override
+            public void onError(String message) {
+                showLoadError(message + "\nChạm để thử lại.");
+            }
+        });
+    }
+
+    // Điền lại câu trả lời đã lưu để làm tiếp hoặc làm lại bài test.
+    private void loadSavedAnswers() {
+        boolean isRoom = DiscoveryApi.MODE_ROOM.equals(mode);
+        (isRoom ? api.getPostAnswers(postId) : api.getMyLifestyleTest())
+                .enqueue(new ApiCallback<QuizModels.LifestyleTest>(this) {
+                    @Override
+                    public void onSuccess(QuizModels.LifestyleTest data) {
+                        if (data != null) {
+                            for (QuizModels.Answer a : data.answers) selected.put(a.questionId, a.optionKey);
+                            // Đang làm dở thì mở lại đúng câu; đã xong thì làm lại từ đầu.
+                            if (!isRoom && data.isStarted && !data.isCompleted) {
+                                currentQuestion = Math.min(Math.max(data.currentStep - 1, 0), questions.size() - 1);
+                            }
+                        }
+                        showFirstQuestion();
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        // Không đọc được câu trả lời cũ vẫn làm bài được.
+                        showFirstQuestion();
+                    }
+                });
+    }
+
+    private void showFirstQuestion() {
+        if (startQuestionId >= 0) {
+            for (int i = 0; i < questions.size(); i++) {
+                if (questions.get(i).questionId == startQuestionId) currentQuestion = i;
+            }
+        }
+        if (startedAtMs == 0) startedAtMs = SystemClock.elapsedRealtime();
         renderQuestion();
     }
 
-    private void initQuestions() {
-        questions = new QuestionModel[]{
-                new QuestionModel(
-                        "Bạn thường đi ngủ lúc mấy giờ?",
-                        R.drawable.ic_moon,
-                        new String[]{"Trước 23:00", "Từ 23:00 đến 00:00", "Sau 00:00, mình là cú đêm"}
-                ),
-                new QuestionModel(
-                        "Bạn thích không gian sạch sẽ đến mức nào?",
-                        R.drawable.ic_sparkles,
-                        new String[]{"Gọn gàng, dọn dẹp mỗi ngày", "Dọn vài lần mỗi tuần", "Thoải mái, bừa một chút cũng ổn"}
-                ),
-                new QuestionModel(
-                        "Bạn có hút thuốc không?",
-                        R.drawable.ic_no_smoking,
-                        new String[]{"Không hút, muốn phòng không khói", "Không hút, chấp nhận hút bên ngoài", "Có hút, chỉ hút ở nơi cho phép"}
-                ),
-                new QuestionModel(
-                        "Tần suất nấu ăn ở nhà của bạn?",
-                        R.drawable.ic_sparkles,
-                        new String[]{"Nấu ăn mỗi ngày, thích tự nấu", "Nấu vài lần tuần khi có thời gian", "Hầu như đặt đồ ăn ngoài"}
-                ),
-                new QuestionModel(
-                        "Mức độ dẫn bạn bè về phòng chơi?",
-                        R.drawable.ic_people,
-                        new String[]{"Thoải mái, thích không gian nhộn nhịp", "Cần báo trước cho bạn cùng phòng", "Hạn chế, thích không gian riêng tư"}
-                ),
-                new QuestionModel(
-                        "Góc nhìn của bạn về nuôi thú cưng?",
-                        R.drawable.ic_sparkles,
-                        new String[]{"Rất yêu thích và đang nuôi thú cưng", "Đồng ý nuôi nếu sạch sẽ và không ồn", "Không muốn ở cùng thú cưng"}
-                ),
-                new QuestionModel(
-                        "Mức độ nhạy cảm với tiếng ồn của bạn?",
-                        R.drawable.ic_sparkles,
-                        new String[]{"Cần không gian yên tĩnh tuyệt đối", "Bình thường, chấp nhận tiếng ồn vừa phải", "Dễ tính, không ảnh hưởng bởi tiếng ồn"}
-                ),
-                new QuestionModel(
-                        "Phong cách giao tiếp bạn hướng tới?",
-                        R.drawable.ic_people,
-                        new String[]{"Thích trò chuyện, chia sẻ như bạn thân", "Thân thiện nhưng giữ không gian riêng", "Tôn trọng sự riêng tư, ít giao tiếp"}
-                )
-        };
+    private void showLoading(String message) {
+        setButtonsEnabled(false);
+        if (tvQuestionTitle != null) {
+            tvQuestionTitle.setText(message);
+            tvQuestionTitle.setOnClickListener(null);
+        }
+        for (RelativeLayout card : optionCards) if (card != null) card.setVisibility(View.INVISIBLE);
     }
 
-    private void renderQuestion() {
-        QuestionModel q = questions[currentQuestion];
-
-        if (selectedOptions[currentQuestion] == -1) {
-            selectedOptions[currentQuestion] = (currentQuestion == 0) ? 1 : 0;
+    private void showLoadError(String message) {
+        AppNotificationHelper.showError(this, message);
+        if (tvQuestionTitle != null) {
+            tvQuestionTitle.setText(message);
+            tvQuestionTitle.setOnClickListener(v -> loadQuestions());
         }
+    }
+
+    // ---------- Hiển thị ----------
+
+    private void renderQuestion() {
+        QuizModels.Question q = questions.get(currentQuestion);
+        int total = questions.size();
 
         if (tvQuestionNumber != null) {
-            tvQuestionNumber.setText(String.format(Locale.getDefault(), "Câu %d / %d", currentQuestion + 1, questions.length));
+            tvQuestionNumber.setText(String.format(Locale.getDefault(), "Câu %d / %d", currentQuestion + 1, total));
         }
-
-        if (pbQuizProgress != null) {
-            pbQuizProgress.setProgress(currentQuestion + 1);
+        if (tvTimeLeft != null) {
+            // Khoảng 25 giây mỗi câu; sửa 1 câu thì không cần hiện thời gian
+            int minutesLeft = Math.max(1, Math.round((total - currentQuestion) * 0.4f));
+            tvTimeLeft.setVisibility(singleQuestion ? View.INVISIBLE : View.VISIBLE);
+            tvTimeLeft.setText(getString(R.string.quiz_time_left_format, minutesLeft));
         }
-
-        if (imgCategoryIcon != null) {
-            imgCategoryIcon.setImageResource(q.categoryIconRes);
-        }
-
+        if (pbQuizProgress != null) pbQuizProgress.setProgress(currentQuestion + 1);
+        if (imgCategoryIcon != null) imgCategoryIcon.setImageResource(QuizUi.iconFor(q.questionKey));
         if (tvQuestionTitle != null) {
-            tvQuestionTitle.setText(q.title);
+            tvQuestionTitle.setText(q.text);
+            tvQuestionTitle.setOnClickListener(null);
         }
 
-        if (tvOpt1Text != null) tvOpt1Text.setText(q.options[0]);
-        if (tvOpt2Text != null) tvOpt2Text.setText(q.options[1]);
-        if (tvOpt3Text != null) tvOpt3Text.setText(q.options[2]);
-
-        if (btnQuizNext != null) {
-            if (currentQuestion == questions.length - 1) {
-                btnQuizNext.setText(R.string.btn_finish);
+        // Layout có 3 thẻ lựa chọn; câu có ít lựa chọn hơn thì ẩn thẻ thừa.
+        for (int i = 0; i < optionCards.length; i++) {
+            if (optionCards[i] == null) continue;
+            if (i < q.options.size()) {
+                optionCards[i].setVisibility(View.VISIBLE);
+                if (optionTexts[i] != null) optionTexts[i].setText(q.options.get(i).label);
             } else {
-                btnQuizNext.setText(R.string.btn_next);
+                optionCards[i].setVisibility(View.GONE);
             }
         }
 
+        if (singleQuestion) {
+            if (btnQuizNext != null) btnQuizNext.setText(R.string.btn_save_answer);
+            if (btnQuizPrev != null) btnQuizPrev.setText(R.string.btn_cancel);
+        } else if (btnQuizNext != null) {
+            btnQuizNext.setText(currentQuestion == total - 1 ? R.string.btn_finish : R.string.btn_next);
+        }
+        setButtonsEnabled(true);
         updateOptionStyles();
     }
 
     private void selectOption(int index) {
-        selectedOptions[currentQuestion] = index;
+        if (saving || questions.isEmpty()) return;
+        QuizModels.Question q = questions.get(currentQuestion);
+        if (index >= q.options.size()) return;
+        selected.put(q.questionId, q.options.get(index).optionKey);
         updateOptionStyles();
     }
 
     private void updateOptionStyles() {
-        int selected = selectedOptions[currentQuestion];
-
-        setCardStyle(cardOpt1, tvOpt1Text, imgOpt1Radio, selected == 0);
-        setCardStyle(cardOpt2, tvOpt2Text, imgOpt2Radio, selected == 1);
-        setCardStyle(cardOpt3, tvOpt3Text, imgOpt3Radio, selected == 2);
+        QuizModels.Question q = questions.get(currentQuestion);
+        String chosen = selected.get(q.questionId);
+        for (int i = 0; i < optionCards.length && i < q.options.size(); i++) {
+            setCardStyle(optionCards[i], optionTexts[i], optionRadios[i],
+                    q.options.get(i).optionKey.equals(chosen));
+        }
     }
 
     private void setCardStyle(RelativeLayout card, TextView tv, ImageView radio, boolean isSelected) {
@@ -244,5 +302,79 @@ public class HabitQuizActivity extends AppCompatActivity {
             tv.setTypeface(null, Typeface.NORMAL);
             radio.setImageResource(R.drawable.ic_radio_circle);
         }
+    }
+
+    private void setButtonsEnabled(boolean enabled) {
+        if (btnQuizNext != null) btnQuizNext.setEnabled(enabled);
+        if (btnQuizPrev != null) btnQuizPrev.setEnabled(enabled);
+    }
+
+    // ---------- Lưu câu trả lời ----------
+
+    private void saveCurrentAndContinue() {
+        if (saving || questions.isEmpty()) return;
+        QuizModels.Question q = questions.get(currentQuestion);
+        String optionKey = selected.get(q.questionId);
+        if (optionKey == null) {
+            AppNotificationHelper.showInfo(this, "Hãy chọn một đáp án giống bạn nhất");
+            return;
+        }
+
+        boolean isLast = currentQuestion == questions.size() - 1;
+        List<QuizModels.Answer> answers =
+                Collections.singletonList(new QuizModels.Answer(q.questionId, optionKey));
+        boolean isRoom = DiscoveryApi.MODE_ROOM.equals(mode);
+        // Sửa 1 câu: không gửi currentStep/completed để giữ nguyên tiến độ trên server.
+        QuizModels.SaveAnswersRequest body = isRoom || singleQuestion
+                ? new QuizModels.SaveAnswersRequest(answers, null, null)
+                : new QuizModels.SaveAnswersRequest(answers, Math.min(currentQuestion + 2, questions.size()), isLast);
+
+        saving = true;
+        setButtonsEnabled(false);
+        (isRoom ? api.savePostAnswers(postId, body) : api.saveMyAnswers(body))
+                .enqueue(new ApiCallback<QuizModels.LifestyleTest>(this) {
+                    @Override
+                    public void onSuccess(QuizModels.LifestyleTest data) {
+                        saving = false;
+                        if (singleQuestion) {
+                            setResult(RESULT_OK);
+                            finish();
+                        } else if (isLast) {
+                            onQuizFinished(data);
+                        } else {
+                            currentQuestion++;
+                            renderQuestion();
+                        }
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        saving = false;
+                        setButtonsEnabled(true);
+                        AppNotificationHelper.showError(HabitQuizActivity.this, message);
+                    }
+                });
+    }
+
+    private void onQuizFinished(QuizModels.LifestyleTest data) {
+        if (DiscoveryApi.MODE_ROOM.equals(mode)) {
+            if (data != null && !data.isCompleted) {
+                AppNotificationHelper.showError(this, "Phòng còn câu hỏi chưa trả lời");
+                setButtonsEnabled(true);
+                return;
+            }
+            setResult(RESULT_OK);
+            finish();
+            return;
+        }
+
+        AppNotificationHelper.showSuccess(this, "Hoàn thành bài kiểm tra thói quen!");
+        Intent intent = new Intent(HabitQuizActivity.this, QuizSuccessActivity.class);
+        intent.putExtra(QuizSuccessActivity.EXTRA_ANSWERED, data != null ? data.answeredCount : questions.size());
+        intent.putExtra(QuizSuccessActivity.EXTRA_TOTAL, questions.size());
+        intent.putExtra(QuizSuccessActivity.EXTRA_DURATION_SEC,
+                (SystemClock.elapsedRealtime() - startedAtMs) / 1000);
+        startActivity(intent);
+        finish();
     }
 }

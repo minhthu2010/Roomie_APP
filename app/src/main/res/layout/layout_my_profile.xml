@@ -83,10 +83,14 @@
 
             <!-- Lifestyle Habits Quiz Card using LinearLayout & RelativeLayout -->
             <LinearLayout
+                android:id="@+id/card_habits_quiz"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
                 android:background="@drawable/bg_card_rounded"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground"
                 android:orientation="vertical"
                 android:padding="16dp">
 
@@ -123,16 +127,18 @@
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/tv_habits_date"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:text="@string/sub_habits_date"
+                            android:text="@string/lifestyle_profile_tap_to_view"
                             android:textColor="@color/roomie_text_secondary"
                             android:textSize="11sp" />
                     </LinearLayout>
                 </RelativeLayout>
 
                 <ProgressBar
+                    android:id="@+id/pb_habits"
                     style="?android:attr/progressBarStyleHorizontal"
                     android:layout_width="match_parent"
                     android:layout_height="8dp"

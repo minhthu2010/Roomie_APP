@@ -243,7 +243,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentStart="true"
-                        android:text="@string/cat_shared_expenses"
+                        android:text="@string/cat_smoking_pets"
                         android:textColor="@color/text_primary"
                         android:textSize="13sp" />
 
@@ -301,6 +301,41 @@
 
                     <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="88" android:background="@drawable/bg_badge_match" />
                     <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="12" />
+                </LinearLayout>
+
+                <!-- Category 5 (bộ câu hỏi v2) -->
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:text="@string/cat_expenses_shared"
+                        android:textColor="@color/text_primary"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:text="@string/rate_90"
+                        android:textColor="@color/primary_maroon"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </RelativeLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="8dp"
+                    android:layout_marginTop="6dp"
+                    android:background="@drawable/bg_filter_btn"
+                    android:orientation="horizontal">
+
+                    <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="90" android:background="@drawable/bg_badge_match" />
+                    <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="10" />
                 </LinearLayout>
             </LinearLayout>
 

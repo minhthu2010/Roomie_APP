@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Chỉ cho bản debug (gọi server local khi dev). Bản release gọi server thật qua https nên không cần.
+     - usesCleartextTraffic: cho phép http://
+     - ACCESS_LOCAL_NETWORK: Android 17 (API 37) chặn app kết nối tới địa chỉ mạng nội bộ
+       (10.0.2.2, 192.168.x.x) nếu chưa có quyền này. Cấp quyền một lần sau khi cài app:
+         adb shell pm grant com.example.roomie android.permission.ACCESS_LOCAL_NETWORK -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
+
+    <application android:usesCleartextTraffic="true" />
+
+</manifest>

@@ -1,3 +1,4 @@
 const router = require('express').Router();
-// B thêm route của mảng bài đăng ở đây
+// C: khám phá, tìm phòng và tương thích
+router.use(require('./quiz.routes'));
 module.exports = router;

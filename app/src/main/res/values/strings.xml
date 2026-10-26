@@ -121,16 +121,17 @@
     <string name="opt_find_room">Tìm phòng ở ghép</string>
     <string name="opt_find_roommate">Tìm bạn cùng phòng</string>
     <string name="next_quiz_intro">Tiếp đến: Giới thiệu bài kiểm tra →</string>
-    <string name="quiz_subtext">6 câu hỏi giúp gợi ý người có nhịp sống hợp với bạn.</string>
+    <string name="quiz_subtext">Vài câu hỏi ngắn giúp gợi ý người có nhịp sống hợp với bạn.</string>
     <string name="btn_save_and_explore">Lưu &amp; khám phá thói quen</string>
 
     <!-- Quiz Intro Strings -->
     <string name="quiz_intro_step">BƯỚC 3 · TƯƠNG THÍCH</string>
     <string name="quiz_intro_title">Hiểu nhau trước khi ở chung</string>
     <string name="quiz_intro_banner_text">8 câu hỏi · khoảng 3 phút</string>
+    <string name="quiz_intro_banner_format">%1$d câu hỏi · khoảng %2$d phút</string>
     <string name="quiz_intro_banner_sub">Không có đáp án đúng hay sai — chỉ cần chọn điều giống bạn nhất.</string>
     <string name="quiz_intro_heading">Tìm người có nhịp sống hợp với bạn</string>
-    <string name="quiz_intro_desc">Câu trả lời giúp Roomie tính mức phù hợp về giờ giấc, việc nhà, chi tiêu và giao tiếp.</string>
+    <string name="quiz_intro_desc">Câu trả lời giúp Roomie tính mức phù hợp về giờ giấc, việc nhà, hút thuốc &amp; thú cưng, chi tiêu chung và giao tiếp.</string>
     <string name="quiz_retest_title">Có thể làm lại bất cứ lúc nào</string>
     <string name="quiz_retest_subtext">Vào Hồ sơ để cập nhật khi thói quen thay đổi.</string>
     <string name="btn_start_quiz">Bắt đầu bài kiểm tra</string>
@@ -140,6 +141,7 @@
     <string name="quiz_header_subtitle">THIẾT LẬP HỒ SƠ MỚI</string>
     <string name="quiz_header_title">Phong cách sống</string>
     <string name="quiz_time_left">Còn khoảng 3 phút</string>
+    <string name="quiz_time_left_format">Còn khoảng %1$d phút</string>
     <string name="quiz_instruction">Chọn điều giống bạn nhất khi sống chung.</string>
     <string name="btn_next">Tiếp tục →</string>
     <string name="btn_finish">Hoàn tất</string>
@@ -296,9 +298,11 @@
     <string name="rate_98">98%</string>
     <string name="cat_sleep_noise">Giờ ngủ &amp; tiếng ồn</string>
     <string name="rate_95">95%</string>
-    <string name="cat_shared_expenses">Chi tiêu chung</string>
+    <string name="cat_smoking_pets">Hút thuốc &amp; thú cưng</string>
     <string name="rate_92">92%</string>
     <string name="cat_guests_social">Khách &amp; giao tiếp</string>
+    <string name="cat_expenses_shared">Chi tiêu &amp; đồ dùng chung</string>
+    <string name="rate_90">90%</string>
     <string name="rate_88">88%</string>
     <string name="highlights_title">Điểm chung nổi bật</string>
     <string name="highlight_no_smoking">Không hút thuốc</string>
@@ -479,6 +483,28 @@
     <string name="sub_habits_date">Cập nhật 28/09/2026</string>
     <string name="badge_quiz_completed">Đã hoàn tất</string>
     <string name="btn_retake_quiz">Làm lại bài kiểm tra</string>
+
+    <!-- Thói quen sống của tôi (LifestyleReviewActivity) -->
+    <string name="lifestyle_review_title">Thói quen sống của tôi</string>
+    <string name="lifestyle_status_completed">Đã hoàn tất bài kiểm tra</string>
+    <string name="lifestyle_status_in_progress">Bạn đang làm dở bài kiểm tra</string>
+    <string name="lifestyle_status_sub">Cập nhật %1$s · %2$d/%3$d câu</string>
+    <string name="lifestyle_status_sub_no_date">%1$d/%2$d câu đã trả lời</string>
+    <string name="lifestyle_edit_hint">Chạm vào một câu để sửa riêng câu đó.</string>
+    <string name="lifestyle_loading">Đang tải thói quen sống...</string>
+    <string name="lifestyle_load_error">%1$s\nChạm để thử lại.</string>
+    <string name="lifestyle_empty">Bạn chưa làm bài kiểm tra thói quen sống.\nLàm bài để Roomie gợi ý phòng và bạn cùng phòng hợp với bạn.</string>
+    <string name="lifestyle_not_answered">Chưa trả lời</string>
+    <string name="lifestyle_edit_answer">Sửa câu trả lời</string>
+    <string name="lifestyle_retake_all">Làm lại toàn bộ</string>
+    <string name="lifestyle_continue_quiz">Làm tiếp bài kiểm tra</string>
+    <string name="lifestyle_start_quiz">Làm bài kiểm tra</string>
+    <string name="lifestyle_group_other">Khác</string>
+    <string name="lifestyle_profile_not_done">Chưa làm</string>
+    <string name="lifestyle_profile_in_progress">Đang làm %1$d/%2$d</string>
+    <string name="lifestyle_profile_updated">Cập nhật %1$s</string>
+    <string name="lifestyle_profile_tap_to_view">Chạm để xem lại câu trả lời</string>
+    <string name="btn_save_answer">Lưu câu trả lời</string>
     <string name="header_account">TÀI KHOẢN</string>
     <string name="menu_personal_info">Thông tin cá nhân</string>
     <string name="menu_verification_safety">Xác minh &amp; an toàn</string>

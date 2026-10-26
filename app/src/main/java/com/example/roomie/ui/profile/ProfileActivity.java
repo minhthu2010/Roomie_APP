@@ -3,6 +3,8 @@ package com.example.roomie.ui.profile;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
@@ -13,8 +15,14 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.roomie.R;
 import com.example.roomie.common.BottomNavHelper;
+import com.example.roomie.data.discovery.DiscoveryApi;
+import com.example.roomie.data.discovery.QuizModels;
+import com.example.roomie.data.remote.ApiCallback;
+import com.example.roomie.data.remote.ApiClient;
 import com.example.roomie.ui.auth.MainActivity;
+import com.example.roomie.ui.quiz.LifestyleReviewActivity;
 import com.example.roomie.ui.quiz.QuizIntroActivity;
+import com.example.roomie.ui.quiz.QuizUi;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -38,6 +46,12 @@ public class ProfileActivity extends AppCompatActivity {
         openSubscreen(R.id.menu_notifications, R.layout.layout_notifications);
         openSubscreen(R.id.menu_settings, R.layout.layout_settings);
 
+        View cardHabits = findViewById(R.id.card_habits_quiz);
+        if (cardHabits != null) {
+            cardHabits.setOnClickListener(v ->
+                    startActivity(new Intent(ProfileActivity.this, LifestyleReviewActivity.class)));
+        }
+
         View btnRetakeQuiz = findViewById(R.id.btn_retake_quiz);
         if (btnRetakeQuiz != null) {
             btnRetakeQuiz.setOnClickListener(v -> {
@@ -60,6 +74,47 @@ public class ProfileActivity extends AppCompatActivity {
                     })
                     .show());
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadHabitsStatus();
+    }
+
+    // Thẻ "Hồ sơ thói quen sống": trạng thái + ngày cập nhật lấy từ API (người C)
+    private void loadHabitsStatus() {
+        TextView tvBadge = findViewById(R.id.tv_quiz_completed);
+        TextView tvDate = findViewById(R.id.tv_habits_date);
+        ProgressBar pbHabits = findViewById(R.id.pb_habits);
+        if (tvBadge == null || tvDate == null || pbHabits == null) return;
+
+        ApiClient.create(this, DiscoveryApi.class).getMyLifestyleTest()
+                .enqueue(new ApiCallback<QuizModels.LifestyleTest>(this) {
+                    @Override
+                    public void onSuccess(QuizModels.LifestyleTest test) {
+                        if (test == null) return;
+                        int total = Math.max(test.totalQuestions, 1);
+                        pbHabits.setProgress(test.answeredCount * 100 / total);
+                        if (test.isCompleted) {
+                            tvBadge.setText(R.string.badge_quiz_completed);
+                        } else if (test.answeredCount > 0) {
+                            tvBadge.setText(getString(R.string.lifestyle_profile_in_progress,
+                                    test.answeredCount, test.totalQuestions));
+                        } else {
+                            tvBadge.setText(R.string.lifestyle_profile_not_done);
+                        }
+                        String date = QuizUi.formatDate(test.updatedAt);
+                        tvDate.setText(date != null
+                                ? getString(R.string.lifestyle_profile_updated, date)
+                                : getString(R.string.lifestyle_profile_tap_to_view));
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        // Giữ nguyên thẻ; lỗi sẽ hiện khi mở màn xem lại.
+                    }
+                });
     }
 
     private void openSubscreen(int viewId, int layoutId) {
