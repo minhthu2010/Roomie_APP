@@ -72,9 +72,9 @@ public class ChiTietPhongActivity extends AppCompatActivity {
         findViewById(R.id.btn_view_all_photos).setOnClickListener(openGallery);
         findViewById(R.id.img_cover).setOnClickListener(openGallery);
 
-        // Nhấn vào địa chỉ phòng -> Mở màn hình Vị trí phòng (bản đồ làm ở nhánh feature/c-map)
+        // Nhấn vào địa chỉ phòng -> Mở màn hình Vị trí phòng
         findViewById(R.id.layout_address_location).setOnClickListener(v ->
-                startActivity(new Intent(this, ViTriPhongActivity.class).putExtra(EXTRA_POST_ID, postId)));
+                startActivity(ViTriPhongActivity.intent(this, postId)));
 
         // Tương thích với phòng / với chủ phòng
         findViewById(R.id.layout_room_compatibility).setOnClickListener(v ->

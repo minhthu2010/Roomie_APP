@@ -11,6 +11,20 @@ const HAVERSINE_KM = (lat1, lng1, lat2, lng2) => `
     POWER(SIN(RADIANS(${lat2} - ${lat1}) / 2), 2) +
     COS(RADIANS(${lat1})) * COS(RADIANS(${lat2})) * POWER(SIN(RADIANS(${lng2} - ${lng1}) / 2), 2)))`;
 
+// Quyền riêng tư: tọa độ trả ra app lệch cố định ~60-120m theo từng phòng (cùng phòng luôn lệch
+// như nhau nên marker không nhảy), để bản đồ công khai không chỉ đúng căn nhà.
+// Khoảng cách / lọc vùng vẫn tính bằng tọa độ thật trong DB.
+function approxLocation(postId, lat, lng) {
+  if (lat == null || lng == null) return { latitude: null, longitude: null };
+  let h = 0;
+  for (const ch of String(postId)) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  const angle = (h % 360) * (Math.PI / 180);
+  const meters = 60 + (h % 61);                 // 60..120m
+  const dLat = (meters * Math.cos(angle)) / 111320;
+  const dLng = (meters * Math.sin(angle)) / (111320 * Math.cos((lat * Math.PI) / 180));
+  return { latitude: Math.round((lat + dLat) * 1e6) / 1e6, longitude: Math.round((lng + dLng) * 1e6) / 1e6 };
+}
+
 // RoomCardDto dùng chung cho Home / Tìm kiếm / Bản đồ / Đã lưu
 function toRoomCard(r, score, isSaved) {
   const area = [r.street_address, r.district_legacy || r.ward_name].filter(Boolean).join(', ');
@@ -27,8 +41,7 @@ function toRoomCard(r, score, isSaved) {
     districtName: r.district_legacy,
     landmarkName: r.landmark_name,
     distanceKm: r.distance_km == null ? null : Math.round(r.distance_km * 10) / 10,
-    latitude: r.latitude,
-    longitude: r.longitude,
+    ...approxLocation(r.post_id, r.latitude, r.longitude),
   };
 }
 
@@ -69,6 +82,11 @@ async function searchRooms(userId, f) {
     where.push(`(lower(immutable_unaccent(coalesce(r.district_legacy, ''))) = lower(immutable_unaccent(${area}))
       OR lower(immutable_unaccent(coalesce(r.ward_name, ''))) = lower(immutable_unaccent(${area})))`);
   }
+  // Vùng đang xem trên bản đồ
+  if (f.minLat != null && f.maxLat != null && f.minLng != null && f.maxLng != null) {
+    where.push(`r.latitude BETWEEN ${p(f.minLat)} AND ${p(f.maxLat)}
+      AND r.longitude BETWEEN ${p(f.minLng)} AND ${p(f.maxLng)}`);
+  }
   if (f.minRent != null) where.push(`r.monthly_rent >= ${p(f.minRent)}`);
   if (f.maxRent != null) where.push(`r.monthly_rent <= ${p(f.maxRent)}`);
   if (f.roomTypes.length) where.push(`r.room_type = ANY(${p(f.roomTypes)}::text[])`);
@@ -100,6 +118,13 @@ async function searchRooms(userId, f) {
       LIMIT ${MAX_CANDIDATES}`, params);
 
   const scores = await scorePosts(userId, rows.map((r) => r.post_id));
+  // Chip "≥ 80% phù hợp": lọc sau khi tính điểm (cần đăng nhập và đã làm bài test)
+  if (f.minMatch != null) {
+    for (let i = rows.length - 1; i >= 0; i--) {
+      const m = scores.get(rows[i].post_id)?.match;
+      if (m == null || m < f.minMatch) rows.splice(i, 1);
+    }
+  }
   if (f.sort === 'match') {
     // % cao trước; phòng chưa tính được % xếp cuối, giữ thứ tự mới nhất
     rows.sort((a, b) => (scores.get(b.post_id)?.match ?? -1) - (scores.get(a.post_id)?.match ?? -1));
@@ -152,4 +177,4 @@ async function suggestLandmarks({ q, type, limit, radiusKm }) {
   }));
 }
 
-module.exports = { searchRooms, suggestLandmarks, toRoomCard };
+module.exports = { searchRooms, suggestLandmarks, toRoomCard, approxLocation, HAVERSINE_KM };

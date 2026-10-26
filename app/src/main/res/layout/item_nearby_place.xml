@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Một địa điểm lân cận: icon loại, tên, dòng phụ (tuyến xe / giờ mở cửa), khoảng cách -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:paddingVertical="10dp">
+
+    <RelativeLayout
+        android:id="@+id/icon_box"
+        android:layout_width="38dp"
+        android:layout_height="38dp"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:background="@drawable/bg_badge_sage">
+
+        <ImageView
+            android:id="@+id/img_place_icon"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_centerInParent="true"
+            android:importantForAccessibility="no"
+            tools:src="@drawable/ic_school" />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/tv_place_distance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:textColor="@color/color_text_primary"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        tools:text="0,8 km" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="8dp"
+        android:layout_toStartOf="@id/tv_place_distance"
+        android:layout_toEndOf="@id/icon_box"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_place_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/color_text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            tools:text="ĐH Bách Khoa" />
+
+        <TextView
+            android:id="@+id/tv_place_sub"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="@color/color_text_secondary"
+            android:textSize="12sp"
+            tools:text="Tuyến 08, 59, 69" />
+    </LinearLayout>
+</RelativeLayout>

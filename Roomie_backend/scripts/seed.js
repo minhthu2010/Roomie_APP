@@ -78,6 +78,18 @@ const IDS = {
       ('supermarket', 'Co.op Mart Lý Thường Kiệt', NULL, 'Mở cửa đến 22:00', '497 Hòa Hảo', '79', 10.7612, 106.6601),
       ('bus_stop', 'Trạm xe buýt ĐH Bách Khoa', NULL, 'Tuyến 08, 59, 69', 'Lý Thường Kiệt', '79', 10.7730, 106.6590)
       ON CONFLICT DO NOTHING`);
+    // Địa điểm lân cận cho màn Vị trí phòng (dữ liệu mẫu, tọa độ gần đúng)
+    await c.query(`INSERT INTO landmarks (landmark_type, name, short_name, subtitle, address_text, province_code, latitude, longitude) VALUES
+      ('hospital', 'Bệnh viện Nhân dân 115', 'BV 115', 'Cấp cứu 24/7', 'Thành Thái, Quận 10', '79', 10.7740, 106.6670),
+      ('supermarket', 'Co.op Mart Nguyễn Đình Chiểu', NULL, 'Mở cửa đến 22:00', 'Nguyễn Đình Chiểu, Quận 3', '79', 10.7790, 106.6880),
+      ('bus_stop', 'Trạm xe buýt Hồ Con Rùa', NULL, 'Tuyến 03, 19, 36', 'Công trường Quốc tế, Quận 3', '79', 10.7826, 106.6960),
+      ('hospital', 'Bệnh viện Chợ Rẫy', NULL, 'Cấp cứu 24/7', 'Nguyễn Chí Thanh, Quận 5', '79', 10.7577, 106.6595),
+      ('supermarket', 'Bách Hóa Xanh An Dương Vương', NULL, 'Mở cửa đến 21:30', 'An Dương Vương, Quận 5', '79', 10.7608, 106.6800),
+      ('supermarket', 'Circle K Phan Xích Long', NULL, 'Mở cửa 24/7', 'Phan Xích Long, Phú Nhuận', '79', 10.7985, 106.6880),
+      ('bus_stop', 'Trạm xe buýt Phan Đăng Lưu', NULL, 'Tuyến 24, 104', 'Phan Đăng Lưu, Phú Nhuận', '79', 10.8010, 106.6905),
+      ('supermarket', 'WinMart+ Điện Biên Phủ', NULL, 'Mở cửa đến 22:00', 'Điện Biên Phủ, Bình Thạnh', '79', 10.8015, 106.7090),
+      ('bus_stop', 'Trạm xe buýt Hàng Xanh', NULL, 'Tuyến 10, 52, 55', 'Ngã tư Hàng Xanh, Bình Thạnh', '79', 10.8019, 106.7116)
+      ON CONFLICT DO NOTHING`);
 
     // Quận (hiển thị + lọc khu vực), trường gần nhất, tiện ích của các phòng mẫu.
     // Dùng UPDATE để chạy lại seed trên DB cũ vẫn bổ sung được. Không đổi address_text/giá...:

@@ -23,6 +23,19 @@ router.get('/room-posts/:postId/images', optionalAuth, validate(postParams), asy
   ok(res, await room.getRoomImages(viewer(req), req.valid.params.postId));
 });
 
+// Vị trí phòng + trường, siêu thị, trạm xe buýt... trong bán kính
+router.get('/room-posts/:postId/nearby', optionalAuth,
+  validate({
+    ...postParams,
+    query: z.object({
+      radiusKm: z.coerce.number().min(0.2).max(5).default(2),
+      limit: z.coerce.number().int().min(1).max(20).default(6),
+    }),
+  }),
+  async (req, res) => {
+    ok(res, await room.getNearby(viewer(req), req.valid.params.postId, req.valid.query));
+  });
+
 // Bấm "Liên hệ Zalo" / "Gọi điện"
 router.post('/room-posts/:postId/contact-clicks', requireAuth,
   validate({ ...postParams, body: z.object({ channel: z.enum(['zalo', 'call']) }) }),
