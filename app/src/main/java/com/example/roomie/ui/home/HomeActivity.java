@@ -108,7 +108,7 @@ public class HomeActivity extends AppCompatActivity {
         // "Xem bản đồ" button click opens "Bản đồ giá phòng" screen
         View btnViewMap = findViewById(R.id.btn_view_map);
         if (btnViewMap != null) {
-            btnViewMap.setOnClickListener(v -> startActivity(new Intent(this, BanDoGiaPhongActivity.class)));
+            btnViewMap.setOnClickListener(v -> startActivity(BanDoGiaPhongActivity.intent(this, criteria)));
         }
 
         findViewById(R.id.layout_sort).setOnClickListener(v -> showSortDialog());

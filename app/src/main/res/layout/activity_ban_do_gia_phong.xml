@@ -19,6 +19,7 @@
     <!-- Selected Room Detail Overlay Card -->
     <LinearLayout
         android:id="@+id/card_selected_room"
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/bottom_navigation_bar"
@@ -75,6 +76,7 @@
                         android:background="@drawable/bg_badge_match"
                         android:paddingHorizontal="8dp"
                         android:paddingVertical="3dp"
+                        android:id="@+id/tv_sel_match"
                         android:text="@string/match_rate_94"
                         android:textColor="@color/color_white"
                         android:textSize="11sp"
@@ -96,6 +98,7 @@
                     android:layout_marginTop="6dp"
                     android:ellipsize="end"
                     android:maxLines="2"
+                    android:id="@+id/tv_sel_title"
                     android:text="@string/room_title"
                     android:textColor="@color/color_text_primary"
                     android:textSize="14sp"
@@ -105,7 +108,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="3dp"
-                    android:text="268 Lý Thường Kiệt · 0,8 km"
+                    android:id="@+id/tv_sel_address"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text=""
                     android:textColor="@color/color_text_secondary"
                     android:textSize="11sp" />
 
@@ -113,7 +119,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="3dp"
-                    android:text="3.200.000đ/tháng"
+                    android:id="@+id/tv_sel_price"
+                    android:text=""
                     android:textColor="@color/color_primary"
                     android:textSize="14sp"
                     android:textStyle="bold" />
@@ -127,7 +134,7 @@
             android:layout_height="46dp"
             android:layout_marginTop="14dp"
             android:background="@drawable/bg_button_secondary"
-            android:text="Xem chi tiết"
+            android:text="@string/map_view_detail"
             android:textAllCaps="false"
             android:textColor="@color/color_text_primary"
             android:textSize="14sp"
@@ -149,7 +156,7 @@
                 android:background="@drawable/bg_button_primary"
                 android:drawableStart="@drawable/ic_chat"
                 android:paddingHorizontal="16dp"
-                android:text="Liên hệ Zalo"
+                android:text="@string/btn_contact_zalo"
                 android:textAllCaps="false"
                 android:textColor="@color/color_white"
                 android:textSize="14sp"
@@ -164,7 +171,7 @@
                 android:background="@drawable/bg_button_secondary"
                 android:drawableStart="@drawable/ic_phone"
                 android:paddingHorizontal="16dp"
-                android:text="Gọi điện"
+                android:text="@string/btn_call_phone"
                 android:textAllCaps="false"
                 android:textColor="@color/color_text_primary"
                 android:textSize="14sp"
@@ -176,156 +183,30 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/card_selected_room"
+        android:layout_above="@id/bottom_navigation_bar"
         android:layout_alignParentTop="true">
 
-        <!-- Map Mockup Graphic -->
-        <ImageView
-            android:id="@+id/img_map_bg"
+        <!-- Bản đồ OpenStreetMap (osmdroid); nhãn giá thêm từ code -->
+        <org.osmdroid.views.MapView
+            android:id="@+id/map_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:contentDescription="@string/btn_view_map"
-            android:scaleType="centerCrop"
-            android:src="@drawable/bg_map_mockup" />
+            android:layout_height="match_parent" />
 
-        <!-- Pins on Map -->
-        <!-- Active Pin 3,2 tr -->
-        <LinearLayout
-            android:id="@+id/pin_3_2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginStart="110dp"
-            android:layout_marginTop="110dp"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_chip_selected"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="5dp"
-                android:text="3,2 tr"
-                android:textColor="@color/color_white"
-                android:textSize="13sp"
-                android:textStyle="bold" />
-
-            <View
-                android:layout_width="10dp"
-                android:layout_height="10dp"
-                android:layout_marginTop="-4dp"
-                android:background="@drawable/bg_chip_selected"
-                android:rotation="45" />
-        </LinearLayout>
-
-        <!-- Pin 3,8 tr -->
-        <LinearLayout
-            android:id="@+id/pin_3_8"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginEnd="50dp"
-            android:layout_marginTop="140dp"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_chip_unselected"
-                android:elevation="2dp"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="5dp"
-                android:text="3,8 tr"
-                android:textColor="@color/color_text_primary"
-                android:textSize="13sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <!-- Pin 4,1 tr -->
-        <LinearLayout
-            android:id="@+id/pin_4_1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginStart="40dp"
-            android:layout_marginTop="190dp"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_chip_unselected"
-                android:elevation="2dp"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="5dp"
-                android:text="4,1 tr"
-                android:textColor="@color/color_text_primary"
-                android:textSize="13sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <!-- Pin 2,9 tr -->
-        <LinearLayout
-            android:id="@+id/pin_2_9"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginEnd="35dp"
-            android:layout_marginTop="230dp"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_chip_unselected"
-                android:elevation="2dp"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="5dp"
-                android:text="2,9 tr"
-                android:textColor="@color/color_text_primary"
-                android:textSize="13sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <!-- Pin 3,5 tr -->
-        <LinearLayout
-            android:id="@+id/pin_3_5"
+        <!-- Đang tải / báo cần phóng to -->
+        <TextView
+            android:id="@+id/tv_map_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
-            android:layout_marginBottom="35dp"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_chip_unselected"
-                android:elevation="2dp"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="5dp"
-                android:text="3,5 tr"
-                android:textColor="@color/color_text_primary"
-                android:textSize="13sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <!-- Target Circle Indicator -->
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_centerInParent="true"
-            android:contentDescription="@string/cd_shield_icon"
-            android:src="@drawable/ic_target" />
+            android:layout_marginBottom="24dp"
+            android:background="@drawable/bg_chip_unselected"
+            android:elevation="3dp"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="7dp"
+            android:textColor="@color/color_text_primary"
+            android:textSize="12sp"
+            android:visibility="gone" />
 
         <!-- Floating Location Compass Button -->
         <RelativeLayout
@@ -407,7 +288,8 @@
                         android:layout_toEndOf="@id/icon_search"
                         android:ellipsize="end"
                         android:singleLine="true"
-                        android:text="Quận 10 · gần ĐH Bách Khoa"
+                        android:id="@+id/tv_map_search_text"
+                        android:text="@string/hint_search"
                         android:textColor="@color/color_text_primary"
                         android:textSize="13sp" />
                 </RelativeLayout>
@@ -454,7 +336,7 @@
                         android:elevation="2dp"
                         android:paddingHorizontal="14dp"
                         android:paddingVertical="7dp"
-                        android:text="24 phòng"
+                        android:text="@string/detail_loading"
                         android:textColor="@color/color_white"
                         android:textSize="12sp"
                         android:textStyle="bold" />
@@ -469,7 +351,9 @@
                         android:elevation="2dp"
                         android:paddingHorizontal="14dp"
                         android:paddingVertical="7dp"
-                        android:text="2–4 triệu"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:text="@string/filter_budget_any"
                         android:textColor="@color/color_text_primary"
                         android:textSize="12sp" />
 
@@ -483,7 +367,9 @@
                         android:elevation="2dp"
                         android:paddingHorizontal="14dp"
                         android:paddingVertical="7dp"
-                        android:text="≥ 80% phù hợp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:text="@string/map_chip_match"
                         android:textColor="@color/color_text_primary"
                         android:textSize="12sp" />
                 </LinearLayout>

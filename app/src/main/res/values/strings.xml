@@ -621,6 +621,27 @@
     <string name="profile_member_since">Thành viên từ %1$s</string>
     <string name="profile_hidden">Người dùng này đang ẩn hồ sơ công khai.</string>
     <string name="about_poster_title_fmt">Về %1$s</string>
+
+    <!-- Bản đồ giá phòng / Vị trí phòng (người C, osmdroid) -->
+    <string name="map_view_detail">Xem chi tiết</string>
+    <string name="map_chip_match">≥ 80% phù hợp</string>
+    <string name="map_room_count">%1$d phòng</string>
+    <string name="map_loading">Đang tải phòng trong khu vực…</string>
+    <string name="map_zoom_in">Có %1$d phòng, phóng to để xem hết</string>
+    <string name="map_empty">Không có phòng nào trong khu vực này</string>
+    <string name="map_price_label">%1$s tr</string>
+    <string name="map_need_quiz">Không có phòng phù hợp từ 80% trở lên ở khu vực này</string>
+    <string name="map_location_denied">Cần quyền vị trí để hiện vị trí của bạn</string>
+    <string name="map_locating">Đang tìm vị trí của bạn…</string>
+    <string name="map_attribution">© OpenStreetMap</string>
+    <string name="loc_title">Vị trí phòng</string>
+    <string name="loc_back">Chi tiết phòng</string>
+    <string name="loc_nearby_title">Khoảng cách lân cận</string>
+    <string name="loc_nearby_sub">Đường chim bay</string>
+    <string name="loc_nearby_empty">Chưa có địa điểm nào trong bán kính 2 km.</string>
+    <string name="loc_approx_note">Vị trí trên bản đồ là gần đúng (±150 m). Hỏi chủ phòng địa chỉ chính xác.</string>
+    <string name="loc_directions">Chỉ đường</string>
+    <string name="loc_no_location">Phòng chưa ghim vị trí trên bản đồ.</string>
     <string name="profile_no_bio">Chưa có giới thiệu.</string>
     <string name="profile_no_habits">Chưa làm bài kiểm tra thói quen.</string>
     <string name="profile_posts_title">Bài đăng đang tìm người (%1$d)</string>

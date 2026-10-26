@@ -68,6 +68,15 @@ public interface DiscoveryApi {
     @GET("users/{userId}/public-profile")
     Call<ApiResponse<RoomModels.PublicProfile>> getPublicProfile(@Path("userId") String userId);
 
+    // ---------- Bản đồ ----------
+
+    /** Tham số: SearchCriteria.toQuery() + minLat, maxLat, minLng, maxLng, minMatch */
+    @GET("room-posts/map")
+    Call<ApiResponse<MapModels.MapRooms>> getMapRooms(@QueryMap Map<String, String> query);
+
+    @GET("room-posts/{postId}/nearby")
+    Call<ApiResponse<MapModels.Nearby>> getNearby(@Path("postId") String postId);
+
     @GET("landmarks/suggest")
     Call<ApiResponse<List<SearchModels.Landmark>>> suggestLandmarks(@Query("q") String q,
                                                                     @Query("type") String type,
