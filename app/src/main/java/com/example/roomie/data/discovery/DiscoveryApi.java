@@ -30,4 +30,7 @@ public interface DiscoveryApi {
     @PUT("room-posts/{postId}/lifestyle-answers")
     Call<ApiResponse<QuizModels.LifestyleTest>> savePostAnswers(@Path("postId") String postId,
                                                                @Body QuizModels.SaveAnswersRequest body);
+
+    @GET("room-posts/{postId}/compatibility")
+    Call<ApiResponse<MatchingModels.Compatibility>> getCompatibility(@Path("postId") String postId);
 }

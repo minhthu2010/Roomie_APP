@@ -1,8 +1,10 @@
 package com.example.roomie.ui.room;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,12 +14,27 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.roomie.R;
 import com.example.roomie.common.BottomNavHelper;
+import com.example.roomie.data.discovery.DiscoveryApi;
+import com.example.roomie.data.discovery.MatchingModels;
+import com.example.roomie.data.remote.ApiCallback;
+import com.example.roomie.data.remote.ApiClient;
 import com.example.roomie.ui.matching.ChiTietTuongThichPhongActivity;
 import com.example.roomie.ui.matching.KetQuaTuongThichActivity;
 import com.example.roomie.ui.profile.HoSoNguoiDangActivity;
 import com.example.roomie.ui.report.BaoCaoBaiDangActivity;
 
+import java.util.Locale;
+
 public class ChiTietPhongActivity extends AppCompatActivity {
+
+    public static final String EXTRA_POST_ID = "POST_ID";
+
+    public static Intent intent(Context context, String postId) {
+        return new Intent(context, ChiTietPhongActivity.class).putExtra(EXTRA_POST_ID, postId);
+    }
+
+    // TODO (tuần 3): tải chi tiết phòng theo postId; hiện mới dùng cho phần tương thích
+    private String postId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,11 +69,13 @@ public class ChiTietPhongActivity extends AppCompatActivity {
             );
         }
 
+        postId = getIntent().getStringExtra(EXTRA_POST_ID);
+
         // Tương thích với phòng -> Mở màn hình Chi tiết tương thích với phòng
         View roomCompat = findViewById(R.id.layout_room_compatibility);
         if (roomCompat != null) {
             roomCompat.setOnClickListener(v ->
-                startActivity(new Intent(this, ChiTietTuongThichPhongActivity.class))
+                startActivity(ChiTietTuongThichPhongActivity.intent(this, postId))
             );
         }
 
@@ -64,7 +83,7 @@ public class ChiTietPhongActivity extends AppCompatActivity {
         View hostCompat = findViewById(R.id.layout_host_compatibility);
         if (hostCompat != null) {
             hostCompat.setOnClickListener(v ->
-                startActivity(new Intent(this, KetQuaTuongThichActivity.class))
+                startActivity(KetQuaTuongThichActivity.intent(this, postId))
             );
         }
 
@@ -83,5 +102,36 @@ public class ChiTietPhongActivity extends AppCompatActivity {
                 startActivity(new Intent(this, BaoCaoBaiDangActivity.class))
             );
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadCompatibility();
+    }
+
+    // % tương thích với phòng và với chủ phòng (người C)
+    private void loadCompatibility() {
+        TextView tvRoomRate = findViewById(R.id.tv_room_compat_rate);
+        TextView tvHostRate = findViewById(R.id.tv_host_compat_rate);
+        if (postId == null || tvRoomRate == null || tvHostRate == null) return;
+        ApiClient.create(this, DiscoveryApi.class).getCompatibility(postId)
+                .enqueue(new ApiCallback<MatchingModels.Compatibility>(this) {
+                    @Override
+                    public void onSuccess(MatchingModels.Compatibility data) {
+                        if (data == null) return;
+                        tvRoomRate.setText(percentText(data.room.overall));
+                        tvHostRate.setText(percentText(data.host.overall));
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        // Giữ "--%"; mở màn tương thích sẽ thấy lỗi chi tiết
+                    }
+                });
+    }
+
+    private static String percentText(Integer percent) {
+        return percent == null ? "--%" : String.format(Locale.getDefault(), "%d%%", percent);
     }
 }
