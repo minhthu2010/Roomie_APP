@@ -115,7 +115,7 @@
                 android:layout_marginTop="8dp"
                 android:max="8"
                 android:progress="1"
-                android:progressDrawable="@drawable/bg_button_primary" />
+                android:progressDrawable="@drawable/progress_bar_custom" />
 
         </RelativeLayout>
 
@@ -134,7 +134,8 @@
                 android:layout_height="36dp"
                 android:layout_centerInParent="true"
                 android:contentDescription="Category Icon"
-                android:src="@drawable/ic_moon" />
+                android:src="@drawable/ic_moon"
+                android:tint="@color/white" />
 
         </RelativeLayout>
 

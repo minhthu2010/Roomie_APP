@@ -13,6 +13,10 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.roomie.R;
+import com.example.roomie.data.discovery.DiscoveryApi;
+import com.example.roomie.data.discovery.QuizModels;
+import com.example.roomie.data.remote.ApiCallback;
+import com.example.roomie.data.remote.ApiClient;
 import com.example.roomie.ui.auth.MainActivity;
 
 public class QuizIntroActivity extends AppCompatActivity {
@@ -49,5 +53,28 @@ public class QuizIntroActivity extends AppCompatActivity {
                 startActivity(intent);
             });
         }
+
+        loadQuestionCount();
+    }
+
+    // Số câu lấy từ bộ câu hỏi đang phát hành thay vì ghi cứng trong strings.xml.
+    private void loadQuestionCount() {
+        TextView tvBanner = findViewById(R.id.tv_banner_title);
+        if (tvBanner == null) return;
+        ApiClient.create(this, DiscoveryApi.class)
+                .getQuestionnaire(DiscoveryApi.MODE_PERSONAL)
+                .enqueue(new ApiCallback<QuizModels.Questionnaire>(this) {
+                    @Override
+                    public void onSuccess(QuizModels.Questionnaire data) {
+                        if (data == null || data.totalQuestions == 0) return;
+                        int minutes = Math.max(1, Math.round(data.totalQuestions * 0.4f));
+                        tvBanner.setText(getString(R.string.quiz_intro_banner_format, data.totalQuestions, minutes));
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        // Giữ chữ mặc định; lỗi mạng sẽ báo ở màn làm bài.
+                    }
+                });
     }
 }

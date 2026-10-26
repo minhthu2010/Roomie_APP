@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -82,6 +84,11 @@
             android:name=".ui.quiz.HabitQuizActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+
+        <!-- Lifestyle Review Activity (Thói quen sống của tôi) -->
+        <activity
+            android:name=".ui.quiz.LifestyleReviewActivity"
+            android:exported="false" />
 
         <!-- Quiz Success Activity (Step 4) -->
         <activity
