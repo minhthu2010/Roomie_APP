@@ -7,7 +7,9 @@ import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
@@ -41,6 +43,30 @@ public interface DiscoveryApi {
     /** Tham số: xem SearchCriteria.toQuery() (q, area, landmarkId, minRent, maxRent, roomTypes, gender, amenities, sort, page, limit) */
     @GET("room-posts/search")
     Call<ApiResponse<List<SearchModels.RoomCard>>> searchRooms(@QueryMap Map<String, String> query);
+
+    // ---------- Chi tiết phòng, ảnh, đã lưu, hồ sơ người đăng ----------
+
+    @GET("room-posts/{postId}")
+    Call<ApiResponse<RoomModels.RoomDetail>> getRoomDetail(@Path("postId") String postId);
+
+    @GET("room-posts/{postId}/images")
+    Call<ApiResponse<RoomModels.RoomImages>> getRoomImages(@Path("postId") String postId);
+
+    @POST("room-posts/{postId}/contact-clicks")
+    Call<ApiResponse<RoomModels.ContactClick>> logContactClick(@Path("postId") String postId,
+                                                              @Body RoomModels.ContactClick body);
+
+    @GET("saved-posts")
+    Call<ApiResponse<List<RoomModels.SavedRoom>>> getSavedRooms(@Query("page") int page, @Query("limit") int limit);
+
+    @PUT("saved-posts/{postId}")
+    Call<ApiResponse<RoomModels.SaveResult>> savePost(@Path("postId") String postId);
+
+    @DELETE("saved-posts/{postId}")
+    Call<ApiResponse<RoomModels.SaveResult>> unsavePost(@Path("postId") String postId);
+
+    @GET("users/{userId}/public-profile")
+    Call<ApiResponse<RoomModels.PublicProfile>> getPublicProfile(@Path("userId") String userId);
 
     @GET("landmarks/suggest")
     Call<ApiResponse<List<SearchModels.Landmark>>> suggestLandmarks(@Query("q") String q,

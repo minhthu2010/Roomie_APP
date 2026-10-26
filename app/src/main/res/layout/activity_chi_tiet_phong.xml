@@ -99,6 +99,7 @@
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:layout_centerInParent="true"
+                            android:id="@+id/img_favorite"
                             android:contentDescription="@string/cd_favorite"
                             android:src="@drawable/ic_heart_outline" />
                     </RelativeLayout>
@@ -114,6 +115,7 @@
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:id="@+id/img_cover"
                     android:scaleType="centerCrop"
                     android:src="@drawable/img_detail_room"
                     tools:ignore="ContentDescription" />
@@ -127,7 +129,8 @@
                     android:background="@drawable/bg_badge_match"
                     android:paddingHorizontal="10dp"
                     android:paddingVertical="4dp"
-                    android:text="📷 1 / 8"
+                    android:id="@+id/tv_photo_count"
+                    android:text="📷 1 / 1"
                     android:textColor="@color/white"
                     android:textSize="12sp"
                     tools:ignore="HardcodedText" />
@@ -161,6 +164,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:id="@+id/tv_view_all_photos"
                         android:text="@string/btn_view_all_photos"
                         android:textColor="@color/text_primary"
                         android:textSize="14sp"
@@ -173,6 +177,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
+                android:id="@+id/tv_price"
                 android:text="@string/room_detail_price"
                 android:textColor="@color/primary_maroon"
                 android:textSize="24sp"
@@ -182,6 +187,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
+                android:id="@+id/tv_title"
                 android:text="@string/room_detail_title"
                 android:textColor="@color/text_primary"
                 android:textSize="18sp"
@@ -208,92 +214,25 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:id="@+id/tv_address"
                     android:text="@string/room_detail_address"
                     android:textColor="@color/text_secondary"
                     android:textSize="13sp" />
             </LinearLayout>
 
-            <!-- Amenities Chips -->
-            <LinearLayout
+            <!-- Tiện ích: chip item_detail_chip thêm từ code -->
+            <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:orientation="horizontal">
+                android:scrollbars="none">
 
                 <LinearLayout
+                    android:id="@+id/layout_amenities"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_chip_unselected"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="14dp"
-                    android:paddingVertical="8dp">
-
-                    <ImageView
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
-                        android:layout_marginEnd="6dp"
-                        android:contentDescription="@string/filter_amenity_ac"
-                        android:src="@drawable/ic_kitchen" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/filter_amenity_ac"
-                        android:textColor="@color/text_primary"
-                        android:textSize="13sp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:background="@drawable/bg_chip_unselected"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="14dp"
-                    android:paddingVertical="8dp">
-
-                    <ImageView
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
-                        android:layout_marginEnd="6dp"
-                        android:contentDescription="@string/filter_amenity_washer"
-                        android:src="@drawable/ic_washing_machine" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/filter_amenity_washer"
-                        android:textColor="@color/text_primary"
-                        android:textSize="13sp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:background="@drawable/bg_chip_unselected"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="14dp"
-                    android:paddingVertical="8dp">
-
-                    <ImageView
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
-                        android:layout_marginEnd="6dp"
-                        android:contentDescription="@string/filter_amenity_kitchen"
-                        android:src="@drawable/ic_kitchen" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/filter_amenity_kitchen"
-                        android:textColor="@color/text_primary"
-                        android:textSize="13sp" />
-                </LinearLayout>
-            </LinearLayout>
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
 
             <!-- Match Card 1 (Room Compatibility) -->
             <LinearLayout
@@ -339,11 +278,15 @@
                     android:textColor="@color/text_secondary"
                     android:textSize="11sp" />
 
-                <View
+                <ProgressBar
+                    android:id="@+id/pb_room_compat"
+                    style="?android:attr/progressBarStyleHorizontal"
                     android:layout_width="match_parent"
                     android:layout_height="8dp"
                     android:layout_marginTop="10dp"
-                    android:background="@drawable/bg_chip_selected" />
+                    android:max="100"
+                    android:progress="0"
+                    android:progressDrawable="@drawable/progress_bar_custom" />
             </LinearLayout>
 
             <!-- Description -->
@@ -361,6 +304,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
                 android:lineSpacingExtra="3dp"
+                android:id="@+id/tv_description"
                 android:text="@string/section_description_text"
                 android:textColor="@color/text_primary"
                 android:textSize="13sp" />
@@ -390,6 +334,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
+                        android:id="@+id/tv_val_roommates"
                         android:text="@string/val_roommate_needed"
                         android:textColor="@color/text_primary"
                         android:textSize="13sp" />
@@ -413,6 +358,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
+                        android:id="@+id/tv_val_move_in"
                         android:text="@string/val_move_in_date"
                         android:textColor="@color/text_primary"
                         android:textSize="13sp" />
@@ -436,6 +382,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
+                        android:id="@+id/tv_val_area"
                         android:text="@string/val_area"
                         android:textColor="@color/text_primary"
                         android:textSize="13sp" />
@@ -459,6 +406,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
+                        android:id="@+id/tv_val_deposit"
                         android:text="@string/val_deposit"
                         android:textColor="@color/text_primary"
                         android:textSize="13sp" />
@@ -470,6 +418,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
+                android:id="@+id/tv_bills_title"
                 android:text="@string/section_bills_title"
                 android:textColor="@color/text_primary"
                 android:textSize="14sp"
@@ -479,6 +428,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
+                android:id="@+id/tv_bills"
                 android:text="@string/section_bills_text"
                 android:textColor="@color/text_primary"
                 android:textSize="13sp" />
@@ -493,71 +443,26 @@
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
-            <LinearLayout
+            <!-- Ưu tiên bạn cùng phòng: chip thêm từ code -->
+            <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:orientation="horizontal">
+                android:scrollbars="none">
 
-                <TextView
+                <LinearLayout
+                    android:id="@+id/layout_prefs"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_chip_selected"
-                    android:paddingHorizontal="16dp"
-                    android:paddingVertical="8dp"
-                    android:text="@string/chip_gender_female"
-                    android:textColor="@color/white"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:background="@drawable/bg_chip_selected"
-                    android:paddingHorizontal="16dp"
-                    android:paddingVertical="8dp"
-                    android:text="@string/chip_pref_student"
-                    android:textColor="@color/white"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:background="@drawable/bg_chip_selected"
-                    android:paddingHorizontal="16dp"
-                    android:paddingVertical="8dp"
-                    android:text="@string/chip_pref_working"
-                    android:textColor="@color/white"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_chip_selected"
-                    android:paddingHorizontal="16dp"
-                    android:paddingVertical="8dp"
-                    android:text="@string/chip_pref_no_smoking"
-                    android:textColor="@color/white"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
 
             <!-- Expectations -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
+                android:id="@+id/tv_expectations_title"
                 android:text="@string/section_expectations_title"
                 android:textColor="@color/text_primary"
                 android:textSize="14sp"
@@ -567,6 +472,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
+                android:id="@+id/tv_expectations"
                 android:text="@string/section_expectations_text"
                 android:textColor="@color/text_primary"
                 android:textSize="13sp" />
@@ -603,6 +509,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:id="@+id/tv_host_name"
                         android:text="@string/host_name"
                         android:textColor="@color/text_primary"
                         android:textSize="14sp"
@@ -612,6 +519,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
+                        android:id="@+id/tv_host_role"
                         android:text="@string/host_role"
                         android:textColor="@color/text_secondary"
                         android:textSize="12sp" />
@@ -663,11 +571,15 @@
                         android:textStyle="bold" />
                 </RelativeLayout>
 
-                <View
+                <ProgressBar
+                    android:id="@+id/pb_host_compat"
+                    style="?android:attr/progressBarStyleHorizontal"
                     android:layout_width="match_parent"
                     android:layout_height="8dp"
                     android:layout_marginTop="10dp"
-                    android:background="@drawable/bg_chip_selected" />
+                    android:max="100"
+                    android:progress="0"
+                    android:progressDrawable="@drawable/progress_bar_custom" />
             </LinearLayout>
 
             <!-- Bottom Contact Action Buttons -->

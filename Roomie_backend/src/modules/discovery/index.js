@@ -3,4 +3,5 @@ const router = require('express').Router();
 router.use(require('./quiz.routes'));
 router.use(require('./search.routes'));     // /room-posts/search phải đứng trước /room-posts/:postId
 router.use(require('./matching.routes'));
+router.use(require('./room.routes'));       // chi tiết, ảnh, đã lưu, hồ sơ người đăng
 module.exports = router;

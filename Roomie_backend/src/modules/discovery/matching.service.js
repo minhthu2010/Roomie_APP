@@ -184,4 +184,10 @@ async function scorePosts(seekerId, postIds, client = db) {
   return result;
 }
 
-module.exports = { getCompatibility, scorePosts };
+// Tương thích giữa 2 người (hồ sơ người đăng): DETAIL_SQL không có phòng, "host" = người kia
+async function compareUsers(seekerId, otherUserId) {
+  const { rows } = await db.query(DETAIL_SQL, [seekerId, null, otherUserId]);
+  return compare(rows, 'host');
+}
+
+module.exports = { getCompatibility, scorePosts, compareUsers };
