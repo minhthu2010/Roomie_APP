@@ -84,7 +84,7 @@
                         android:layout_centerVertical="true"
                         android:scaleType="centerCrop"
                         android:src="@drawable/img_avatar_host"
-                        app:shapeAppearanceOverlay="@style/cr999" />
+                        app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full" />
 
                     <com.google.android.material.imageview.ShapeableImageView
                         android:layout_width="48dp"
@@ -93,8 +93,18 @@
                         android:layout_centerVertical="true"
                         android:scaleType="centerCrop"
                         android:src="@drawable/img_avatar_user"
-                        app:shapeAppearanceOverlay="@style/cr999" />
+                        app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full" />
                 </RelativeLayout>
+
+                <TextView
+                    android:id="@+id/tv_match_subject"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textColor="@color/white"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    tools:text="Bạn &amp; Ngọc Anh (chủ phòng)" />
 
                 <!-- Gauge Ring Container -->
                 <RelativeLayout
@@ -118,7 +128,8 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="94%"
+                            android:id="@+id/tv_match_percent"
+                            android:text="--%"
                             android:textColor="@color/match_success"
                             android:textSize="28sp"
                             android:textStyle="bold"
@@ -127,7 +138,10 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/match_very_compatible"
+                            android:id="@+id/tv_match_level"
+                            android:gravity="center"
+                            android:maxWidth="84dp"
+                            android:text="@string/match_loading"
                             android:textColor="@color/border_light"
                             android:textSize="12sp" />
                     </LinearLayout>
@@ -135,13 +149,14 @@
 
                 <!-- Tagline Subtitle -->
                 <TextView
+                    android:id="@+id/tv_match_tagline"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="18dp"
                     android:gravity="center"
                     android:lineSpacingExtra="3dp"
                     android:paddingHorizontal="8dp"
-                    android:text="@string/match_tagline"
+                    android:text=""
                     android:textColor="@color/border_light"
                     android:textSize="13sp" />
             </LinearLayout>
@@ -163,184 +178,17 @@
                     android:textSize="14sp"
                     android:textStyle="bold" />
 
-                <!-- Category 1 -->
-                <RelativeLayout
+                <!-- Các nhóm được thêm từ code (item_match_group_row) -->
+                <LinearLayout
+                    android:id="@+id/layout_group_rows"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:text="@string/cat_cleanliness"
-                        android:textColor="@color/text_primary"
-                        android:textSize="13sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:text="@string/rate_98"
-                        android:textColor="@color/primary_maroon"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-                </RelativeLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="8dp"
-                    android:layout_marginTop="6dp"
-                    android:background="@drawable/bg_filter_btn"
-                    android:orientation="horizontal">
-
-                    <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="98" android:background="@drawable/bg_badge_match" />
-                    <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="2" />
-                </LinearLayout>
-
-                <!-- Category 2 -->
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:text="@string/cat_sleep_noise"
-                        android:textColor="@color/text_primary"
-                        android:textSize="13sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:text="@string/rate_95"
-                        android:textColor="@color/primary_maroon"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-                </RelativeLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="8dp"
-                    android:layout_marginTop="6dp"
-                    android:background="@drawable/bg_filter_btn"
-                    android:orientation="horizontal">
-
-                    <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="95" android:background="@drawable/bg_badge_match" />
-                    <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="5" />
-                </LinearLayout>
-
-                <!-- Category 3 -->
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:text="@string/cat_smoking_pets"
-                        android:textColor="@color/text_primary"
-                        android:textSize="13sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:text="@string/rate_92"
-                        android:textColor="@color/primary_maroon"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-                </RelativeLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="8dp"
-                    android:layout_marginTop="6dp"
-                    android:background="@drawable/bg_filter_btn"
-                    android:orientation="horizontal">
-
-                    <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="92" android:background="@drawable/bg_badge_match" />
-                    <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="8" />
-                </LinearLayout>
-
-                <!-- Category 4 -->
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:text="@string/cat_guests_social"
-                        android:textColor="@color/text_primary"
-                        android:textSize="13sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:text="@string/rate_88"
-                        android:textColor="@color/primary_maroon"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-                </RelativeLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="8dp"
-                    android:layout_marginTop="6dp"
-                    android:background="@drawable/bg_filter_btn"
-                    android:orientation="horizontal">
-
-                    <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="88" android:background="@drawable/bg_badge_match" />
-                    <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="12" />
-                </LinearLayout>
-
-                <!-- Category 5 (bộ câu hỏi v2) -->
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:text="@string/cat_expenses_shared"
-                        android:textColor="@color/text_primary"
-                        android:textSize="13sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:text="@string/rate_90"
-                        android:textColor="@color/primary_maroon"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-                </RelativeLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="8dp"
-                    android:layout_marginTop="6dp"
-                    android:background="@drawable/bg_filter_btn"
-                    android:orientation="horizontal">
-
-                    <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="90" android:background="@drawable/bg_badge_match" />
-                    <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="10" />
-                </LinearLayout>
+                    android:orientation="vertical" />
             </LinearLayout>
 
-            <!-- Section 2: Điểm chung nổi bật -->
+            <!-- Section 2: Điểm chung nổi bật (item_match_highlight thêm từ code) -->
             <TextView
+                android:id="@+id/tv_highlights_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="18dp"
@@ -350,91 +198,10 @@
                 android:textStyle="bold" />
 
             <LinearLayout
+                android:id="@+id/layout_highlights"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_filter_btn"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="14dp"
-                    android:paddingVertical="9dp">
-
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:layout_marginEnd="6dp"
-                        android:contentDescription="@string/highlight_no_smoking"
-                        android:src="@drawable/ic_check_small" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/highlight_no_smoking"
-                        android:textColor="@color/text_primary"
-                        android:textSize="13sp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:background="@drawable/bg_filter_btn"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="14dp"
-                    android:paddingVertical="9dp">
-
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:layout_marginEnd="6dp"
-                        android:contentDescription="@string/highlight_weekly_chores"
-                        android:src="@drawable/ic_check_small" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/highlight_weekly_chores"
-                        android:textColor="@color/text_primary"
-                        android:textSize="13sp" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_filter_btn"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="14dp"
-                    android:paddingVertical="9dp">
-
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:layout_marginEnd="6dp"
-                        android:contentDescription="@string/highlight_sleep_midnight"
-                        android:src="@drawable/ic_check_small" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/highlight_sleep_midnight"
-                        android:textColor="@color/text_primary"
-                        android:textSize="13sp" />
-                </LinearLayout>
-            </LinearLayout>
+                android:orientation="vertical" />
 
             <!-- Bottom Contact Action Buttons -->
             <LinearLayout

@@ -67,6 +67,7 @@
                 <ImageView
                     android:layout_width="82dp"
                     android:layout_height="82dp"
+                    android:id="@+id/img_room"
                     android:contentDescription="@string/room_detail_title"
                     android:scaleType="centerCrop"
                     android:src="@drawable/img_detail_room" />
@@ -79,6 +80,7 @@
                     android:orientation="vertical">
 
                     <TextView
+                        android:id="@+id/tv_room_title"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/room_detail_title"
@@ -90,7 +92,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="268 Lý Thường Kiệt, Quận 10"
+                        android:id="@+id/tv_room_address"
+                        android:text=""
                         android:textColor="@color/text_secondary"
                         android:textSize="12sp" />
                 </LinearLayout>
@@ -125,7 +128,8 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="94%"
+                            android:id="@+id/tv_room_percent"
+                            android:text="--%"
                             android:textColor="@color/match_success"
                             android:textSize="30sp" />
 
@@ -152,7 +156,8 @@
                         android:background="@drawable/bg_badge_sage"
                         android:paddingHorizontal="10dp"
                         android:paddingVertical="5dp"
-                        android:text="Dữ liệu minh họa"
+                        android:id="@+id/tv_room_level"
+                        android:text="@string/match_loading"
                         android:textColor="@color/text_primary"
                         android:textSize="10sp"
                         android:textStyle="bold" />
@@ -171,7 +176,8 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@id/score_gauge"
                     android:layout_marginTop="12dp"
-                    android:text="Điểm số và các so sánh dưới đây là minh họa, chưa phải kết quả đánh giá thực tế."
+                    android:id="@+id/tv_room_note"
+                    android:text=""
                     android:textColor="@color/white"
                     android:textSize="12sp" />
             </RelativeLayout>
@@ -188,7 +194,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Mức độ phù hợp theo 8 tiêu chí"
+                android:id="@+id/tv_criteria_title"
+                android:text="@string/match_criteria_title_loading"
                 android:textColor="@color/text_primary"
                 android:textSize="14sp"
                 android:textStyle="bold" />
@@ -197,72 +204,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="So sánh minh họa · Không phải dữ liệu thực tế"
+                android:text="@string/match_criteria_sub"
                 android:textColor="@color/text_secondary"
                 android:textSize="11sp" />
 
+            <!-- Từng tiêu chí (item_compat_criterion) được thêm từ code -->
             <LinearLayout
+                android:id="@+id/layout_criteria"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/bg_card_outline"
-                android:orientation="vertical"
-                android:padding="12dp">
-
-                <TextView style="@style/CompatibilityCriterionTitle" android:text="Giờ ngủ và nghỉ ngơi" />
-                <TextView style="@style/CompatibilityStatusDiscuss" android:text="Cần trao đổi" />
-                <TextView style="@style/CompatibilityDetail" android:text="Người tìm: Ngủ trước 00:00." />
-                <TextView style="@style/CompatibilityDetail" android:text="Phòng: Giờ yên tĩnh từ 23:00; cần thống nhất giờ nghỉ." />
-            </LinearLayout>
-
-            <LinearLayout style="@style/CompatibilityCriterionCard">
-                <TextView style="@style/CompatibilityCriterionTitle" android:text="Vệ sinh và mức độ ngăn nắp" />
-                <TextView style="@style/CompatibilityStatusGood" android:text="✓  Phù hợp" />
-                <TextView style="@style/CompatibilityDetail" android:text="Người tìm: Gọn gàng, dọn dẹp hằng ngày." />
-                <TextView style="@style/CompatibilityDetail" android:text="Phòng: Giữ sạch sẽ không gian chung mỗi ngày." />
-            </LinearLayout>
-
-            <LinearLayout style="@style/CompatibilityCriterionCard">
-                <TextView style="@style/CompatibilityCriterionTitle" android:text="Hút thuốc" />
-                <TextView style="@style/CompatibilityStatusGood" android:text="✓  Phù hợp" />
-                <TextView style="@style/CompatibilityDetail" android:text="Người tìm: Không hút thuốc." />
-                <TextView style="@style/CompatibilityDetail" android:text="Phòng: Không hút thuốc trong phòng." />
-            </LinearLayout>
-
-            <LinearLayout style="@style/CompatibilityCriterionCard">
-                <TextView style="@style/CompatibilityCriterionTitle" android:text="Nấu ăn" />
-                <TextView style="@style/CompatibilityStatusGood" android:text="✓  Phù hợp" />
-                <TextView style="@style/CompatibilityDetail" android:text="Người tìm: Nấu ăn vài bữa mỗi tuần." />
-                <TextView style="@style/CompatibilityDetail" android:text="Phòng: Có bếp chung để sử dụng." />
-            </LinearLayout>
-
-            <LinearLayout style="@style/CompatibilityCriterionCard">
-                <TextView style="@style/CompatibilityCriterionTitle" android:text="Chia sẻ việc nhà" />
-                <TextView style="@style/CompatibilityStatusGood" android:text="✓  Phù hợp" />
-                <TextView style="@style/CompatibilityDetail" android:text="Người tìm: Sẵn sàng chia việc theo tuần." />
-                <TextView style="@style/CompatibilityDetail" android:text="Phòng: Phân công việc nhà theo tuần." />
-            </LinearLayout>
-
-            <LinearLayout style="@style/CompatibilityCriterionCard">
-                <TextView style="@style/CompatibilityCriterionTitle" android:text="Chi phí sinh hoạt" />
-                <TextView style="@style/CompatibilityStatusGood" android:text="✓  Phù hợp" />
-                <TextView style="@style/CompatibilityDetail" android:text="Người tìm: Muốn chia đều, ghi rõ khoản chung." />
-                <TextView style="@style/CompatibilityDetail" android:text="Phòng: Chi phí chung chia đều và ghi rõ." />
-            </LinearLayout>
-
-            <LinearLayout style="@style/CompatibilityCriterionCard">
-                <TextView style="@style/CompatibilityCriterionTitle" android:text="Khách đến chơi và tiếng ồn" />
-                <TextView style="@style/CompatibilityStatusDiscuss" android:text="Cần trao đổi" />
-                <TextView style="@style/CompatibilityDetail" android:text="Người tìm: Báo trước khi có khách đến chơi." />
-                <TextView style="@style/CompatibilityDetail" android:text="Phòng: Khách báo trước; ưu tiên yên tĩnh sau 22h." />
-            </LinearLayout>
-
-            <LinearLayout style="@style/CompatibilityCriterionCard">
-                <TextView style="@style/CompatibilityCriterionTitle" android:text="Cách giải quyết mâu thuẫn" />
-                <TextView style="@style/CompatibilityStatusUnknown" android:text="Chưa đủ dữ liệu" />
-                <TextView style="@style/CompatibilityDetail" android:text="Người tìm: Chưa có câu trả lời." />
-                <TextView style="@style/CompatibilityDetail" android:text="Phòng: Chưa có quy ước xử lý bất đồng." />
-            </LinearLayout>
+                android:orientation="vertical" />
 
             <TextView
                 android:id="@+id/btn_back_to_room"
