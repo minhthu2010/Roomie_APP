@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const { pool, withTransaction } = require('../src/db');
+const { writeSampleImages } = require('./sampleImages');
 
 const IDS = {
   admin: '00000000-0000-0000-0000-000000000001',
@@ -99,6 +100,56 @@ const IDS = {
          SELECT $1, amenity_id FROM amenities WHERE amenity_code = ANY($2::text[])
          ON CONFLICT DO NOTHING`, [postId, amenities]);
     }
+
+    // Ảnh mẫu (vẽ bằng scripts/sampleImages.js vào uploads/seed). Thêm ảnh vào bài đã duyệt
+    // sẽ kích hoạt trigger duyệt lại, nên tắt trigger đó trong transaction này.
+    const CAPTIONS = ['Không gian phòng', 'Góc cửa sổ', 'Khu bếp & kệ đồ', 'Góc học tập'];
+    await c.query('ALTER TABLE post_images DISABLE TRIGGER trg_post_images_material_reapproval');
+    for (let i = 0; i < postDetails.length; i++) {
+      const postId = postDetails[i][0];
+      const urls = writeSampleImages(i, 4);
+      for (let k = 0; k < urls.length; k++) {
+        await c.query(
+          `INSERT INTO post_images (post_id, image_url, display_order, is_cover, caption)
+           SELECT $1, $2, $3, $4, $5
+            WHERE NOT EXISTS (SELECT 1 FROM post_images WHERE post_id = $1 AND display_order = $3)`,
+          [postId, urls[k], k + 1, k === 0, CAPTIONS[k]]);
+      }
+    }
+    await c.query('ALTER TABLE post_images ENABLE TRIGGER trg_post_images_material_reapproval');
+
+    // Nội dung chi tiết cho phòng mẫu (chỉ ghi đè mô tả mặc định). Các cột này là "material"
+    // nên cũng tắt trigger duyệt lại để bài mẫu vẫn ở trạng thái đã duyệt.
+    const details = {
+      '10000000-0000-0000-0000-000000000001': ['Phòng nhiều ánh sáng, có ban công và khu bếp riêng. Phòng hiện có 2 bạn nữ là sinh viên Bách Khoa, cần thêm 1 bạn.', 3200000, 'Điện 3.500đ/kWh, nước 100.000đ/người, wifi + rác chia đều', 2, 'Ưu tiên bạn gọn gàng, tôn trọng giờ nghỉ sau 23:00 và không hút thuốc.'],
+      '10000000-0000-0000-0000-000000000002': ['Căn hộ 2 phòng ngủ, ban công thoáng, cách ĐH Kinh tế 5 phút đi bộ. Có thang máy và bảo vệ.', 3800000, 'Điện nước theo đồng hồ, phí quản lý 150.000đ/tháng', 1, 'Mong bạn thân thiện, có thể nấu ăn chung cuối tuần.'],
+      '10000000-0000-0000-0000-000000000003': ['Studio đủ nội thất: giường, tủ, bàn làm việc, máy lạnh. Vào ở ngay, phù hợp người đi làm.', 4300000, 'Điện 4.000đ/kWh, nước khoán 80.000đ', 0, 'Phù hợp người đi làm, giờ giấc linh hoạt.'],
+      '10000000-0000-0000-0000-000000000004': ['Phòng riêng có gác lửng, cửa sổ lớn, gần ĐH Khoa học Tự nhiên và chợ.', 2800000, 'Điện 3.800đ/kWh, nước 70.000đ/người', 1, 'Ưu tiên sinh viên, yên tĩnh buổi tối.'],
+      '10000000-0000-0000-0000-000000000005': ['Nhà nguyên căn 3 phòng trong hẻm yên tĩnh, đang có 2 bạn nam đi làm, cần thêm 1 bạn.', 4100000, 'Chia đều theo số người, khoảng 300.000đ/tháng', 2, 'Không hút thuốc trong nhà, dọn dẹp theo lịch trực.'],
+      '10000000-0000-0000-0000-000000000006': ['Phòng ở ghép 4 người, giá rẻ cho sinh viên, đi bộ 7 phút tới Bách Khoa.', 1900000, 'Điện nước khoán 150.000đ/người', 3, 'Mong bạn nữ sinh viên, hòa đồng và giữ vệ sinh chung.'],
+    };
+    await c.query('ALTER TABLE room_posts DISABLE TRIGGER trg_room_posts_material_reapproval');
+    for (const [postId, [desc, deposit, bills, occupants, expectations]] of Object.entries(details)) {
+      await c.query(
+        `UPDATE room_posts SET description = $2, deposit_amount = $3, utility_cost_note = $4,
+                current_occupants = $5, roommate_expectations = $6,
+                available_from = CURRENT_DATE + 14, smoking_allowed = FALSE,
+                preferred_occupation = CASE WHEN post_id = '10000000-0000-0000-0000-000000000003' THEN 'worker' ELSE 'student' END
+          WHERE post_id = $1 AND description = 'Phòng mẫu để test.'`,
+        [postId, desc, deposit, bills, occupants, expectations]);
+    }
+    await c.query('ALTER TABLE room_posts ENABLE TRIGGER trg_room_posts_material_reapproval');
+
+    // Hồ sơ người đăng (Ngọc Anh) và người tìm (Mai Linh) cho màn hồ sơ công khai
+    await c.query(
+      `UPDATE user_profiles SET bio = $2, gender = 'female', birth_year = 2003, occupation = 'student',
+              school_or_workplace = 'ĐH Bách Khoa TP.HCM'
+        WHERE user_id = $1 AND bio IS NULL`,
+      [IDS.owner, 'Mình là sinh viên năm 3, thích nấu ăn và giữ phòng gọn gàng. Mong tìm bạn ở ghép hòa đồng, tôn trọng giờ nghỉ.']);
+    await c.query(
+      `UPDATE user_profiles SET gender = 'female', birth_year = 2004, occupation = 'student',
+              school_or_workplace = 'ĐH Kinh tế TP.HCM'
+        WHERE user_id = $1 AND birth_year IS NULL`, [IDS.seeker]);
 
     // Câu trả lời bài test cho bộ câu hỏi đang phát hành (v2, 13 câu): question_key -> option_key.
     // Seeker gần giống phòng 1, khác nhiều phòng 3 để thấy điểm % chênh lệch.

@@ -49,7 +49,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:text="1 / 8"
+                android:text=""
                 android:textColor="@color/color_white"
                 android:textSize="14sp" />
         </RelativeLayout>
@@ -65,7 +65,8 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/room_detail_title"
+                android:id="@+id/tv_gallery_title"
+                android:text=""
                 android:textColor="@color/color_white"
                 android:textSize="14sp"
                 android:textStyle="bold" />
@@ -74,7 +75,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:text="268 Lý Thường Kiệt, Quận 10 · Ngọc Anh"
+                android:id="@+id/tv_gallery_subtitle"
+                android:text=""
                 android:textColor="@color/color_text_pink"
                 android:textSize="12sp" />
         </LinearLayout>
@@ -99,7 +101,7 @@
                 android:layout_marginStart="12dp"
                 android:background="@drawable/bg_circle_button"
                 android:backgroundTint="@color/roomie_primary_badge"
-                android:contentDescription="Ảnh trước"
+                android:contentDescription="@string/cd_prev_photo"
                 android:padding="10dp"
                 android:src="@drawable/ic_chevron_left"
                 app:tint="@color/color_white" />
@@ -112,7 +114,7 @@
                 android:layout_marginEnd="12dp"
                 android:background="@drawable/bg_circle_button"
                 android:backgroundTint="@color/roomie_primary_badge"
-                android:contentDescription="Ảnh tiếp theo"
+                android:contentDescription="@string/cd_next_photo"
                 android:padding="10dp"
                 android:src="@drawable/ic_chevron_right"
                 app:tint="@color/color_white" />
@@ -124,84 +126,34 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="42dp"
             android:gravity="center"
-            android:text="Không gian phòng · Ảnh 1 trong 8"
+            android:text="@string/detail_loading"
             android:textColor="@color/color_white"
             android:textSize="14sp" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <!-- Ảnh nhỏ: item_gallery_thumb thêm từ code, chạm để chọn -->
+        <HorizontalScrollView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
             android:layout_marginTop="28dp"
-            android:gravity="center"
-            android:orientation="horizontal">
+            android:paddingHorizontal="20dp"
+            android:clipToPadding="false"
+            android:scrollbars="none">
 
-            <FrameLayout
-                android:id="@+id/thumb1"
-                android:layout_width="76dp"
-                android:layout_height="68dp"
-                android:layout_marginEnd="8dp"
-                android:background="@drawable/bg_card_outline"
-                android:padding="2dp">
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/img_detail_room"
-                    app:shapeAppearanceOverlay="@style/cr8" />
-            </FrameLayout>
-
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/thumb2"
-                android:layout_width="68dp"
-                android:layout_height="60dp"
-                android:layout_marginEnd="8dp"
-                android:contentDescription="Ảnh phòng 2"
-                android:scaleType="centerCrop"
-                android:src="@drawable/img_room1"
-                app:shapeAppearanceOverlay="@style/cr8" />
-
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/thumb3"
-                android:layout_width="68dp"
-                android:layout_height="60dp"
-                android:layout_marginEnd="8dp"
-                android:contentDescription="Ảnh phòng 3"
-                android:scaleType="centerCrop"
-                android:src="@drawable/img_room2"
-                app:shapeAppearanceOverlay="@style/cr8" />
-
-            <FrameLayout
-                android:id="@+id/thumb4"
-                android:layout_width="68dp"
-                android:layout_height="60dp">
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/img_room3"
-                    app:shapeAppearanceOverlay="@style/cr8" />
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:alpha="0.6"
-                    android:background="@color/color_primary_dark" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="+4"
-                    android:textColor="@color/color_white"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-            </FrameLayout>
-        </LinearLayout>
+            <LinearLayout
+                android:id="@+id/layout_thumbs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:gravity="center"
-            android:text="Vuốt để xem ảnh · Chạm hai lần để phóng to"
+            android:text="@string/gallery_hint"
             android:textColor="@color/color_text_pink"
             android:textSize="12sp" />
     </LinearLayout>

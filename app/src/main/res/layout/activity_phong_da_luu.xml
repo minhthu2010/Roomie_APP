@@ -68,6 +68,7 @@
                         android:background="@drawable/bg_chip_selected"
                         android:paddingHorizontal="12dp"
                         android:paddingVertical="8dp"
+                        android:id="@+id/chip_saved_all"
                         android:text="@string/saved_filter_all"
                         android:textColor="@color/white"
                         android:textSize="12sp" />
@@ -79,6 +80,7 @@
                         android:background="@drawable/bg_chip_unselected"
                         android:paddingHorizontal="12dp"
                         android:paddingVertical="8dp"
+                        android:id="@+id/chip_saved_district"
                         android:text="@string/saved_filter_district"
                         android:textColor="@color/text_primary"
                         android:textSize="12sp" />
@@ -90,17 +92,20 @@
                         android:background="@drawable/bg_chip_unselected"
                         android:paddingHorizontal="12dp"
                         android:paddingVertical="8dp"
+                        android:id="@+id/chip_saved_school"
                         android:text="@string/saved_filter_school"
                         android:textColor="@color/text_primary"
                         android:textSize="12sp" />
                 </LinearLayout>
             </HorizontalScrollView>
 
+            <!-- Chưa theo dõi lịch sử giá nên ẩn thông báo "vừa giảm giá" -->
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:background="@drawable/bg_badge_sage"
+                android:visibility="gone"
                 android:gravity="center_vertical"
                 android:padding="10dp">
 
@@ -122,33 +127,31 @@
                     android:src="@drawable/ic_chevron_right" />
             </RelativeLayout>
 
-            <include
-                android:id="@+id/saved_room1"
-                layout="@layout/item_saved_room_card"
+            <!-- Phòng đã lưu: item_saved_room_card thêm từ code -->
+            <LinearLayout
+                android:id="@+id/layout_saved_rooms"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp" />
+                android:orientation="vertical" />
 
-            <include
-                android:id="@+id/saved_room2"
-                layout="@layout/item_saved_room_card"
+            <TextView
+                android:id="@+id/tv_saved_empty"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp" />
-
-            <include
-                android:id="@+id/saved_room3"
-                layout="@layout/item_saved_room_card"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp" />
+                android:layout_marginTop="40dp"
+                android:gravity="center"
+                android:lineSpacingExtra="4dp"
+                android:text="@string/detail_loading"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="12dp"
-                android:text="@string/saved_hidden_notice"
+                android:id="@+id/tv_saved_footer"
+                android:text="@string/saved_footer_notice"
                 android:textColor="@color/text_secondary"
                 android:textSize="11sp" />
         </LinearLayout>
