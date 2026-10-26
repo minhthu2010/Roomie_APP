@@ -1,7 +1,7 @@
 const db = require('../../db');
 const AppError = require('../../common/AppError');
 const { scorePosts, compareUsers } = require('./matching.service');
-const { toRoomCard } = require('./search.service');
+const { toRoomCard, approxLocation, HAVERSINE_KM } = require('./search.service');
 
 // Bài xem được: đã duyệt và chưa xóa; chủ bài luôn xem được bài của mình
 async function loadPostRow(postId, viewerId) {
@@ -78,8 +78,7 @@ async function getRoomDetail(viewerId, postId) {
     districtName: r.district_legacy,
     provinceName: r.province_name,
     landmark: r.landmark_id ? { id: r.landmark_id, name: r.landmark_name, shortName: r.landmark_short_name } : null,
-    latitude: r.latitude,
-    longitude: r.longitude,
+    ...approxLocation(r.post_id, r.latitude, r.longitude),
     listingStatus: r.listing_status,
     canContact: r.can_contact,
     firstPublishedAt: r.first_published_at,
@@ -113,6 +112,41 @@ async function getRoomImages(viewerId, postId) {
   const r = await loadPostRow(postId, viewerId);
   const area = [r.street_address, r.district_legacy || r.ward_name].filter(Boolean).join(', ');
   return { postId, title: r.title, addressText: area, ownerName: r.owner_name, images: await listImages(postId) };
+}
+
+// GET /room-posts/:postId/nearby - màn Vị trí phòng: tọa độ gần đúng + địa điểm lân cận
+async function getNearby(viewerId, postId, { radiusKm, limit }) {
+  const r = await loadPostRow(postId, viewerId);
+  if (r.latitude == null) {
+    return { postId, title: r.title, addressText: r.street_address, latitude: null, longitude: null, places: [] };
+  }
+  // Khoảng cách tính từ tọa độ thật; app chỉ nhận tọa độ gần đúng của phòng
+  const distance = HAVERSINE_KM('$1', '$2', 'l.latitude', 'l.longitude');
+  const { rows } = await db.query(
+    `SELECT l.landmark_id, l.landmark_type, l.name, l.short_name, l.subtitle, l.address_text,
+            l.latitude, l.longitude, ${distance} AS distance_km
+       FROM landmarks l
+      WHERE l.is_active AND ${distance} <= $3
+      ORDER BY distance_km
+      LIMIT $4`, [r.latitude, r.longitude, radiusKm, limit]);
+  const area = [r.street_address, r.district_legacy || r.ward_name].filter(Boolean).join(', ');
+  return {
+    postId,
+    title: r.title,
+    addressText: area || r.address_text,
+    areaText: [r.ward_name, r.province_name].filter(Boolean).join(', '),
+    ...approxLocation(r.post_id, r.latitude, r.longitude),
+    places: rows.map((l) => ({
+      id: l.landmark_id,
+      type: l.landmark_type,
+      name: l.short_name || l.name,
+      fullName: l.name,
+      subtitle: l.subtitle || l.address_text,
+      latitude: l.latitude,
+      longitude: l.longitude,
+      distanceKm: Math.round(l.distance_km * 100) / 100,
+    })),
+  };
 }
 
 // ---------- Đã lưu ----------
@@ -222,5 +256,5 @@ async function getPublicProfile(viewerId, userId) {
 }
 
 module.exports = {
-  getRoomDetail, getRoomImages, savePost, unsavePost, listSaved, logContactClick, getPublicProfile,
+  getRoomDetail, getRoomImages, getNearby, savePost, unsavePost, listSaved, logContactClick, getPublicProfile,
 };

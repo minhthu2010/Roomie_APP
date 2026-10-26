@@ -58,7 +58,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="268 Lý Thường Kiệt, Quận 10"
+                    android:id="@+id/tv_loc_address"
+                    android:text="@string/detail_loading"
                     android:textColor="@color/color_text_primary"
                     android:textSize="17sp"
                     android:textStyle="bold" />
@@ -67,7 +68,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="Phường 14, TP. Hồ Chí Minh · Khu dân cư yên tĩnh"
+                    android:id="@+id/tv_loc_sub"
+                    android:text=""
                     android:textColor="@color/color_text_secondary"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -83,7 +85,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
-                android:text="Khoảng cách lân cận"
+                android:text="@string/loc_nearby_title"
                 android:textColor="@color/color_text_primary"
                 android:textSize="15sp"
                 android:textStyle="bold" />
@@ -93,201 +95,26 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:text="Đi bộ / xe máy"
+                android:text="@string/loc_nearby_sub"
                 android:textColor="@color/color_text_secondary"
                 android:textSize="12sp" />
         </RelativeLayout>
 
-        <!-- Nearby List Items -->
-        <!-- Item 1: ĐH Bách Khoa -->
-        <RelativeLayout
+        <!-- Địa điểm lân cận: item_nearby_place thêm từ code, chạm để xem trên bản đồ -->
+        <LinearLayout
+            android:id="@+id/layout_nearby"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingVertical="10dp">
+            android:orientation="vertical" />
 
-            <RelativeLayout
-                android:id="@+id/icon_box_1"
-                android:layout_width="38dp"
-                android:layout_height="38dp"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:background="@drawable/bg_badge_sage">
-
-                <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:layout_centerInParent="true"
-                    android:contentDescription="@string/school_1_title"
-                    android:src="@drawable/ic_school" />
-            </RelativeLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="12dp"
-                android:layout_toStartOf="@+id/tv_distance_1"
-                android:layout_toEndOf="@+id/icon_box_1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="ĐH Bách Khoa"
-                    android:textColor="@color/color_text_primary"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="Cổng Lý Thường Kiệt"
-                    android:textColor="@color/color_text_secondary"
-                    android:textSize="12sp" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/tv_distance_1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:text="0,8 km"
-                android:textColor="@color/color_text_primary"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-        </RelativeLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/color_border_light" />
-
-        <!-- Item 2: Co.opmart Lý Thường Kiệt -->
-        <RelativeLayout
+        <TextView
+            android:id="@+id/tv_loc_note"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingVertical="10dp">
-
-            <RelativeLayout
-                android:id="@+id/icon_box_2"
-                android:layout_width="38dp"
-                android:layout_height="38dp"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:background="@drawable/bg_badge_sage">
-
-                <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:layout_centerInParent="true"
-                    android:contentDescription="Store"
-                    android:src="@drawable/ic_store" />
-            </RelativeLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="12dp"
-                android:layout_toStartOf="@+id/tv_distance_2"
-                android:layout_toEndOf="@+id/icon_box_2"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Co.opmart Lý Thường Kiệt"
-                    android:textColor="@color/color_text_primary"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="Mở cửa đến 22:00"
-                    android:textColor="@color/color_text_secondary"
-                    android:textSize="12sp" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/tv_distance_2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:text="0,5 km"
-                android:textColor="@color/color_text_primary"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-        </RelativeLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/color_border_light" />
-
-        <!-- Item 3: Trạm xe buýt 38 -->
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingVertical="10dp">
-
-            <RelativeLayout
-                android:id="@+id/icon_box_3"
-                android:layout_width="38dp"
-                android:layout_height="38dp"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:background="@drawable/bg_badge_sage">
-
-                <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:layout_centerInParent="true"
-                    android:contentDescription="Bus"
-                    android:src="@drawable/ic_bus" />
-            </RelativeLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="12dp"
-                android:layout_toStartOf="@+id/tv_distance_3"
-                android:layout_toEndOf="@+id/icon_box_3"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Trạm xe buýt 38"
-                    android:textColor="@color/color_text_primary"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="Tuyến 08, 59, 69"
-                    android:textColor="@color/color_text_secondary"
-                    android:textSize="12sp" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/tv_distance_3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:text="180 m"
-                android:textColor="@color/color_text_primary"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-        </RelativeLayout>
+            android:layout_marginTop="8dp"
+            android:text="@string/loc_approx_note"
+            android:textColor="@color/color_text_secondary"
+            android:textSize="11sp" />
 
         <!-- Bottom Action Contact Buttons Row -->
         <LinearLayout
@@ -305,7 +132,7 @@
                 android:background="@drawable/bg_button_primary"
                 android:drawableStart="@drawable/ic_chat"
                 android:paddingHorizontal="16dp"
-                android:text="Liên hệ Zalo"
+                android:text="@string/btn_contact_zalo"
                 android:textAllCaps="false"
                 android:textColor="@color/color_white"
                 android:textSize="14sp"
@@ -320,7 +147,7 @@
                 android:background="@drawable/bg_button_secondary"
                 android:drawableStart="@drawable/ic_phone"
                 android:paddingHorizontal="16dp"
-                android:text="Gọi điện"
+                android:text="@string/btn_call_phone"
                 android:textAllCaps="false"
                 android:textColor="@color/color_text_primary"
                 android:textSize="14sp"
@@ -335,66 +162,45 @@
         android:layout_above="@id/card_location_info"
         android:layout_alignParentTop="true">
 
-        <!-- Map Mockup Graphic -->
-        <ImageView
-            android:id="@+id/img_map_bg"
+        <!-- Bản đồ OpenStreetMap (osmdroid): vùng gần đúng của phòng + địa điểm lân cận -->
+        <org.osmdroid.views.MapView
+            android:id="@+id/map_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:contentDescription="@string/btn_view_map"
-            android:scaleType="centerCrop"
-            android:src="@drawable/bg_map_mockup" />
+            android:layout_height="match_parent" />
 
-        <!-- Pins on Map -->
-        <!-- Main Room Location Marker (House Pin) -->
-        <ImageView
-            android:id="@+id/pin_room_location"
-            android:layout_width="48dp"
-            android:layout_height="58dp"
-            android:layout_centerInParent="true"
-            android:contentDescription="@string/main_heading_pin_location"
-            android:elevation="4dp"
-            android:src="@drawable/ic_pin_marker" />
-
-        <!-- Landmark Pin (ĐH Bách Khoa) -->
+        <!-- Mở Google Maps chỉ đường -->
         <LinearLayout
+            android:id="@+id/btn_directions"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
-            android:layout_marginStart="36dp"
-            android:layout_marginBottom="32dp"
-            android:background="@drawable/bg_chip_unselected"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/bg_chip_selected"
+            android:clickable="true"
             android:elevation="3dp"
+            android:focusable="true"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="7dp">
+            android:paddingHorizontal="14dp">
 
             <ImageView
-                android:layout_width="16dp"
-                android:layout_height="16dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:layout_marginEnd="6dp"
-                android:contentDescription="@string/chip_university"
-                android:src="@drawable/ic_school" />
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_location_on"
+                app:tint="@color/color_white" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ĐH Bách Khoa"
-                android:textColor="@color/color_text_primary"
-                android:textSize="13sp"
+                android:text="@string/loc_directions"
+                android:textColor="@color/color_white"
+                android:textSize="14sp"
                 android:textStyle="bold" />
         </LinearLayout>
-
-        <!-- Target Dot Circle on right -->
-        <ImageView
-            android:layout_width="22dp"
-            android:layout_height="22dp"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="70dp"
-            android:contentDescription="@string/cd_shield_icon"
-            android:src="@drawable/ic_target" />
 
         <!-- Top Control Bar -->
         <RelativeLayout
@@ -428,7 +234,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Chi tiết phòng"
+                    android:text="@string/loc_back"
                     android:textColor="@color/color_text_primary"
                     android:textSize="14sp"
                     android:textStyle="bold" />
@@ -443,7 +249,7 @@
                 android:elevation="2dp"
                 android:gravity="center"
                 android:paddingHorizontal="18dp"
-                android:text="Vị trí phòng"
+                android:text="@string/loc_title"
                 android:textColor="@color/color_white"
                 android:textSize="14sp"
                 android:textStyle="bold" />

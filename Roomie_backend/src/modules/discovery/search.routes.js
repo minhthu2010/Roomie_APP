@@ -18,7 +18,7 @@ function optionalAuth(req, res, next) {
   next();
 }
 
-const searchQuery = z.object({
+const filters = {
   q: z.string().trim().max(100).optional(),
   area: z.string().trim().max(100).optional(),
   landmarkId: z.coerce.number().int().positive().optional(),
@@ -29,10 +29,29 @@ const searchQuery = z.object({
   gender: z.enum(['female', 'male']).optional(),
   amenities: csv(z.string().max(50)),
   sort: z.enum(['match', 'newest', 'price_asc', 'price_desc', 'distance']).default('match'),
+  minMatch: z.coerce.number().int().min(0).max(100).optional(),
   page: z.string().optional(),
   limit: z.string().optional(),
-}).refine((f) => f.minRent == null || f.maxRent == null || f.minRent <= f.maxRent,
-  { message: 'minRent phải nhỏ hơn hoặc bằng maxRent', path: ['minRent'] });
+};
+const rentOrder = [(f) => f.minRent == null || f.maxRent == null || f.minRent <= f.maxRent,
+  { message: 'minRent phải nhỏ hơn hoặc bằng maxRent', path: ['minRent'] }];
+
+const lat = z.coerce.number().min(-90).max(90);
+const lng = z.coerce.number().min(-180).max(180);
+const bbox = { minLat: lat, maxLat: lat, minLng: lng, maxLng: lng };
+
+const searchQuery = z.object({ ...filters, ...z.object(bbox).partial().shape }).refine(...rentOrder);
+const mapQuery = z.object({ ...filters, ...bbox })
+  .refine(...rentOrder)
+  .refine((f) => f.minLat < f.maxLat && f.minLng < f.maxLng, { message: 'Vùng bản đồ không hợp lệ', path: ['minLat'] });
+
+// Bản đồ giá phòng: các phòng trong vùng đang xem (tối đa MAP_LIMIT), cùng bộ lọc với tìm kiếm
+const MAP_LIMIT = 200;
+router.get('/room-posts/map', optionalAuth, validate({ query: mapQuery }), async (req, res) => {
+  const result = await search.searchRooms(req.user ? req.user.userId : null,
+    { ...req.valid.query, offset: 0, limit: MAP_LIMIT });
+  ok(res, { items: result.items, total: result.total, truncated: result.total > MAP_LIMIT });
+});
 
 // Tìm phòng + bộ lọc; trả RoomCardDto có matchPercent, sắp xếp theo % phù hợp mặc định
 router.get('/room-posts/search', optionalAuth, validate({ query: searchQuery }), async (req, res) => {
