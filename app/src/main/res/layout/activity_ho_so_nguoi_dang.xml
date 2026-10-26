@@ -78,13 +78,14 @@
                     android:layout_height="90dp"
                     android:scaleType="centerCrop"
                     android:src="@drawable/img_avatar_host"
-                    app:shapeAppearanceOverlay="@style/cr999" />
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:text="@string/profile_name_age"
+                    android:id="@+id/tv_profile_name"
+                    android:text="@string/detail_loading"
                     android:textColor="@color/white"
                     android:textSize="20sp"
                     android:textStyle="bold" />
@@ -94,7 +95,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:gravity="center"
-                    android:text="@string/profile_occupation"
+                    android:id="@+id/tv_profile_occupation"
+                    android:text=""
                     android:textColor="@color/border_light"
                     android:textSize="13sp" />
             </LinearLayout>
@@ -104,6 +106,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
+                android:id="@+id/tv_about_title"
                 android:text="@string/about_poster_title"
                 android:textColor="@color/text_primary"
                 android:textSize="14sp"
@@ -114,7 +117,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
                 android:lineSpacingExtra="3dp"
-                android:text="@string/about_poster_text"
+                android:id="@+id/tv_about"
+                android:text=""
                 android:textColor="@color/text_secondary"
                 android:textSize="13sp" />
 
@@ -123,125 +127,22 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="18dp"
+                android:id="@+id/tv_habits_title"
                 android:text="@string/habits_title"
                 android:textColor="@color/text_primary"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
+            <!-- Thói quen nổi bật: item_detail_chip thêm từ code -->
             <LinearLayout
+                android:id="@+id/layout_habits"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_chip_unselected"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="14dp"
-                    android:paddingVertical="9dp">
-
-                    <ImageView
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
-                        android:layout_marginEnd="6dp"
-                        android:contentDescription="@string/habit_sleep_early"
-                        android:src="@drawable/ic_moon" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/habit_sleep_early"
-                        android:textColor="@color/text_primary"
-                        android:textSize="13sp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:background="@drawable/bg_chip_unselected"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="14dp"
-                    android:paddingVertical="9dp">
-
-                    <ImageView
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
-                        android:layout_marginEnd="6dp"
-                        android:contentDescription="@string/habit_no_smoking"
-                        android:src="@drawable/ic_no_smoking" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/habit_no_smoking"
-                        android:textColor="@color/text_primary"
-                        android:textSize="13sp" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_chip_unselected"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="14dp"
-                    android:paddingVertical="9dp">
-
-                    <ImageView
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
-                        android:layout_marginEnd="6dp"
-                        android:contentDescription="@string/habit_cooking"
-                        android:src="@drawable/ic_kitchen" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/habit_cooking"
-                        android:textColor="@color/text_primary"
-                        android:textSize="13sp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:background="@drawable/bg_chip_unselected"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="14dp"
-                    android:paddingVertical="9dp">
-
-                    <ImageView
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
-                        android:layout_marginEnd="6dp"
-                        android:contentDescription="@string/habit_pet_friendly"
-                        android:src="@drawable/ic_pet" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/habit_pet_friendly"
-                        android:textColor="@color/text_primary"
-                        android:textSize="13sp" />
-                </LinearLayout>
-            </LinearLayout>
+                android:orientation="vertical" />
 
             <!-- Section 3: Mức tương thích với bạn -->
             <LinearLayout
+                android:id="@+id/card_profile_match"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
@@ -266,21 +167,52 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
-                        android:text="@string/room_compatibility_rate"
+                        android:id="@+id/tv_profile_match"
+                        android:text="--%"
                         android:textColor="@color/primary_maroon"
                         android:textSize="20sp"
                         android:textStyle="bold" />
                 </RelativeLayout>
 
-                <View
+                <ProgressBar
+                    android:id="@+id/pb_profile_match"
+                    style="?android:attr/progressBarStyleHorizontal"
                     android:layout_width="match_parent"
                     android:layout_height="8dp"
                     android:layout_marginTop="10dp"
-                    android:background="@drawable/bg_chip_selected" />
+                    android:max="100"
+                    android:progressDrawable="@drawable/progress_bar_custom" />
+
+                <TextView
+                    android:id="@+id/tv_profile_match_level"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp" />
             </LinearLayout>
 
-            <!-- Bottom Contact Action Buttons -->
+            <!-- Bài đăng đang tìm người: item_feed_room_card thêm từ code -->
+            <TextView
+                android:id="@+id/tv_posts_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:textColor="@color/text_primary"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
             <LinearLayout
+                android:id="@+id/layout_profile_posts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <!-- Liên hệ theo từng bài đăng (chạm vào bài) nên ẩn ở hồ sơ -->
+            <LinearLayout
+                android:id="@+id/layout_profile_contact"
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"

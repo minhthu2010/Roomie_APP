@@ -24,7 +24,7 @@ import com.example.roomie.data.discovery.SearchModels;
 import com.example.roomie.data.remote.ApiCallback;
 import com.example.roomie.data.remote.ApiClient;
 import com.example.roomie.ui.filter.BoLocActivity;
-import com.example.roomie.ui.room.ChiTietPhongActivity;
+import com.example.roomie.ui.search.RoomCardBinder;
 import com.example.roomie.ui.search.RoomFormat;
 import com.example.roomie.ui.search.SearchActivity;
 import com.example.roomie.ui.search.SearchCriteria;
@@ -40,8 +40,6 @@ public class HomeActivity extends AppCompatActivity {
 
     private static final int PAGE_SIZE = 10;
     private static final String STATE_CRITERIA = "criteria";
-    // Chưa có ảnh thật (B làm upload ảnh) thì dùng ảnh minh họa xoay vòng
-    private static final int[] PLACEHOLDERS = {R.drawable.img_room1, R.drawable.img_room2, R.drawable.img_room3};
 
     private DiscoveryApi api;
     private SearchCriteria criteria = new SearchCriteria();
@@ -180,28 +178,7 @@ public class HomeActivity extends AppCompatActivity {
     // ---------- Hiển thị ----------
 
     private void addRoomCard(SearchModels.RoomCard room) {
-        View card = LayoutInflater.from(this).inflate(R.layout.item_feed_room_card, layoutRooms, false);
-        ((ImageView) card.findViewById(R.id.img_room))
-                .setImageResource(PLACEHOLDERS[layoutRooms.getChildCount() % PLACEHOLDERS.length]);
-
-        TextView badge = card.findViewById(R.id.tv_match_badge);
-        if (room.matchPercent != null) {
-            badge.setText(getString(R.string.feed_match_badge, room.matchPercent));
-        } else {
-            badge.setVisibility(View.GONE);
-        }
-        ((ImageView) card.findViewById(R.id.img_saved))
-                .setImageResource(room.isSaved ? R.drawable.ic_heart : R.drawable.ic_heart_outline);
-
-        ((TextView) card.findViewById(R.id.tv_room_title)).setText(room.title);
-        String address = room.addressText != null ? room.addressText : "";
-        if (room.distanceKm != null) address = getString(R.string.feed_distance, address, RoomFormat.km(room.distanceKm));
-        ((TextView) card.findViewById(R.id.tv_room_address)).setText(address);
-        ((TextView) card.findViewById(R.id.tv_room_price))
-                .setText(getString(R.string.feed_price, RoomFormat.money(room.monthlyRent)));
-
-        card.setOnClickListener(v -> startActivity(ChiTietPhongActivity.intent(this, room.id)));
-        layoutRooms.addView(card);
+        layoutRooms.addView(RoomCardBinder.create(this, layoutRooms, room, layoutRooms.getChildCount()));
     }
 
     private void bindHeader() {
