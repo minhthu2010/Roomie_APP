@@ -97,8 +97,9 @@
                     android:autofillHints=""
                     android:background="@null"
                     android:hint="@string/hint_search"
+                    android:imeOptions="actionSearch"
                     android:inputType="text"
-                    android:text="@string/search_sample_query"
+                    android:maxLines="1"
                     android:textColor="@color/text_primary"
                     android:textSize="14sp" />
             </RelativeLayout>
@@ -111,8 +112,9 @@
                 android:textColor="@color/text_secondary"
                 android:textSize="12sp" />
 
-            <!-- Section 2: Tìm kiếm gần đây -->
+            <!-- Section 2: Tìm kiếm gần đây (lưu trên máy, item_search_suggestion thêm từ code) -->
             <RelativeLayout
+                android:id="@+id/layout_recent_header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp">
@@ -139,93 +141,11 @@
                     android:textSize="12sp" />
             </RelativeLayout>
 
-            <!-- Recent Item 1 -->
-            <RelativeLayout
+            <LinearLayout
+                android:id="@+id/layout_recent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/bg_card_outline"
-                android:padding="14dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="12dp"
-                    android:layout_toStartOf="@+id/icon_hist1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/recent_1_title"
-                        android:textColor="@color/text_primary"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="@string/recent_1_subtitle"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <ImageView
-                    android:id="@+id/icon_hist1"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:contentDescription="@string/cd_history"
-                    android:src="@drawable/ic_history" />
-            </RelativeLayout>
-
-            <!-- Recent Item 2 -->
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/bg_card_outline"
-                android:padding="14dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="12dp"
-                    android:layout_toStartOf="@+id/icon_hist2"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/recent_2_title"
-                        android:textColor="@color/text_primary"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="@string/recent_2_subtitle"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <ImageView
-                    android:id="@+id/icon_hist2"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:contentDescription="@string/cd_history"
-                    android:src="@drawable/ic_history" />
-            </RelativeLayout>
+                android:orientation="vertical" />
 
             <!-- Section 3: Khu vực được quan tâm -->
             <TextView
@@ -249,6 +169,9 @@
                     android:background="@drawable/bg_chip_unselected"
                     android:paddingHorizontal="18dp"
                     android:paddingVertical="9dp"
+                    android:id="@+id/chip_area_q10"
+                    android:clickable="true"
+                    android:focusable="true"
                     android:text="@string/area_quan_10"
                     android:textColor="@color/text_primary"
                     android:textSize="14sp" />
@@ -260,6 +183,9 @@
                     android:background="@drawable/bg_chip_unselected"
                     android:paddingHorizontal="18dp"
                     android:paddingVertical="9dp"
+                    android:id="@+id/chip_area_q3"
+                    android:clickable="true"
+                    android:focusable="true"
                     android:text="@string/area_quan_3"
                     android:textColor="@color/text_primary"
                     android:textSize="14sp" />
@@ -271,6 +197,9 @@
                     android:background="@drawable/bg_chip_unselected"
                     android:paddingHorizontal="18dp"
                     android:paddingVertical="9dp"
+                    android:id="@+id/chip_area_binh_thanh"
+                    android:clickable="true"
+                    android:focusable="true"
                     android:text="@string/area_binh_thanh"
                     android:textColor="@color/text_primary"
                     android:textSize="14sp" />
@@ -288,6 +217,9 @@
                     android:background="@drawable/bg_chip_unselected"
                     android:paddingHorizontal="18dp"
                     android:paddingVertical="9dp"
+                    android:id="@+id/chip_area_phu_nhuan"
+                    android:clickable="true"
+                    android:focusable="true"
                     android:text="@string/area_phu_nhuan"
                     android:textColor="@color/text_primary"
                     android:textSize="14sp" />
@@ -303,93 +235,12 @@
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
-            <!-- School 1 -->
-            <RelativeLayout
+            <!-- Trường gợi ý từ API /landmarks/suggest (item_search_suggestion) -->
+            <LinearLayout
+                android:id="@+id/layout_schools"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/bg_card_outline"
-                android:padding="14dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="12dp"
-                    android:layout_toStartOf="@+id/icon_school1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/school_1_title"
-                        android:textColor="@color/text_primary"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="@string/school_1_subtitle"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <ImageView
-                    android:id="@+id/icon_school1"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:contentDescription="@string/cd_school"
-                    android:src="@drawable/ic_school" />
-            </RelativeLayout>
-
-            <!-- School 2 -->
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/bg_card_outline"
-                android:padding="14dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="12dp"
-                    android:layout_toStartOf="@+id/icon_school2"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/school_2_title"
-                        android:textColor="@color/text_primary"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="@string/school_2_subtitle"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <ImageView
-                    android:id="@+id/icon_school2"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:contentDescription="@string/cd_school"
-                    android:src="@drawable/ic_school" />
-            </RelativeLayout>
+                android:orientation="vertical" />
 
             <!-- Primary Action Button: Tìm phòng -->
             <RelativeLayout

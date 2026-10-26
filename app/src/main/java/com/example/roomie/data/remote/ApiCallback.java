@@ -18,6 +18,7 @@ import retrofit2.Response;
 public abstract class ApiCallback<T> implements Callback<ApiResponse<T>> {
 
     private final Activity activity;
+    private ApiResponse.Meta meta;
 
     protected ApiCallback(Activity activity) {
         this.activity = activity;
@@ -25,12 +26,18 @@ public abstract class ApiCallback<T> implements Callback<ApiResponse<T>> {
 
     public abstract void onSuccess(T data);
 
+    /** Thông tin phân trang (page, limit, total) của API danh sách; null với API khác. */
+    protected ApiResponse.Meta getMeta() {
+        return meta;
+    }
+
     public abstract void onError(String message);
 
     @Override
     public void onResponse(@NonNull Call<ApiResponse<T>> call, @NonNull Response<ApiResponse<T>> response) {
         if (isGone()) return;
         if (response.isSuccessful() && response.body() != null) {
+            meta = response.body().meta;
             onSuccess(response.body().data);
         } else {
             onError(readErrorMessage(response));
