@@ -58,19 +58,21 @@ public class HomeActivity extends AppCompatActivity {
             });
         }
 
-        // Clicking any room card opens "Chi tiết phòng" screen
-        View.OnClickListener openDetailListener = v -> {
-            Intent intent = new Intent(HomeActivity.this, ChiTietPhongActivity.class);
-            startActivity(intent);
-        };
-
-        View card1 = findViewById(R.id.card_room1);
-        if (card1 != null) card1.setOnClickListener(openDetailListener);
-
-        View card2 = findViewById(R.id.card_room2);
-        if (card2 != null) card2.setOnClickListener(openDetailListener);
-
-        View card3 = findViewById(R.id.card_room3);
-        if (card3 != null) card3.setOnClickListener(openDetailListener);
+        // Clicking any room card opens "Chi tiết phòng" screen.
+        // TODO (C): thay 3 thẻ viết cứng bằng feed thật; tạm gắn 3 phòng mẫu trong seed để test tương thích.
+        int[] cardIds = {R.id.card_room1, R.id.card_room2, R.id.card_room3};
+        for (int i = 0; i < cardIds.length; i++) {
+            View card = findViewById(cardIds[i]);
+            String postId = DEMO_POST_IDS[i];
+            if (card != null) {
+                card.setOnClickListener(v -> startActivity(ChiTietPhongActivity.intent(this, postId)));
+            }
+        }
     }
+
+    private static final String[] DEMO_POST_IDS = {
+            "10000000-0000-0000-0000-000000000001",
+            "10000000-0000-0000-0000-000000000002",
+            "10000000-0000-0000-0000-000000000003",
+    };
 }
