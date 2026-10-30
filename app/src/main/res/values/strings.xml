@@ -851,4 +851,7 @@
     <string name="filter_area_all_in">Tất cả khu vực · %1$s</string>
     <string name="feed_empty_province">Chưa có phòng nào đang tìm người ở %1$s.\nHãy thử tỉnh/thành khác hoặc quay lại sau.</string>
     <string name="feed_empty_change_province">Đổi tỉnh/thành</string>
+    <string name="filter_area_query">“%1$s” · %2$s</string>
+    <string name="map_empty_widen">Không có phòng trong %1$d km · Mở rộng ra %2$d km</string>
+    <string name="sort_distance_me">Gần bạn nhất</string>
 </resources>

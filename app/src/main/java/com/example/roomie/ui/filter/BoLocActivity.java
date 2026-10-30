@@ -225,17 +225,28 @@ public class BoLocActivity extends AppCompatActivity {
     }
 
     private void bindAll() {
-        String area = criteria.wardName != null ? criteria.wardName : criteria.area;
-        String province = ProvinceStore.shortName(ProvinceStore.get(this).name);
-        tvArea.setText(area != null
-                ? getString(R.string.filter_area_suffix, area, province)
-                : getString(R.string.filter_area_all_in, province));
+        tvArea.setText(areaLabel());
         rangeBudget.setValues(
                 criteria.minRent != null ? (float) criteria.minRent : 0f,
                 criteria.maxRent != null ? (float) criteria.maxRent : BUDGET_MAX);
         tvBudget.setText(RoomFormat.budgetLabel(this, criteria.minRent, criteria.maxRent));
         bindChips();
         bindChoices();
+    }
+
+    /**
+     * Ô "Khu vực" ghi đúng vị trí đang tìm: quanh vị trí / địa chỉ / trường (khi đó không lọc theo tỉnh),
+     * phường / quận, từ khóa, hoặc cả tỉnh đang chọn
+     */
+    private String areaLabel() {
+        String province = ProvinceStore.shortName(ProvinceStore.get(this).name);
+        if (criteria.nearMe) return getString(R.string.chip_near_me);
+        if (criteria.landmarkName != null) return getString(R.string.chip_near, criteria.landmarkName);
+        if (criteria.placeName != null) return getString(R.string.chip_near_place, criteria.placeName);
+        String area = criteria.wardName != null ? criteria.wardName : criteria.area;
+        if (area != null) return getString(R.string.filter_area_suffix, area, province);
+        if (criteria.query != null) return getString(R.string.filter_area_query, criteria.query, province);
+        return getString(R.string.filter_area_all_in, province);
     }
 
     private void bindChips() {

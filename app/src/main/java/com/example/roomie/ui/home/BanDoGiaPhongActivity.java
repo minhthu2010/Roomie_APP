@@ -81,6 +81,9 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
     private static final double DEFAULT_ZOOM = 13.0;
     private static final long RELOAD_DELAY_MS = 400;
     private static final int HIGH_MATCH = 80;
+    /** Bán kính mặc định của server khi không gửi radiusKm, và mức mở rộng tối đa */
+    private static final int DEFAULT_RADIUS_KM = 3;
+    private static final int MAX_RADIUS_KM = 10;
 
     private DiscoveryApi api;
     private SearchCriteria criteria = new SearchCriteria();
@@ -201,6 +204,13 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
         super.finish();
     }
 
+    /** Dòng trạng thái dưới bản đồ: thường là nhãn trắng; có hành động (mở rộng bán kính) thì nút màu đỏ đậm */
+    private void styleStatus(View.OnClickListener action) {
+        styleChip(tvStatus, action != null);
+        tvStatus.setOnClickListener(action);
+        tvStatus.setClickable(action != null);
+    }
+
     // ---------- Chọn giá nhanh ----------
 
     private static final float PRICE_MAX = 10_000_000f;
@@ -319,6 +329,22 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
      * Đưa bản đồ tới vị trí đang tìm và cắm ghim "Vị trí bạn tìm".
      * Phường/xã chưa có tọa độ thì hỏi backend tâm phường (tra Photon, có cache).
      */
+    /**
+     * Thu phóng vừa đủ cả vòng bán kính quanh tâm (bản đồ chỉ tải phòng trong vùng đang xem,
+     * nên vùng nhìn phải chứa hết vòng tìm kiếm). Gọi sau khi MapView đã đo xong kích thước.
+     */
+    private void fitRadius(GeoPoint center) {
+        double radius = criteria.radiusKm != null ? criteria.radiusKm : DEFAULT_RADIUS_KM;
+        double dLat = radius / 111.0;
+        double dLng = radius / (111.0 * Math.cos(Math.toRadians(center.getLatitude())));
+        BoundingBox box = new BoundingBox(center.getLatitude() + dLat, center.getLongitude() + dLng,
+                center.getLatitude() - dLat, center.getLongitude() - dLng);
+        map.post(() -> {
+            map.zoomToBoundingBox(box, false, Math.round(16 * getResources().getDisplayMetrics().density));
+            scheduleReload(0);
+        });
+    }
+
     private void moveToSearchLocation() {
         if (searchPin != null) {
             map.getOverlays().remove(searchPin);
@@ -326,9 +352,10 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
         }
         if (criteria.hasCenter()) {
             GeoPoint center = new GeoPoint(criteria.centerLat, criteria.centerLng);
-            // Đủ rộng để thấy phòng trong bán kính tìm kiếm (3km) quanh địa chỉ / trường; phường nhỏ hơn
-            map.getController().setZoom(criteria.wardCode != null ? 15.0 : 14.0);
             map.getController().setCenter(center);
+            // Quanh địa chỉ / trường / vị trí: thấy hết vòng bán kính; phường: phóng gần
+            if (criteria.hasDistanceOrigin()) fitRadius(center);
+            else map.getController().setZoom(15.0);
             searchPin = new Marker(map);
             searchPin.setPosition(center);
             searchPin.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
@@ -404,8 +431,20 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
                 firstLoad = false;
                 showRooms(data.items);
                 chipCount.setText(getString(R.string.map_room_count, data.items.size()));
+                styleStatus(null);
+                int radius = criteria.radiusKm != null ? criteria.radiusKm : DEFAULT_RADIUS_KM;
                 if (data.truncated) {
                     tvStatus.setText(getString(R.string.map_zoom_in, data.total));
+                } else if (data.items.isEmpty() && criteria.hasDistanceOrigin() && radius < MAX_RADIUS_KM) {
+                    // Tìm quanh 1 điểm mà trống: bấm để mở rộng bán kính (3 -> 5 -> 10 km)
+                    int wider = radius < 5 ? 5 : MAX_RADIUS_KM;
+                    tvStatus.setText(getString(R.string.map_empty_widen, radius, wider));
+                    styleStatus(v -> {
+                        criteria.radiusKm = wider;
+                        hideCard();
+                        moveToSearchLocation();
+                        scheduleReload(0);
+                    });
                 } else if (data.items.isEmpty()) {
                     tvStatus.setText(onlyHighMatch ? R.string.map_need_quiz : R.string.map_empty);
                 } else {
@@ -422,6 +461,7 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
             @Override
             public void onError(String message) {
                 tvStatus.setVisibility(View.VISIBLE);
+                styleStatus(null);
                 tvStatus.setText(message);
             }
         });

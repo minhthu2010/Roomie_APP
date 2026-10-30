@@ -315,6 +315,7 @@ public class HomeActivity extends AppCompatActivity {
 
     // "Gần trường nhất" hay "Gần địa chỉ nhất" tùy điểm gốc
     private int sortLabel(String sort) {
+        if (SearchCriteria.SORT_DISTANCE.equals(sort) && criteria.nearMe) return R.string.sort_distance_me;
         if (SearchCriteria.SORT_DISTANCE.equals(sort) && criteria.placeName != null) return R.string.sort_distance_place;
         return RoomFormat.sortLabel(sort);
     }
