@@ -1,7 +1,13 @@
 package com.example.roomie.ui.search;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Typeface;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -16,12 +22,16 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.roomie.R;
+import com.example.roomie.common.AppNotificationHelper;
 import com.example.roomie.data.discovery.DiscoveryApi;
 import com.example.roomie.data.discovery.PlaceModels;
 import com.example.roomie.data.discovery.SearchModels;
@@ -40,6 +50,20 @@ import retrofit2.Call;
 public class SearchActivity extends AppCompatActivity {
 
     private static final long SUGGEST_DELAY_MS = 300;
+    private static final long FRESH_LOCATION_MS = 5 * 60 * 1000;
+    private static final long LOCATE_TIMEOUT_MS = 15 * 1000;
+    // Khung bao TP.HCM sau sáp nhập (gồm Bình Dương, Bà Rịa - Vũng Tàu, Côn Đảo)
+    private static final double HCMC_MIN_LAT = 8.3, HCMC_MAX_LAT = 11.55;
+    private static final double HCMC_MIN_LNG = 105.95, HCMC_MAX_LNG = 108.5;
+
+    private final ActivityResultLauncher<String[]> locationPermission = registerForActivityResult(
+            new ActivityResultContracts.RequestMultiplePermissions(), granted -> {
+                if (hasLocationPermission()) locate();
+                else AppNotificationHelper.showInfo(this, getString(R.string.search_near_me_denied));
+            });
+    private LocationListener locationListener;
+    private Runnable locateTimeout;
+    private TextView tvNearMeSub;
 
     private DiscoveryApi api;
     private RecentSearchStore recentStore;
@@ -124,12 +148,14 @@ public class SearchActivity extends AppCompatActivity {
         bindAreaChip(R.id.chip_area_phu_nhuan);
         loadTopWards();
 
+        renderNearMe();
         renderRecent();
         loadSchools(null);
     }
 
     @Override
     protected void onDestroy() {
+        stopLocating();
         if (pendingSuggest != null) handler.removeCallbacks(pendingSuggest);
         if (suggestCall != null) suggestCall.cancel();
         if (placesCall != null) placesCall.cancel();
@@ -218,6 +244,106 @@ public class SearchActivity extends AppCompatActivity {
         e.lat = place.latitude;
         e.lng = place.longitude;
         recentStore.add(e);
+        finishWithCriteria();
+    }
+
+    // ---------- Phòng gần vị trí của tôi (GPS) ----------
+
+    private void renderNearMe() {
+        LinearLayout container = findViewById(R.id.layout_near_me);
+        container.removeAllViews();
+        View row = inflateRow(container, getString(R.string.search_near_me_title),
+                getString(R.string.search_near_me_sub), R.drawable.ic_my_location);
+        tvNearMeSub = row.findViewById(R.id.tv_subtitle);
+        row.setOnClickListener(v -> {
+            if (hasLocationPermission()) locate();
+            else locationPermission.launch(new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION});
+        });
+        container.addView(row);
+    }
+
+    private boolean hasLocationPermission() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /**
+     * Vị trí gần đây (dưới 5 phút) thì dùng luôn; không thì xin 1 lần định vị mới, chờ tối đa 15 giây.
+     * Không dùng Google Play services để chạy được cả trên máy không có.
+     */
+    @SuppressLint("MissingPermission")
+    private void locate() {
+        if (locationListener != null) return;   // đang lấy vị trí
+        LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
+        Location last = null;
+        for (String provider : lm.getProviders(true)) {
+            Location l = lm.getLastKnownLocation(provider);
+            if (l != null && (last == null || l.getTime() > last.getTime())) last = l;
+        }
+        if (last != null && System.currentTimeMillis() - last.getTime() < FRESH_LOCATION_MS) {
+            searchNear(last);
+            return;
+        }
+        String provider = lm.isProviderEnabled(LocationManager.GPS_PROVIDER) ? LocationManager.GPS_PROVIDER
+                : lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER) ? LocationManager.NETWORK_PROVIDER : null;
+        if (provider == null) {
+            if (last != null) searchNear(last);
+            else AppNotificationHelper.showInfo(this, getString(R.string.search_near_me_failed));
+            return;
+        }
+        Location fallback = last;
+        tvNearMeSub.setText(R.string.search_near_me_locating);
+        // Cài đủ các hàm: Android < 11 chưa có cài đặt mặc định cho onStatusChanged...
+        locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                stopLocating();
+                searchNear(location);
+            }
+
+            @Override
+            public void onStatusChanged(String p, int status, Bundle extras) {}
+
+            @Override
+            public void onProviderEnabled(String p) {}
+
+            @Override
+            public void onProviderDisabled(String p) {}
+        };
+        lm.requestLocationUpdates(provider, 0, 0, locationListener, Looper.getMainLooper());
+        locateTimeout = () -> {
+            stopLocating();
+            if (fallback != null) searchNear(fallback);
+            else AppNotificationHelper.showInfo(this, getString(R.string.search_near_me_failed));
+        };
+        handler.postDelayed(locateTimeout, LOCATE_TIMEOUT_MS);
+    }
+
+    private void stopLocating() {
+        if (locateTimeout != null) handler.removeCallbacks(locateTimeout);
+        locateTimeout = null;
+        if (locationListener != null) {
+            ((LocationManager) getSystemService(LOCATION_SERVICE)).removeUpdates(locationListener);
+            locationListener = null;
+        }
+        if (tvNearMeSub != null) tvNearMeSub.setText(R.string.search_near_me_sub);
+    }
+
+    /** Tìm phòng quanh vị trí hiện tại; không lưu vào tìm kiếm gần đây vì vị trí thay đổi */
+    private void searchNear(Location location) {
+        double lat = location.getLatitude();
+        double lng = location.getLongitude();
+        if (lat < HCMC_MIN_LAT || lat > HCMC_MAX_LAT || lng < HCMC_MIN_LNG || lng > HCMC_MAX_LNG) {
+            AppNotificationHelper.showInfo(this, getString(R.string.search_near_me_outside));
+            return;
+        }
+        criteria.clearLocation();
+        criteria.nearMe = true;
+        criteria.placeName = getString(R.string.search_near_me_label);
+        criteria.centerLat = lat;
+        criteria.centerLng = lng;
+        criteria.sort = SearchCriteria.SORT_DISTANCE;
         finishWithCriteria();
     }
 

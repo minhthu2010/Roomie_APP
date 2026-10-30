@@ -31,6 +31,13 @@ const filters = {
   roomTypes: csv(z.enum(ROOM_TYPES)),
   gender: z.enum(['female', 'male']).optional(),
   amenities: csv(z.string().max(50)),
+  // Chuyển vào được trước ngày này (phòng chưa ghi ngày = ở được ngay)
+  moveInBy: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'moveInBy phải có dạng YYYY-MM-DD').optional(),
+  minArea: z.coerce.number().min(0).max(1000).optional(),
+  maxDeposit: z.coerce.number().int().min(0).optional(),
+  // Số người cần ở cùng lúc (đi cùng bạn bè): phòng phải còn tìm ít nhất ngần ấy người
+  minSlots: z.coerce.number().int().min(1).max(10).optional(),
+  occupation: z.enum(['student', 'worker']).optional(),
   sort: z.enum(['match', 'newest', 'price_asc', 'price_desc', 'distance']).default('match'),
   minMatch: z.coerce.number().int().min(0).max(100).optional(),
   page: z.string().optional(),
