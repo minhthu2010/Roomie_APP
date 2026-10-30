@@ -46,7 +46,7 @@ public interface AccountsApi {
     // ---------- Quên mật khẩu ----------
 
     @POST("auth/password/forgot")
-    Call<ApiResponse<AccountModels.OtpChallenge>> forgotPassword(@Body AccountModels.AccountRequest body);
+    Call<ApiResponse<AccountModels.OtpChallenge>> forgotPassword(@Body AccountModels.EmailRequest body);
 
     @POST("auth/password/verify-otp")
     Call<ApiResponse<AccountModels.ResetToken>> verifyResetOtp(@Body AccountModels.VerifyResetOtpRequest body);

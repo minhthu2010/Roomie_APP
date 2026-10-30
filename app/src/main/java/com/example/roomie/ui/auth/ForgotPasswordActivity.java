@@ -1,6 +1,7 @@
 package com.example.roomie.ui.auth;
 
 import android.os.Bundle;
+import android.util.Patterns;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -48,9 +49,9 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
         if (btnSendCode != null) {
             btnSendCode.setOnClickListener(v -> {
-                String input = etEmailOrPhone != null ? etEmailOrPhone.getText().toString().trim() : "";
-                if (input.isEmpty()) {
-                    AppNotificationHelper.showError(ForgotPasswordActivity.this, "Vui lòng nhập số điện thoại hoặc email");
+                String input = etEmailOrPhone != null ? etEmailOrPhone.getText().toString().trim().toLowerCase() : "";
+                if (!Patterns.EMAIL_ADDRESS.matcher(input).matches()) {
+                    AppNotificationHelper.showError(ForgotPasswordActivity.this, "Vui lòng nhập email hợp lệ");
                     return;
                 }
 
@@ -59,11 +60,11 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         }
     }
 
-    // Server tìm tài khoản theo email/SĐT rồi gửi mã về email của tài khoản đó
+    // Server gửi mã khôi phục về email của tài khoản
     private void sendCode(AppCompatButton button, String account) {
         button.setEnabled(false);
         ApiClient.create(this, AccountsApi.class)
-                .forgotPassword(new AccountModels.AccountRequest(account))
+                .forgotPassword(new AccountModels.EmailRequest(account))
                 .enqueue(new ApiCallback<AccountModels.OtpChallenge>(this) {
                     @Override
                     public void onSuccess(AccountModels.OtpChallenge challenge) {

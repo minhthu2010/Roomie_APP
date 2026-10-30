@@ -6,7 +6,7 @@ const { requireAuth } = require('../../middleware/auth');
 const auth = require('./auth.service');
 const password = require('./password.service');
 const google = require('./google.service');
-const { email, otpCode, account, strongPassword } = require('./schemas');
+const { email, otpCode, strongPassword } = require('./schemas');
 
 const signupPassword = z.string().min(6, 'Mật khẩu tối thiểu 6 ký tự').max(72, 'Mật khẩu tối đa 72 ký tự');
 const deviceLabel = z.string().trim().max(120).optional();
@@ -39,11 +39,11 @@ router.post('/register/resend-otp',
     ok(res, await auth.resendSignupOtp(req.valid.body.email));
   });
 
-// Đăng nhập bằng email hoặc số điện thoại (LoginActivity)
+// Đăng nhập bằng email (LoginActivity)
 router.post('/login',
   validate({
     body: z.object({
-      account: z.string().trim().min(1, 'Vui lòng nhập số điện thoại hoặc email').max(254),
+      email,
       password: z.string().min(1, 'Vui lòng nhập mật khẩu').max(72),
       deviceLabel,
     }),
@@ -71,14 +71,14 @@ router.post('/google',
 
 // ---------- Quên mật khẩu (ForgotPassword -> VerifyOtp -> ResetPassword) ----------
 
-router.post('/password/forgot', validate({ body: z.object({ account }) }), async (req, res) => {
-  ok(res, await password.requestReset(req.valid.body.account));
+router.post('/password/forgot', validate({ body: z.object({ email }) }), async (req, res) => {
+  ok(res, await password.requestReset(req.valid.body.email));
 });
 
 router.post('/password/verify-otp',
-  validate({ body: z.object({ account, code: otpCode }) }),
+  validate({ body: z.object({ email, code: otpCode }) }),
   async (req, res) => {
-    ok(res, await password.verifyResetOtp(req.valid.body.account, req.valid.body.code));
+    ok(res, await password.verifyResetOtp(req.valid.body.email, req.valid.body.code));
   });
 
 router.post('/password/reset',

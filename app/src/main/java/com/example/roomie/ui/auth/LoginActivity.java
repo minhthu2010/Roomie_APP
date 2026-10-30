@@ -3,6 +3,7 @@ package com.example.roomie.ui.auth;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -64,14 +65,14 @@ public class LoginActivity extends AppCompatActivity {
             });
         }
 
-        // Đăng nhập bằng email hoặc số điện thoại
+        // Đăng nhập bằng email
         if (btnDoLogin != null) {
             btnDoLogin.setOnClickListener(v -> {
-                String account = etEmailOrPhone != null ? etEmailOrPhone.getText().toString().trim() : "";
+                String account = etEmailOrPhone != null ? etEmailOrPhone.getText().toString().trim().toLowerCase() : "";
                 String password = etPassword != null ? etPassword.getText().toString() : "";
 
-                if (account.isEmpty()) {
-                    AppNotificationHelper.showError(LoginActivity.this, "Vui lòng nhập số điện thoại hoặc email");
+                if (!Patterns.EMAIL_ADDRESS.matcher(account).matches()) {
+                    AppNotificationHelper.showError(LoginActivity.this, "Vui lòng nhập email hợp lệ");
                     return;
                 }
                 if (password.isEmpty()) {
@@ -119,9 +120,9 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onError(String message) {
                         button.setEnabled(true);
-                        if ("EMAIL_NOT_VERIFIED".equals(getErrorCode()) && account.contains("@")) {
+                        if ("EMAIL_NOT_VERIFIED".equals(getErrorCode())) {
                             // Đăng ký dở dang: gửi mã mới rồi mở màn xác thực
-                            VerifyRegisterActivity.resendAndOpen(LoginActivity.this, account.toLowerCase());
+                            VerifyRegisterActivity.resendAndOpen(LoginActivity.this, account);
                         } else {
                             AppNotificationHelper.showError(LoginActivity.this, message);
                         }
