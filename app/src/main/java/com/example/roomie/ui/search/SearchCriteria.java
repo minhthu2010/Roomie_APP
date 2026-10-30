@@ -125,6 +125,20 @@ public class SearchCriteria implements Serializable {
                 || moveInDays != null || minArea != null || maxDeposit != null || minSlots != null || occupation != null;
     }
 
+    /** Số nhóm bộ lọc đang bật ngoài giá (loại phòng, giới tính, tiện ích, ngày chuyển vào...) */
+    public int otherFilterCount() {
+        int n = 0;
+        if (!roomTypes.isEmpty()) n++;
+        if (gender != null) n++;
+        if (!amenities.isEmpty()) n++;
+        if (moveInDays != null) n++;
+        if (minArea != null) n++;
+        if (maxDeposit != null) n++;
+        if (minSlots != null) n++;
+        if (occupation != null) n++;
+        return n;
+    }
+
     /** Có điểm gốc để tính khoảng cách (gần trường / quanh địa chỉ) thì mới sắp theo khoảng cách được */
     public boolean hasDistanceOrigin() {
         return landmarkId != null || (placeName != null && centerLat != null);

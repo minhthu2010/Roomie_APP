@@ -113,7 +113,8 @@ public class HomeActivity extends AppCompatActivity {
         // "Xem bản đồ" button click opens "Bản đồ giá phòng" screen
         View btnViewMap = findViewById(R.id.btn_view_map);
         if (btnViewMap != null) {
-            btnViewMap.setOnClickListener(v -> startActivity(BanDoGiaPhongActivity.intent(this, criteria)));
+            // Bản đồ trả lại điều kiện đã đổi (giá, bộ lọc, vị trí) để danh sách khớp với bản đồ
+            btnViewMap.setOnClickListener(v -> criteriaLauncher.launch(BanDoGiaPhongActivity.intent(this, criteria)));
         }
 
         findViewById(R.id.layout_sort).setOnClickListener(v -> showSortDialog());

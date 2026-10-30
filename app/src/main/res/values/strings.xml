@@ -837,4 +837,11 @@
     <string name="feed_empty_widen">Mở rộng ra %1$d km</string>
     <string name="feed_empty_clear_filters">Bỏ bộ lọc</string>
     <string name="feed_empty_clear_location">Tìm mọi khu vực</string>
+
+    <!-- Bản đồ: chọn giá nhanh, chip bộ lọc khác -->
+    <string name="map_price_apply">Xem phòng</string>
+    <string name="map_price_under">Dưới %1$s tr</string>
+    <string name="map_price_between">%1$s–%2$s tr</string>
+    <string name="map_price_over">Trên %1$s tr</string>
+    <string name="map_chip_more_filters">Bộ lọc · %1$d</string>
 </resources>

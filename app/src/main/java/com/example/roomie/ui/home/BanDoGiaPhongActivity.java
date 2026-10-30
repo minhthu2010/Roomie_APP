@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -42,6 +43,8 @@ import com.example.roomie.ui.saved.SaveToggle;
 import com.example.roomie.ui.search.RoomFormat;
 import com.example.roomie.ui.search.SearchActivity;
 import com.example.roomie.ui.search.SearchCriteria;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.slider.RangeSlider;
 
 import org.osmdroid.events.MapEventsReceiver;
 import org.osmdroid.events.MapListener;
@@ -59,6 +62,7 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import retrofit2.Call;
@@ -99,6 +103,7 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
     private TextView chipCount;
     private TextView chipPrice;
     private TextView chipMatch;
+    private TextView chipMoreFilters;
     private View btnMyLocation;
 
     private final ActivityResultLauncher<Intent> criteriaLauncher = registerForActivityResult(
@@ -145,6 +150,7 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
         chipCount = findViewById(R.id.chip_room_count);
         chipPrice = findViewById(R.id.chip_price_range);
         chipMatch = findViewById(R.id.chip_match_rate);
+        chipMoreFilters = findViewById(R.id.chip_more_filters);
         btnMyLocation = findViewById(R.id.btn_my_location);
 
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
@@ -153,7 +159,8 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
         View.OnClickListener openFilter = v -> criteriaLauncher.launch(
                 new Intent(this, BoLocActivity.class).putExtra(SearchCriteria.EXTRA, criteria));
         findViewById(R.id.btn_filter).setOnClickListener(openFilter);
-        chipPrice.setOnClickListener(openFilter);
+        chipMoreFilters.setOnClickListener(openFilter);
+        chipPrice.setOnClickListener(v -> showPricePicker());
         chipMatch.setOnClickListener(v -> {
             onlyHighMatch = !onlyHighMatch;
             bindHeader();
@@ -185,6 +192,86 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
 
         setupMap();
         bindHeader();
+    }
+
+    /** Đóng bản đồ (nút quay lại, cử chỉ back) thì trả điều kiện hiện tại về Home */
+    @Override
+    public void finish() {
+        setResult(RESULT_OK, new Intent().putExtra(SearchCriteria.EXTRA, criteria));
+        super.finish();
+    }
+
+    // ---------- Chọn giá nhanh ----------
+
+    private static final float PRICE_MAX = 10_000_000f;
+    /** Mức giá gợi ý {min, max} (đồng); null = không giới hạn đầu đó */
+    private static final long[][] PRICE_PRESETS = {
+            {0, 2_000_000}, {2_000_000, 3_000_000}, {3_000_000, 4_000_000}, {4_000_000, 5_000_000}, {5_000_000, 0}};
+
+    private void showPricePicker() {
+        BottomSheetDialog sheet = new BottomSheetDialog(this);
+        View content = getLayoutInflater().inflate(R.layout.dialog_price_picker, null, false);
+        sheet.setContentView(content);
+        TextView tvValue = content.findViewById(R.id.tv_price_value);
+        RangeSlider slider = content.findViewById(R.id.range_price);
+        slider.setTickVisible(false);
+        LinearLayout presets = content.findViewById(R.id.group_price_presets);
+        // Giá đang chọn trong hộp, chỉ áp dụng khi bấm "Xem phòng"
+        Long[] picked = {criteria.minRent, criteria.maxRent};
+
+        Runnable bind = () -> {
+            slider.setValues(picked[0] != null ? (float) picked[0] : 0f, picked[1] != null ? (float) picked[1] : PRICE_MAX);
+            tvValue.setText(RoomFormat.budgetLabel(this, picked[0], picked[1]));
+            for (int i = 0; i < presets.getChildCount(); i++) {
+                long[] p = PRICE_PRESETS[i];
+                boolean on = Objects.equals(picked[0], p[0] == 0 ? null : p[0])
+                        && Objects.equals(picked[1], p[1] == 0 ? null : p[1]);
+                styleChip((TextView) presets.getChildAt(i), on);
+            }
+        };
+        for (long[] p : PRICE_PRESETS) {
+            TextView chip = new TextView(this);
+            String min = RoomFormat.millions(p[0]);
+            String max = RoomFormat.millions(p[1]);
+            chip.setText(p[0] == 0 ? getString(R.string.map_price_under, max)
+                    : p[1] == 0 ? getString(R.string.map_price_over, min)
+                    : getString(R.string.map_price_between, min, max));
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            lp.setMarginEnd(Math.round(8 * getResources().getDisplayMetrics().density));
+            chip.setOnClickListener(v -> {
+                picked[0] = p[0] == 0 ? null : p[0];
+                picked[1] = p[1] == 0 ? null : p[1];
+                bind.run();
+            });
+            presets.addView(chip, lp);
+        }
+        slider.addOnChangeListener((s, value, fromUser) -> {
+            if (!fromUser) return;
+            List<Float> v = s.getValues();
+            picked[0] = v.get(0) <= 0 ? null : (long) (float) v.get(0);
+            picked[1] = v.get(1) >= PRICE_MAX ? null : (long) (float) v.get(1);
+            bind.run();
+        });
+        content.findViewById(R.id.btn_price_any).setOnClickListener(v -> {
+            applyPrice(null, null);
+            sheet.dismiss();
+        });
+        content.findViewById(R.id.btn_price_apply).setOnClickListener(v -> {
+            applyPrice(picked[0], picked[1]);
+            sheet.dismiss();
+        });
+        bind.run();
+        sheet.show();
+    }
+
+    private void applyPrice(Long min, Long max) {
+        if (Objects.equals(min, criteria.minRent) && Objects.equals(max, criteria.maxRent)) return;
+        criteria.minRent = min;
+        criteria.maxRent = max;
+        bindHeader();
+        hideCard();
+        scheduleReload(0);
     }
 
     // ---------- Bản đồ ----------
@@ -437,6 +524,9 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
         chipPrice.setText(RoomFormat.budgetLabel(this, criteria.minRent, criteria.maxRent));
         styleChip(chipPrice, criteria.minRent != null || criteria.maxRent != null);
         styleChip(chipMatch, onlyHighMatch);
+        int others = criteria.otherFilterCount();
+        chipMoreFilters.setVisibility(others > 0 ? View.VISIBLE : View.GONE);
+        chipMoreFilters.setText(getString(R.string.map_chip_more_filters, others));
     }
 
     private void styleChip(TextView chip, boolean selected) {
