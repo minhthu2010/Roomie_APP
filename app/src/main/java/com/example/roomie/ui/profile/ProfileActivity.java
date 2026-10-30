@@ -23,6 +23,7 @@ import com.example.roomie.data.discovery.DiscoveryApi;
 import com.example.roomie.data.discovery.QuizModels;
 import com.example.roomie.data.remote.ApiCallback;
 import com.example.roomie.data.remote.ApiClient;
+import com.example.roomie.data.remote.SessionManager;
 import com.example.roomie.ui.auth.AuthFlow;
 import com.example.roomie.ui.quiz.LifestyleReviewActivity;
 import com.example.roomie.ui.quiz.QuizIntroActivity;
@@ -87,11 +88,16 @@ public class ProfileActivity extends AppCompatActivity {
         TextView tvName = findViewById(R.id.tv_profile_name);
         TextView tvSub = findViewById(R.id.tv_profile_sub);
         ImageView ivAvatar = findViewById(R.id.iv_profile_avatar);
+        // Hiện ngay tên đã lưu (không để lộ tên mẫu "Mai Linh" trong lúc chờ API)
+        SessionManager session = new SessionManager(this);
+        String cachedName = session.getDisplayName();
+        tvName.setText(cachedName != null ? cachedName : "");
         ApiClient.create(this, AccountsApi.class).getMyProfile()
                 .enqueue(new ApiCallback<AccountModels.Profile>(this) {
                     @Override
                     public void onSuccess(AccountModels.Profile profile) {
                         if (profile == null) return;
+                        session.saveDisplayName(profile.displayName);
                         tvName.setText(profile.displayName);
                         tvSub.setText(ProfileUi.subtitle(profile));
                         ImageLoader.load(ivAvatar, profile.avatarUrl, R.drawable.ic_avatar_profile);

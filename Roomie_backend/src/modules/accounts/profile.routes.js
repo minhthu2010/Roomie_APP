@@ -24,7 +24,8 @@ const updateProfileBody = z.object({
   birthYear: z.coerce.number().int().min(1940, 'Năm sinh không hợp lệ').max(2015, 'Năm sinh không hợp lệ').nullable().optional(),
   occupation: z.enum(['student', 'worker', 'other']).nullable().optional(),
   schoolOrWorkplace: optionalText(180),
-  landmarkId: z.coerce.number().int().positive().nullable().optional(),
+  // 0 = bỏ trường đã chọn (app Android không gửi được null qua Gson)
+  landmarkId: z.coerce.number().int().min(0).transform((v) => (v === 0 ? null : v)).nullable().optional(),
   livingAreaText: optionalText(150),
   livingProvinceCode: optionalText(10),
   livingWardCode: optionalText(10),

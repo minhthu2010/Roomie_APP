@@ -110,7 +110,7 @@
     <string name="label_display_name">Tên hiển thị</string>
     <string name="hint_display_name">Mai Linh</string>
     <string name="label_occupation">Nghề nghiệp</string>
-    <string name="label_location">Khu vực</string>
+    <string name="label_location">Khu vực muốn tìm phòng</string>
     <string name="label_bio">Giới thiệu ngắn</string>
     <string name="hint_bio">Mình là sinh viên, thích không gian gọn gàng và yên tĩnh để học.</string>
     <string name="label_budget">Ngân sách / tháng</string>
@@ -189,7 +189,7 @@
     <string name="btn_back_to_post">Quay lại bài đăng</string>
     <string name="btn_back_to_explore">Trở về Khám phá</string>
     <string name="header_city">THÀNH PHỐ HỒ CHÍ MINH</string>
-    <string name="header_greeting">Chào Linh, tìm tổ ấm nhé</string>
+    <string name="header_greeting">Chào bạn, tìm tổ ấm nhé</string>
     <string name="hint_search">Tìm theo phường, trường hoặc đường&#8230;</string>
     <string name="chip_bach_khoa">Gần ĐH Bách Khoa</string>
     <string name="chip_price_range">2–4 triệu</string>
@@ -680,13 +680,13 @@
     <string name="sample_school_workplace">ĐH Bách Khoa TP.HCM</string>
     <string name="label_about_me">Giới thiệu bản thân</string>
     <string name="sample_about_me">Mình thích không gian gọn gàng, yên tĩnh để học. Mong tìm được bạn cùng phòng tôn trọng và chia sẻ việc nhà.</string>
-    <string name="label_living_area">Khu vực sinh sống</string>
+    <string name="label_living_area">Khu vực muốn tìm phòng</string>
     <string name="sample_living_area">Quận 10, TP. Hồ Chí Minh</string>
     <string name="disclaimer_edit_profile">Thông tin này xuất hiện trên hồ sơ của bạn. Bạn có thể điều chỉnh hiển thị trong Quyền riêng tư.</string>
     <string name="btn_save_changes">Lưu thay đổi</string>
     <string name="title_verification_safety">Xác minh &amp; an toàn</string>
-    <string name="verified_phone_title">Tài khoản đã xác minh số điện thoại</string>
-    <string name="verified_phone_sub">Mai Linh · Xác minh giúp kết nối tin cậy hơn.</string>
+    <string name="verified_phone_title">Tài khoản đã xác minh email</string>
+    <string name="verified_phone_sub">Xác minh giúp kết nối tin cậy hơn.</string>
     <string name="phone_verified_card_title">Số điện thoại · Đã xác minh</string>
     <string name="btn_reverify_phone">Thay đổi &amp; xác minh lại</string>
     <string name="email_unverified_card_title">Email · Chưa xác minh</string>
@@ -781,7 +781,7 @@
     <string name="box_logout_confirm_title">Bạn muốn đăng xuất?</string>
     <string name="box_logout_confirm_sub">Bạn cần đăng nhập lại để xem phòng đã lưu và quản lý bài đăng. Bài đăng đã xuất bản không bị xóa.</string>
     <string name="btn_stay">Ở lại</string>
-    <string name="footer_account_mail">Roomie · Tài khoản Mai Linh</string>
+    <string name="footer_account_mail">Roomie · Tài khoản của bạn</string>
     <string name="label_gender">Giới tính</string>
     <string name="label_birth_year">Năm sinh</string>
     <string name="hint_choose">Chọn</string>
@@ -857,4 +857,18 @@
     <string name="places_schools_title">Trường học</string>
     <string name="search_school_rooms">%1$d phòng trong 3km</string>
     <string name="map_my_location_hint">Bản đồ đang ở vị trí của bạn. Muốn lọc phòng quanh đây, chọn “Phòng gần vị trí của tôi” ở ô tìm kiếm.</string>
+    <string name="header_greeting_name">Chào %1$s, tìm tổ ấm nhé</string>
+    <string name="verified_sub_name">%1$s · Xác minh giúp kết nối tin cậy hơn.</string>
+    <string name="footer_account_name">Roomie · Tài khoản %1$s</string>
+    <string name="area_whole_province">Toàn bộ %1$s</string>
+    <string name="area_pick_ward_title">Chọn phường/xã ở %1$s</string>
+    <string name="school_pick_title">Chọn trường / nơi làm</string>
+    <string name="school_pick_hint">Gõ tên trường, VD: bach khoa</string>
+    <string name="school_other">Nơi làm khác: “%1$s”</string>
+    <string name="school_none">Bỏ chọn</string>
+    <string name="loading">Đang tải…</string>
+    <string name="no_result">Không tìm thấy kết quả</string>
+    <!-- Hộp chọn phường/xã (dialog_ward_picker, dùng ở hồ sơ) -->
+    <string name="filter_ward_hint">Gõ tên phường, VD: dien hong</string>
+    <string name="filter_ward_loading">Đang tải danh sách phường/xã…</string>
 </resources>

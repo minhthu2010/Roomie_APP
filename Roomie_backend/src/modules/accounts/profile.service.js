@@ -38,10 +38,13 @@ async function getMyProfile(userId) {
             up.living_area_text, up.living_province_code, up.living_ward_code,
             up.budget_min, up.budget_max, to_char(up.move_in_date, 'YYYY-MM-DD') AS move_in_date,
             COALESCE(up.preferred_gender, 'any') AS preferred_gender, up.onboarding_goal, up.profile_completed_at,
-            l.name AS landmark_name
+            l.name AS landmark_name, l.short_name AS landmark_short_name,
+            p.province_name AS living_province_name, w.ward_name AS living_ward_name
        FROM users u
        LEFT JOIN user_profiles up ON up.user_id = u.user_id
        LEFT JOIN landmarks l ON l.landmark_id = up.landmark_id
+       LEFT JOIN provinces p ON p.province_code = up.living_province_code
+       LEFT JOIN wards w ON w.ward_code = up.living_ward_code
       WHERE u.user_id = $1`, [userId]);
   const u = rows[0];
   if (!u) throw AppError.notFound('Không tìm thấy tài khoản');
@@ -62,9 +65,13 @@ async function getMyProfile(userId) {
     schoolOrWorkplace: u.school_or_workplace,
     landmarkId: u.landmark_id,
     landmarkName: u.landmark_name,
+    landmarkShortName: u.landmark_short_name,
     livingAreaText: u.living_area_text,
+    // "Khu vực muốn tìm phòng": tỉnh bắt buộc khi đã chọn, phường có thể null (= cả tỉnh)
     livingProvinceCode: u.living_province_code,
+    livingProvinceName: u.living_province_name,
     livingWardCode: u.living_ward_code,
+    livingWardName: u.living_ward_name,
     budgetMin: u.budget_min,
     budgetMax: u.budget_max,
     moveInDate: u.move_in_date,
@@ -85,10 +92,49 @@ function buildSet(input, fields, startIndex) {
   return { sets, values };
 }
 
+// Khu vực muốn tìm phòng: phường phải thuộc tỉnh đã chọn; đổi tỉnh mà không gửi phường thì bỏ phường cũ.
+// Đồng thời ghi living_area_text ("Phường Bàn Cờ, Thành phố Hồ Chí Minh") để chỗ khác hiển thị gọn.
+async function normalizeArea(input, c) {
+  if (input.livingProvinceCode === undefined && input.livingWardCode === undefined) return;
+  if (input.livingWardCode) {
+    const { rows } = await c.query(
+      `SELECT w.ward_name, w.province_code, p.province_name
+         FROM wards w JOIN provinces p ON p.province_code = w.province_code WHERE w.ward_code = $1`,
+      [input.livingWardCode]);
+    if (!rows[0]) throw AppError.validation([{ field: 'livingWardCode', message: 'Phường/xã không tồn tại' }]);
+    if (input.livingProvinceCode && input.livingProvinceCode !== rows[0].province_code) {
+      throw AppError.validation([{ field: 'livingWardCode', message: 'Phường/xã không thuộc tỉnh/thành đã chọn' }]);
+    }
+    input.livingProvinceCode = rows[0].province_code;
+    input.livingAreaText = `${rows[0].ward_name}, ${rows[0].province_name}`;
+  } else if (input.livingProvinceCode) {
+    const { rows } = await c.query('SELECT province_name FROM provinces WHERE province_code = $1',
+      [input.livingProvinceCode]);
+    if (!rows[0]) throw AppError.validation([{ field: 'livingProvinceCode', message: 'Tỉnh/thành không tồn tại' }]);
+    input.livingWardCode = null;
+    input.livingAreaText = rows[0].province_name;
+  } else {
+    // Gửi livingProvinceCode rỗng: xóa khu vực
+    input.livingProvinceCode = null;
+    input.livingWardCode = null;
+    input.livingAreaText = null;
+  }
+}
+
+// Trường/nơi làm chọn từ gợi ý: lưu landmark_id, tên hiển thị lấy theo landmark nếu app không gửi
+async function normalizeLandmark(input, c) {
+  if (!input.landmarkId) return;
+  const { rows } = await c.query('SELECT name FROM landmarks WHERE landmark_id = $1 AND is_active', [input.landmarkId]);
+  if (!rows[0]) throw AppError.validation([{ field: 'landmarkId', message: 'Trường/địa điểm không tồn tại' }]);
+  if (input.schoolOrWorkplace === undefined) input.schoolOrWorkplace = rows[0].name;
+}
+
 // Sửa một phần hồ sơ (ProfileSetupActivity, màn Chỉnh sửa hồ sơ).
 // completeSetup = true: đánh dấu đã thiết lập hồ sơ lần đầu.
 async function updateMyProfile(userId, input) {
   await db.withTransaction(async (c) => {
+    await normalizeArea(input, c);
+    await normalizeLandmark(input, c);
     const user = buildSet(input, USER_FIELDS, 1);
     if (user.sets.length) {
       await c.query(`UPDATE users SET ${user.sets.join(', ')} WHERE user_id = $1`, [userId, ...user.values]);

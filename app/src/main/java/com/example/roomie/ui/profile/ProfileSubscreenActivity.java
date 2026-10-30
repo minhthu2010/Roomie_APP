@@ -192,6 +192,7 @@ public class ProfileSubscreenActivity extends AppCompatActivity {
         showUnavailableOnParent(screen, R.id.iv_chevron_faq3);
         showUnavailableOnParent(screen, R.id.iv_chevron_faq4);
         showUnavailableOnParent(screen, R.id.iv_chevron_faq5);
+        showAccountName(screen);
         NotificationsScreen.bind(this, screen);
         SettingsSwitches.bind(this, screen);
         bindBack(screen, R.id.btn_stay_logged_in);
@@ -234,6 +235,25 @@ public class ProfileSubscreenActivity extends AppCompatActivity {
         String[] gender = {null};
         Integer[] birthYear = {null};
         String[] goal = {null};
+        PlacePickers.Area[] area = {null};
+        // landmarkId: null = chưa đổi, 0 = nơi làm tự ghi / bỏ chọn, > 0 = trường trong danh sách
+        Integer[] landmarkId = {null};
+
+        // Khu vực muốn tìm phòng: tỉnh/thành -> phường/xã thật
+        etArea.setFocusable(false);
+        etArea.setOnClickListener(ignored -> PlacePickers.pickArea(this,
+                area[0] != null ? area[0].provinceCode : null, picked -> {
+                    area[0] = picked;
+                    etArea.setText(picked.label());
+                }));
+
+        // Trường / nơi làm: chọn từ gợi ý trường thật, hoặc ghi nơi làm khác
+        etSchool.setFocusable(false);
+        etSchool.setOnClickListener(ignored -> PlacePickers.pickSchool(this,
+                area[0] != null ? area[0].provinceCode : null, school -> {
+                    landmarkId[0] = school.landmarkId;
+                    etSchool.setText(school.name != null ? school.name : "");
+                }));
 
         tvGender.setOnClickListener(ignored -> new AlertDialog.Builder(this)
                 .setTitle("Chọn giới tính")
@@ -286,7 +306,8 @@ public class ProfileSubscreenActivity extends AppCompatActivity {
                 etOccupation.setText(occ != null ? occ : "");
                 etSchool.setText(p.schoolOrWorkplace != null ? p.schoolOrWorkplace : "");
                 etAbout.setText(p.bio != null ? p.bio : "");
-                etArea.setText(p.livingAreaText != null ? p.livingAreaText : "");
+                area[0] = ProfileUi.areaOf(p);
+                etArea.setText(area[0] != null ? area[0].label() : "");
                 ImageLoader.load(editAvatarView, p.avatarUrl, R.drawable.ic_avatar_profile);
 
                 gender[0] = p.gender;
@@ -317,8 +338,12 @@ public class ProfileSubscreenActivity extends AppCompatActivity {
             body.occupation = ProfileUi.value(ProfileUi.OCCUPATION_LABELS, ProfileUi.OCCUPATION_VALUES,
                     etOccupation.getText().toString());
             body.schoolOrWorkplace = etSchool.getText().toString().trim();
+            body.landmarkId = landmarkId[0];
             body.bio = etAbout.getText().toString().trim();
-            body.livingAreaText = etArea.getText().toString().trim();
+            if (area[0] != null) {
+                body.livingProvinceCode = area[0].provinceCode;
+                body.livingWardCode = area[0].wardCode != null ? area[0].wardCode : "";
+            }
             body.gender = gender[0];
             body.birthYear = birthYear[0];
             body.onboardingGoal = goal[0];
@@ -341,6 +366,7 @@ public class ProfileSubscreenActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(AccountModels.Profile profile) {
                     AppNotificationHelper.showSuccess(ProfileSubscreenActivity.this, "Đã lưu thay đổi");
+                    new SessionManager(ProfileSubscreenActivity.this).saveDisplayName(profile.displayName);
                     save.setEnabled(true);
                     onBackPressed();
                 }
@@ -352,6 +378,16 @@ public class ProfileSubscreenActivity extends AppCompatActivity {
                 }
             });
         });
+    }
+
+    // Tên người đang đăng nhập ở màn Xác minh & an toàn và cuối màn Quyền riêng tư
+    private void showAccountName(View root) {
+        String name = new SessionManager(this).getDisplayName();
+        if (name == null) return;
+        TextView verifiedSub = root.findViewById(R.id.tv_verified_sub);
+        if (verifiedSub != null) verifiedSub.setText(getString(R.string.verified_sub_name, name));
+        TextView footer = root.findViewById(R.id.tv_footer_account);
+        if (footer != null) footer.setText(getString(R.string.footer_account_name, name));
     }
 
     private void stylePill(TextView pill, boolean selected) {
