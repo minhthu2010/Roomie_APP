@@ -50,7 +50,7 @@ const HOSPITAL_PART = /(\s-\s|^)(khoa|phong|toa|khu|nha|cong|bai xe) /;
 // shop=supermarket nhưng không bán đồ ăn / nhu yếu phẩm
 const NOT_GROCERY = /(dien may|dien thoai|di dong|noi that|vat lieu|xe may|o to|my pham|thoi trang|sach|thuoc|bebe|me va be|baby|kids)/;
 // Chuỗi siêu thị / cửa hàng tiện lợi. Tiệm tạp hóa nhỏ (tên chủ tiệm, số điện thoại) thì bỏ
-const GROCERY_CHAIN = /(co\.?op|bach hoa xanh|winmart|vinmart|circle k|ministop|familymart|7-eleven|gs25|satra|b's mart|shop ?& ?go|kingfood|emart|lotte|aeon|big c|go!|mm mega|mega market|tops market|finelife|annam|lanchi|nhu yeu pham|sieu thi|supermarket|mart)/;
+const GROCERY_CHAIN = /(co\.?op|bach hoa xanh|winmart|vinmart|circle k|ministop|familymart|7-eleven|gs25|satra|b's mart|shop ?& ?go|kingfood|emart|lotte|aeon|big c|go!|mm mega|mega market|tops market|finelife|annam|lanchi|nhu yeu pham|sieu thi|supermarket|mart\b)/;
 
 function classify(t) {
   const name = normalize(t.name);

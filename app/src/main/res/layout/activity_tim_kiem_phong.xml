@@ -112,13 +112,40 @@
                 android:textColor="@color/text_secondary"
                 android:textSize="12sp" />
 
-            <!-- Gợi ý khi gõ: phường/xã thật + địa chỉ có tọa độ (item_search_suggestion thêm từ code) -->
+            <!-- Đang gõ (từ 2 ký tự): một danh sách gợi ý gộp, thêm từ code (item_search_suggestion):
+                 phường/xã thật, trường học, địa chỉ cụ thể có tọa độ -->
             <LinearLayout
                 android:id="@+id/layout_places"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:visibility="gone" />
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:id="@+id/layout_typed_wards"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+
+                <LinearLayout
+                    android:id="@+id/layout_typed_schools"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+
+                <LinearLayout
+                    android:id="@+id/layout_typed_addresses"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+            </LinearLayout>
+
+            <!-- Chưa gõ: lối tắt, tìm kiếm gần đây, khu vực được quan tâm, gợi ý trường -->
+            <LinearLayout
+                android:id="@+id/layout_idle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
             <!-- "Phòng gần vị trí của tôi" (GPS, item_search_suggestion thêm từ code) -->
             <LinearLayout
@@ -162,83 +189,32 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
 
-            <!-- Section 3: Khu vực được quan tâm -->
+            <!-- Section 3: Khu vực được quan tâm = phường có nhiều phòng nhất trong tỉnh (chip thêm từ code) -->
             <TextView
+                android:id="@+id/tv_popular_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:text="@string/popular_areas_title"
                 android:textColor="@color/text_primary"
                 android:textSize="14sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
 
-            <LinearLayout
+            <HorizontalScrollView
+                android:id="@+id/scroll_popular"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:orientation="horizontal">
+                android:scrollbars="none"
+                android:visibility="gone">
 
-                <TextView
+                <LinearLayout
+                    android:id="@+id/layout_popular"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_chip_unselected"
-                    android:paddingHorizontal="18dp"
-                    android:paddingVertical="9dp"
-                    android:id="@+id/chip_area_q10"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:text="@string/area_quan_10"
-                    android:textColor="@color/text_primary"
-                    android:textSize="14sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:background="@drawable/bg_chip_unselected"
-                    android:paddingHorizontal="18dp"
-                    android:paddingVertical="9dp"
-                    android:id="@+id/chip_area_q3"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:text="@string/area_quan_3"
-                    android:textColor="@color/text_primary"
-                    android:textSize="14sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:background="@drawable/bg_chip_unselected"
-                    android:paddingHorizontal="18dp"
-                    android:paddingVertical="9dp"
-                    android:id="@+id/chip_area_binh_thanh"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:text="@string/area_binh_thanh"
-                    android:textColor="@color/text_primary"
-                    android:textSize="14sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_chip_unselected"
-                    android:paddingHorizontal="18dp"
-                    android:paddingVertical="9dp"
-                    android:id="@+id/chip_area_phu_nhuan"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:text="@string/area_phu_nhuan"
-                    android:textColor="@color/text_primary"
-                    android:textSize="14sp" />
-            </LinearLayout>
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
 
             <!-- Section 4: Gợi ý trường học -->
             <TextView
@@ -256,6 +232,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
+            </LinearLayout>
 
             <!-- Primary Action Button: Tìm phòng -->
             <RelativeLayout

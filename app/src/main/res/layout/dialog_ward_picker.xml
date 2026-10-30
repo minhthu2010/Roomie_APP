@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Hộp chọn phường/xã ở Bộ lọc: ô gõ để lọc không dấu + danh sách -->
+<!-- Hộp chọn phường/xã (hồ sơ: khu vực muốn tìm phòng): ô gõ để lọc không dấu + danh sách -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"

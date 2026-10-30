@@ -593,8 +593,10 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
         }
         myLocation.enableMyLocation();
         GeoPoint here = myLocation.getMyLocation();
+        // Nút này chỉ đưa bản đồ về chỗ bạn đứng; phòng trong vùng nhìn sẽ tự tải lại
         if (here != null) {
             map.getController().animateTo(here);
+            AppNotificationHelper.showInfo(this, getString(R.string.map_my_location_hint));
         } else {
             AppNotificationHelper.showInfo(this, getString(R.string.map_locating));
             myLocation.runOnFirstFix(() -> runOnUiThread(() -> {

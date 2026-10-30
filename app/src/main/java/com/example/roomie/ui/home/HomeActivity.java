@@ -53,6 +53,8 @@ public class HomeActivity extends AppCompatActivity {
     private int page = 1;
     private int loadedCount = 0;
     private boolean loading = false;
+    /** Tăng mỗi lần reload; kết quả của lần tải cũ hơn thì bỏ qua */
+    private int generation = 0;
 
     private TextView tvHeaderCity;
     private TextView tvSearchText;
@@ -102,6 +104,8 @@ public class HomeActivity extends AppCompatActivity {
             if (criteria.wardCode != null || criteria.area != null) criteria.clearLocation();
             reload();
         }));
+        // Lần đầu: tỉnh theo hồ sơ hoặc GPS (đổi xong thì tải lại danh sách)
+        ProvinceStore.initDefault(this, this::reload);
         tvSearchText = findViewById(R.id.tv_search_text);
         scrollChips = findViewById(R.id.scroll_active_chips);
         layoutChips = findViewById(R.id.layout_active_chips);
@@ -151,6 +155,9 @@ public class HomeActivity extends AppCompatActivity {
         btnLoadMore.setVisibility(View.GONE);
         tvFeedSubtitle.setText(R.string.feed_loading);
         bindHeader();
+        // Bỏ kết quả của lần tải trước còn đang chờ (vd. đổi tỉnh khi danh sách cũ chưa về)
+        generation++;
+        loading = false;
         loadPage();
     }
 
@@ -158,6 +165,7 @@ public class HomeActivity extends AppCompatActivity {
         if (loading) return;
         loading = true;
         btnLoadMore.setEnabled(false);
+        int requestGeneration = generation;
         Map<String, String> query = criteria.toQuery(page, PAGE_SIZE);
         // Feed / từ khóa chỉ trong tỉnh đang chọn (backend bỏ qua khi tìm quanh 1 điểm hoặc theo phường)
         query.put("provinceCode", ProvinceStore.code(this));
@@ -165,6 +173,7 @@ public class HomeActivity extends AppCompatActivity {
                 .enqueue(new ApiCallback<List<SearchModels.RoomCard>>(this) {
                     @Override
                     public void onSuccess(List<SearchModels.RoomCard> rooms) {
+                        if (requestGeneration != generation) return;
                         loading = false;
                         btnLoadMore.setEnabled(true);
                         int total = getMeta() != null ? getMeta().total : rooms.size();
@@ -180,6 +189,7 @@ public class HomeActivity extends AppCompatActivity {
 
                     @Override
                     public void onError(String message) {
+                        if (requestGeneration != generation) return;
                         loading = false;
                         btnLoadMore.setEnabled(true);
                         tvFeedSubtitle.setText("");

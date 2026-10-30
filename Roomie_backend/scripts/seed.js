@@ -173,6 +173,11 @@ const IDS = {
       `UPDATE user_profiles SET gender = 'female', birth_year = 2004, occupation = 'student',
               school_or_workplace = 'ĐH Kinh tế TP.HCM'
         WHERE user_id = $1 AND birth_year IS NULL`, [IDS.seeker]);
+    // Khu vực muốn tìm phòng của Mai Linh: Phường Xuân Hoà (gần ĐH Kinh tế), TP.HCM
+    await c.query(
+      `UPDATE user_profiles SET living_province_code = '79', living_ward_code = '27139',
+              living_area_text = 'Phường Xuân Hoà, TP. Hồ Chí Minh'
+        WHERE user_id = $1 AND living_province_code IS NULL`, [IDS.seeker]);
 
     // Câu trả lời bài test cho bộ câu hỏi đang phát hành (v2, 13 câu): question_key -> option_key.
     // Seeker gần giống phòng 1, khác nhiều phòng 3 để thấy điểm % chênh lệch.
