@@ -8,7 +8,7 @@ const PHOTON_URL = 'https://photon.komoot.io';
 const USER_AGENT = 'RoomieApp/1.0 (do an Roomie)';
 const CACHE_DAYS = 30;
 const VN_BBOX = '102.1,8.2,109.6,23.4';                 // minLon,minLat,maxLon,maxLat
-const DEFAULT_BIAS = { lat: 10.776, lon: 106.700 };      // ưu tiên kết quả gần trung tâm TP.HCM
+const DEFAULT_BIAS = { lat: 10.776, lon: 106.700 };      // chưa chọn tỉnh: ưu tiên gần trung tâm TP.HCM
 
 // "Phường Diên Hồng" -> "phuong dien hong" (bỏ dấu, kể cả "đ")
 function normalize(text) {
@@ -66,14 +66,21 @@ function toPlace(f) {
   };
 }
 
-// Gợi ý địa chỉ (số nhà, đường, địa danh) trong Việt Nam
-async function searchAddresses(q, { limit = 5, lat, lng } = {}) {
-  const key = `addr:${normalize(q)}:${limit}`;
+// Tâm tỉnh/thành (provinces.center_lat/lng, migration 006) để ưu tiên kết quả gần tỉnh người dùng chọn
+async function provinceBias(provinceCode) {
+  if (!provinceCode) return DEFAULT_BIAS;
+  const { rows } = await db.query(
+    'SELECT center_lat, center_lng FROM provinces WHERE province_code = $1', [provinceCode]);
+  const p = rows[0];
+  return p && p.center_lat != null ? { lat: p.center_lat, lon: p.center_lng } : DEFAULT_BIAS;
+}
+
+// Gợi ý địa chỉ (số nhà, đường, địa danh) trong Việt Nam, ưu tiên gần tỉnh đang chọn
+async function searchAddresses(q, { limit = 5, provinceCode } = {}) {
+  const key = `addr:${normalize(q)}:${limit}:${provinceCode || ''}`;
   return cached(key, async () => {
-    const data = await photon('/api/', {
-      q, limit: limit + 3, bbox: VN_BBOX,
-      lat: lat ?? DEFAULT_BIAS.lat, lon: lng ?? DEFAULT_BIAS.lon,
-    });
+    const bias = await provinceBias(provinceCode);
+    const data = await photon('/api/', { q, limit: limit + 3, bbox: VN_BBOX, lat: bias.lat, lon: bias.lon });
     const seen = new Set();
     return data.features
       .filter((f) => f.properties.countrycode === 'VN')
@@ -93,8 +100,11 @@ async function searchAddresses(q, { limit = 5, lat, lng } = {}) {
 
 async function listProvinces() {
   const { rows } = await db.query(
-    'SELECT province_code, province_name FROM provinces ORDER BY display_order, province_name');
-  return rows.map((r) => ({ code: r.province_code, name: r.province_name }));
+    `SELECT province_code, province_name, center_lat, center_lng FROM provinces
+      ORDER BY display_order, province_name`);
+  return rows.map((r) => ({
+    code: r.province_code, name: r.province_name, latitude: r.center_lat, longitude: r.center_lng,
+  }));
 }
 
 // Tìm phường/xã không dấu, có thể giới hạn trong 1 tỉnh

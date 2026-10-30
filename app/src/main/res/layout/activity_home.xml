@@ -25,10 +25,15 @@
             android:paddingTop="16dp"
             android:paddingBottom="16dp">
 
-            <!-- Top Header -->
+            <!-- Top Header: tỉnh/thành đang tìm, chạm để đổi -->
             <TextView
+                android:id="@+id/tv_header_city"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:paddingVertical="4dp"
                 android:text="@string/header_city"
                 android:textColor="@color/primary_maroon"
                 android:textSize="11sp"

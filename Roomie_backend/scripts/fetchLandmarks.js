@@ -1,22 +1,36 @@
-// Tải trường ĐH/CĐ, siêu thị, cửa hàng tiện lợi, bệnh viện, trạm xe buýt thật của TP.HCM
-// từ OpenStreetMap (Overpass API), lọc rồi ghi ra data/hcm-landmarks.json.
-// Chỉ cần chạy khi muốn cập nhật dữ liệu: npm run fetch:landmarks
-// Sau đó nạp vào DB: npm run import:landmarks (seed.js cũng tự nạp file này).
+// Tải trường ĐH/CĐ, chuỗi siêu thị / cửa hàng tiện lợi, bệnh viện, trạm xe buýt thật của cả nước
+// từ OpenStreetMap (Overpass API), lọc rồi ghi ra:
+//   data/vn-landmarks.json         địa điểm, mỗi cái gắn mã tỉnh/thành (provinceCode)
+//   data/vn-province-centers.json  tâm 34 tỉnh/thành (trung tâm hành chính) cho bản đồ / gợi ý địa chỉ
+// Chỉ cần chạy khi muốn cập nhật dữ liệu: npm run fetch:landmarks (mất vài phút, tải từng tỉnh)
+// Sau đó nạp vào DB: npm run import:admin && npm run import:landmarks (seed.js cũng tự nạp).
 const fs = require('fs');
 const path = require('path');
 
-const OUT_FILE = path.join(__dirname, '..', 'data', 'hcm-landmarks.json');
+const DATA_DIR = path.join(__dirname, '..', 'data');
+const OUT_FILE = path.join(DATA_DIR, 'vn-landmarks.json');
+const CENTERS_FILE = path.join(DATA_DIR, 'vn-province-centers.json');
+const ADMIN_FILE = path.join(DATA_DIR, 'vn-admin-units.json');
 const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
-// Ranh giới TP.HCM sau sáp nhập 01/07/2025 (gồm cả Bình Dương, Bà Rịa - Vũng Tàu): relation 1973756
-const AREA_ID = 3600000000 + 1973756;
+const USER_AGENT = 'RoomieApp/1.0 (student project)';
+// Nghỉ giữa các lần gọi để không vượt giới hạn của máy chủ Overpass cộng đồng
+const PAUSE_MS = 3000;
 
-const QUERY = `[out:json][timeout:180];
-area(${AREA_ID})->.hcm;
+// 34 tỉnh/thành (ranh giới sau 01/07/2025) và tâm hành chính / nhãn của từng tỉnh
+const PROVINCES_QUERY = `[out:json][timeout:120];
+area["ISO3166-1"="VN"][admin_level=2]->.vn;
+rel["admin_level"="4"]["boundary"="administrative"](area.vn)->.p;
+.p out body;
+node(r.p:"admin_centre");out;
+node(r.p:"label");out;`;
+
+const placesQuery = (relationId) => `[out:json][timeout:180];
+area(${3600000000 + relationId})->.p;
 (
-  nwr["amenity"~"^(university|college)$"]["name"](area.hcm);
-  nwr["amenity"="hospital"]["name"](area.hcm);
-  nwr["shop"~"^(supermarket|convenience)$"]["name"](area.hcm);
-  node["highway"="bus_stop"]["name"](area.hcm);
+  nwr["amenity"~"^(university|college)$"]["name"](area.p);
+  nwr["amenity"="hospital"]["name"](area.p);
+  nwr["shop"~"^(supermarket|convenience)$"]["name"](area.p);
+  node["highway"="bus_stop"]["name"](area.p);
 );
 out center tags;`;
 
@@ -78,15 +92,45 @@ function distanceM(a, b) {
 // (trạm xe buýt 2 chiều đường, trường vừa vẽ điểm vừa vẽ khuôn viên)
 const SAME_PLACE_M = { university: 500, hospital: 300, supermarket: 60, bus_stop: 120 };
 
-async function fetchLandmarks() {
-  const res = await fetch(OVERPASS_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'User-Agent': 'RoomieApp/1.0 (student project)' },
-    body: new URLSearchParams({ data: QUERY }),
-  });
-  if (!res.ok) throw new Error(`Overpass trả về HTTP ${res.status}`);
-  const { elements } = await res.json();
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+/** Gọi Overpass; máy chủ bận (429/504) thì chờ rồi thử lại */
+async function overpass(query) {
+  for (let attempt = 1; ; attempt++) {
+    const res = await fetch(OVERPASS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'User-Agent': USER_AGENT },
+      body: new URLSearchParams({ data: query }),
+    });
+    if (res.ok) return (await res.json()).elements;
+    if (attempt >= 4 || ![429, 502, 503, 504].includes(res.status)) throw new Error(`Overpass trả về HTTP ${res.status}`);
+    await sleep(PAUSE_MS * attempt * 5);
+  }
+}
+
+/** 34 tỉnh/thành: mã hành chính (khớp tên với vn-admin-units.json), relation OSM, tâm */
+async function fetchProvinces() {
+  const units = require(ADMIN_FILE);
+  const codeByName = new Map(units.map((u) => [normalize(u.FullName), u.Code]));
+  const elements = await overpass(PROVINCES_QUERY);
+  const nodes = new Map(elements.filter((e) => e.type === 'node').map((n) => [n.id, n]));
+  const provinces = [];
+  for (const r of elements.filter((e) => e.type === 'relation')) {
+    const code = codeByName.get(normalize(r.tags.name));
+    if (!code) throw new Error(`Không khớp được tỉnh "${r.tags.name}" với dữ liệu hành chính`);
+    const m = r.members.find((x) => x.type === 'node' && x.role === 'admin_centre')
+      || r.members.find((x) => x.type === 'node' && x.role === 'label');
+    const center = m && nodes.get(m.ref);
+    if (!center) throw new Error(`Tỉnh "${r.tags.name}" không có tâm trên OSM`);
+    provinces.push({ code, name: r.tags.name, relation: r.id,
+      lat: Math.round(center.lat * 1e5) / 1e5, lng: Math.round(center.lon * 1e5) / 1e5 });
+  }
+  if (provinces.length !== units.length) throw new Error(`OSM có ${provinces.length} tỉnh, dữ liệu hành chính có ${units.length}`);
+  return provinces.sort((a, b) => a.code.localeCompare(b.code));
+}
+
+/** Địa điểm trong 1 tỉnh, đã lọc và gộp điểm trùng */
+function pickPlaces(elements, provinceCode) {
   const kept = [];
   const byKey = new Map();   // "loại|tên chuẩn hóa" -> các điểm đã giữ
   // Khuôn viên (way/relation) trước điểm (node): trường có cả 2 thì giữ khuôn viên
@@ -102,12 +146,13 @@ async function fetchLandmarks() {
     const item = {
       ref: `${e.type[0]}${e.id}`,
       type,
+      provinceCode,
       name: t.name.trim().slice(0, 180),
-      shortName: (t.short_name || t['name:short'] || '').trim().slice(0, 60) || null,
-      subtitle: subtitle(type, t),
-      address: address(t),
-      lat: Math.round(lat * 1e7) / 1e7,
-      lng: Math.round(lng * 1e7) / 1e7,
+      shortName: (t.short_name || t['name:short'] || '').trim().slice(0, 60) || undefined,
+      subtitle: subtitle(type, t) || undefined,
+      address: address(t) || undefined,
+      lat: Math.round(lat * 1e6) / 1e6,
+      lng: Math.round(lng * 1e6) / 1e6,
     };
     const key = `${type}|${normalize(item.name)}`;
     const same = byKey.get(key) || [];
@@ -116,22 +161,41 @@ async function fetchLandmarks() {
     byKey.set(key, same);
     kept.push(item);
   }
-  kept.sort((a, b) => a.type.localeCompare(b.type) || a.name.localeCompare(b.name, 'vi'));
   return kept;
+}
+
+async function fetchLandmarks() {
+  const provinces = await fetchProvinces();
+  const items = [];
+  const seen = new Set();   // điểm nằm trên ranh giới 2 tỉnh chỉ giữ 1 lần
+  for (const p of provinces) {
+    await sleep(PAUSE_MS);
+    const places = pickPlaces(await overpass(placesQuery(p.relation)), p.code).filter((i) => !seen.has(i.ref));
+    places.forEach((i) => seen.add(i.ref));
+    items.push(...places);
+    console.log(`  ${p.name}: ${places.length} địa điểm`);
+  }
+  items.sort((a, b) => a.provinceCode.localeCompare(b.provinceCode) || a.type.localeCompare(b.type)
+    || a.name.localeCompare(b.name, 'vi'));
+  return { provinces, items };
 }
 
 module.exports = { fetchLandmarks };
 
 if (require.main === module) {
   fetchLandmarks()
-    .then((items) => {
-      // Mỗi địa điểm 1 dòng cho dễ xem thay đổi trên git
-      const body = items.map((i) => JSON.stringify(i)).join(',\n');
+    .then(({ provinces, items }) => {
+      const fetchedAt = new Date().toISOString().slice(0, 10);
+      const source = '© OpenStreetMap contributors (ODbL)';
+      // Mỗi dòng 1 mục cho dễ xem thay đổi trên git
+      const lines = (arr) => arr.map((i) => JSON.stringify(i)).join(',\n');
+      fs.writeFileSync(CENTERS_FILE,
+        `{"source":"${source}","fetchedAt":"${fetchedAt}",\n"provinces":[\n${lines(provinces)}\n]}\n`);
       fs.writeFileSync(OUT_FILE,
-        `{"source":"© OpenStreetMap contributors (ODbL)","fetchedAt":"${new Date().toISOString().slice(0, 10)}",\n"items":[\n${body}\n]}\n`);
+        `{"source":"${source}","fetchedAt":"${fetchedAt}",\n"items":[\n${lines(items)}\n]}\n`);
       const count = {};
       for (const i of items) count[i.type] = (count[i.type] || 0) + 1;
-      console.log(`Đã ghi ${items.length} địa điểm vào data/hcm-landmarks.json`, count);
+      console.log(`Đã ghi ${provinces.length} tâm tỉnh/thành và ${items.length} địa điểm`, count);
     })
     .catch((err) => { console.error(err); process.exit(1); });
 }
