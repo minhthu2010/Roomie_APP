@@ -223,6 +223,50 @@
         </LinearLayout>
         </LinearLayout>
 
+        <!-- Khu vực muốn tìm phòng (chọn trước để gợi ý trường đúng tỉnh) -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="@string/label_living_area"
+            android:textColor="@color/roomie_text_primary"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/bg_edit_text"
+            android:padding="14dp">
+
+            <ImageView
+                android:id="@+id/iv_area_loc_icon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="8dp"
+                android:contentDescription="@string/label_living_area"
+                android:src="@drawable/ic_location_on"
+                app:tint="@color/roomie_text_secondary" />
+
+            <EditText
+                android:id="@+id/et_edit_living_area"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toEndOf="@id/iv_area_loc_icon"
+                android:autofillHints="postalAddress"
+                android:background="@null"
+                android:hint="@string/label_living_area"
+                android:importantForAutofill="no"
+                android:inputType="textPostalAddress"
+                android:text="@string/sample_living_area"
+                android:textColor="@color/roomie_text_primary"
+                android:textSize="15sp" />
+        </RelativeLayout>
+
         <!-- Field 3: Trường học / nơi làm việc -->
         <TextView
             android:layout_width="match_parent"
@@ -294,50 +338,6 @@
             android:text="@string/sample_about_me"
             android:textColor="@color/roomie_text_primary"
             android:textSize="14sp" />
-
-        <!-- Field 5: Khu vực sinh sống -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="@string/label_living_area"
-            android:textColor="@color/roomie_text_primary"
-            android:textSize="15sp"
-            android:textStyle="bold" />
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/bg_edit_text"
-            android:padding="14dp">
-
-            <ImageView
-                android:id="@+id/iv_area_loc_icon"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="8dp"
-                android:contentDescription="@string/label_living_area"
-                android:src="@drawable/ic_location_on"
-                app:tint="@color/roomie_text_secondary" />
-
-            <EditText
-                android:id="@+id/et_edit_living_area"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_toEndOf="@id/iv_area_loc_icon"
-                android:autofillHints="postalAddress"
-                android:background="@null"
-                android:hint="@string/label_living_area"
-                android:importantForAutofill="no"
-                android:inputType="textPostalAddress"
-                android:text="@string/sample_living_area"
-                android:textColor="@color/roomie_text_primary"
-                android:textSize="15sp" />
-        </RelativeLayout>
 
         <!-- Ngân sách & Ngày dọn vào -->
         <LinearLayout

@@ -41,8 +41,11 @@ class TokenAuthenticator implements Authenticator {
     public Request authenticate(@Nullable Route route, @NonNull Response response) throws IOException {
         Request request = response.request();
         String sentHeader = request.header("Authorization");
-        // Request không gắn token (đăng nhập sai mật khẩu...) hoặc đã thử lại một lần
-        if (sentHeader == null || request.url().encodedPath().contains("/auth/") || response.priorResponse() != null) {
+        // Không refresh khi: request không gắn token, đã thử lại một lần, hoặc là API đăng nhập/đăng ký/refresh
+        // (401 ở đó nghĩa là sai mật khẩu, mã...). /auth/me vẫn phải refresh: Splash dùng nó để kiểm tra phiên.
+        String path = request.url().encodedPath();
+        boolean authEndpoint = path.contains("/auth/") && !path.endsWith("/auth/me");
+        if (sentHeader == null || authEndpoint || response.priorResponse() != null) {
             return null;
         }
 
