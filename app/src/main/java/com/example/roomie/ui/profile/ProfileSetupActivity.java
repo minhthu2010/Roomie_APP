@@ -41,6 +41,7 @@ public class ProfileSetupActivity extends AppCompatActivity {
     private String occupation;
     private String gender;
     private Integer birthYear;
+    private PlacePickers.Area area;
 
     private AccountsApi api;
     private ImageView imgAvatar;
@@ -116,10 +117,12 @@ public class ProfileSetupActivity extends AppCompatActivity {
                 })
                 .show());
 
-        layoutSpinnerLoc.setOnClickListener(v -> new AlertDialog.Builder(this)
-                .setTitle("Chọn khu vực")
-                .setItems(ProfileUi.AREAS, (dialog, which) -> tvValLoc.setText(ProfileUi.AREAS[which]))
-                .show());
+        // Khu vực muốn tìm phòng: tỉnh/thành -> phường/xã thật (API của người C)
+        layoutSpinnerLoc.setOnClickListener(v -> PlacePickers.pickArea(this,
+                area != null ? area.provinceCode : null, picked -> {
+                    area = picked;
+                    tvValLoc.setText(picked.label());
+                }));
 
         layoutSpinnerGender.setOnClickListener(v -> new AlertDialog.Builder(this)
                 .setTitle("Chọn giới tính")
@@ -186,7 +189,8 @@ public class ProfileSetupActivity extends AppCompatActivity {
                 occupation = p.occupation;
                 String occLabel = ProfileUi.label(ProfileUi.OCCUPATION_LABELS, ProfileUi.OCCUPATION_VALUES, p.occupation);
                 if (occLabel != null) tvValOcc.setText(occLabel);
-                if (p.livingAreaText != null) tvValLoc.setText(p.livingAreaText);
+                area = ProfileUi.areaOf(p);
+                if (area != null) tvValLoc.setText(area.label());
                 gender = p.gender;
                 String genderLabel = ProfileUi.label(ProfileUi.GENDER_LABELS, ProfileUi.GENDER_VALUES, p.gender);
                 if (genderLabel != null) tvValGender.setText(genderLabel);
@@ -225,8 +229,10 @@ public class ProfileSetupActivity extends AppCompatActivity {
         body.occupation = occupation;
         body.gender = gender;
         body.birthYear = birthYear;
-        String area = tvValLoc.getText().toString().trim();
-        if (!area.isEmpty()) body.livingAreaText = area;
+        if (area != null) {
+            body.livingProvinceCode = area.provinceCode;
+            body.livingWardCode = area.wardCode != null ? area.wardCode : "";
+        }
         body.bio = etBio.getText().toString().trim();
         if (budget != null) {
             body.budgetMin = budget[0];
