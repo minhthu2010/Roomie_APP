@@ -14,6 +14,9 @@ val localProps = Properties().apply {
 val apiBaseUrl: String = localProps.getProperty("roomie.apiBaseUrl", "http://10.0.2.2:3000/api/v1/")
 // User giả lập khi chưa có đăng nhập thật (backend bật AUTH_DEV_BYPASS). Mặc định: seeker trong seed.
 val devUserId: String = localProps.getProperty("roomie.devUserId", "00000000-0000-0000-0000-000000000003")
+// Đăng nhập Google: Web client ID trên Google Cloud (cùng giá trị GOOGLE_CLIENT_IDS ở backend .env)
+//   roomie.googleWebClientId=xxxx.apps.googleusercontent.com
+val googleWebClientId: String = localProps.getProperty("roomie.googleWebClientId", "")
 
 android {
     namespace = "com.example.roomie"
@@ -31,6 +34,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "BASE_URL", "\"$apiBaseUrl\"")
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"$googleWebClientId\"")
     }
 
     buildTypes {
@@ -63,6 +67,9 @@ dependencies {
     implementation(libs.okhttp.logging)
     implementation(libs.glide)
     implementation(libs.osmdroid)
+    implementation(libs.credentials)
+    implementation(libs.credentials.play.services)
+    implementation(libs.googleid)
     testImplementation(libs.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.ext.junit)

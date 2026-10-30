@@ -34,6 +34,10 @@ public interface AccountsApi {
     @POST("auth/login")
     Call<ApiResponse<AccountModels.AuthResult>> login(@Body AccountModels.LoginRequest body);
 
+    /** "Tiếp tục với Google": idToken lấy từ Credential Manager */
+    @POST("auth/google")
+    Call<ApiResponse<AccountModels.AuthResult>> loginWithGoogle(@Body AccountModels.GoogleLoginRequest body);
+
     @POST("auth/refresh")
     Call<ApiResponse<AccountModels.AuthResult>> refresh(@Body AccountModels.RefreshRequest body);
 

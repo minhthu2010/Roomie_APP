@@ -36,23 +36,32 @@ async function loginWithGoogle({ idToken, deviceLabel }) {
 
     if (!user) {
       const byEmail = await c.query(
-        'SELECT user_id, account_status FROM users WHERE LOWER(email) = $1 AND deleted_at IS NULL', [email]);
+        `SELECT user_id, account_status, email_verified_at FROM users
+          WHERE LOWER(email) = $1 AND deleted_at IS NULL FOR UPDATE`, [email]);
       user = byEmail.rows[0];
-      if (user) {
-        // Google đã xác minh email nên tài khoản đăng ký dở cũng coi như đã xác thực
-        await c.query('UPDATE users SET email_verified_at = COALESCE(email_verified_at, NOW()) WHERE user_id = $1',
-          [user.user_id]);
-      } else {
+      if (user && !user.email_verified_at) {
+        // Tài khoản đăng ký dở (chưa xác thực OTP) có thể do người khác tạo bằng email này:
+        // bỏ mật khẩu cũ để người đó không đăng nhập được, chủ email đặt lại mật khẩu nếu cần.
+        await c.query(
+          'UPDATE users SET email_verified_at = NOW(), password_hash = NULL WHERE user_id = $1', [user.user_id]);
+        await c.query(
+          `UPDATE verification_challenges SET consumed_at = NOW()
+            WHERE user_id = $1 AND consumed_at IS NULL`, [user.user_id]);
+      } else if (!user) {
         const { rows } = await c.query(
           `INSERT INTO users (email, full_name, display_name, avatar_url, email_verified_at)
            VALUES ($1, $2, $2, $3, NOW()) RETURNING user_id, account_status`,
           [email, g.name || email.split('@')[0], g.picture || null]);
         user = rows[0];
       }
-      await c.query(
+      const linkedNow = await c.query(
         `INSERT INTO auth_identities (user_id, provider, provider_subject, provider_email)
          VALUES ($1, 'google', $2, $3) ON CONFLICT (user_id, provider) DO NOTHING`,
         [user.user_id, g.sub, email]);
+      // Tài khoản này đã gắn với một tài khoản Google khác: không cho đăng nhập chéo
+      if (linkedNow.rowCount === 0) {
+        throw new AppError(409, 'GOOGLE_ALREADY_LINKED', 'Tài khoản này đã liên kết với một tài khoản Google khác');
+      }
     }
     userId = user.user_id;
     if (user.account_status !== 'active') throw new AppError(403, 'ACCOUNT_SUSPENDED', 'Tài khoản của bạn đã bị khóa');

@@ -57,6 +57,15 @@ public final class AccountModels {
         }
     }
 
+    public static class GoogleLoginRequest {
+        public final String idToken;
+        public final String deviceLabel = deviceLabel();
+
+        public GoogleLoginRequest(String idToken) {
+            this.idToken = idToken;
+        }
+    }
+
     public static class RefreshRequest {
         public final String refreshToken;
 
