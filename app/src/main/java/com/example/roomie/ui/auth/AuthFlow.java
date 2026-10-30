@@ -23,6 +23,7 @@ public final class AuthFlow {
     }
 
     public static void openApp(Activity activity, AccountModels.User user) {
+        if (user != null) new SessionManager(activity).saveDisplayName(user.displayName);
         Intent intent;
         if (user != null && !user.profileCompleted) {
             intent = new Intent(activity, ProfileSetupActivity.class);
