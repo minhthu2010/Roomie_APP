@@ -85,8 +85,7 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         if (btnGoogleLogin != null) {
-            btnGoogleLogin.setOnClickListener(v ->
-                    AppNotificationHelper.showInfo(LoginActivity.this, "Đăng nhập Google sẽ có trong bản cập nhật tới"));
+            btnGoogleLogin.setOnClickListener(v -> loginWithGoogle(btnGoogleLogin));
         }
 
         // Forgot password click
@@ -104,6 +103,41 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(intent);
             });
         }
+    }
+
+    // Chọn tài khoản Google trên máy -> gửi idToken cho backend -> vào app như đăng nhập thường
+    private void loginWithGoogle(View button) {
+        if (!GoogleSignIn.isConfigured()) {
+            AppNotificationHelper.showError(this, "Chưa cấu hình roomie.googleWebClientId trong local.properties");
+            return;
+        }
+        button.setEnabled(false);
+        GoogleSignIn.start(this, new GoogleSignIn.Listener() {
+            @Override
+            public void onIdToken(String idToken) {
+                ApiClient.create(LoginActivity.this, AccountsApi.class)
+                        .loginWithGoogle(new AccountModels.GoogleLoginRequest(idToken))
+                        .enqueue(new ApiCallback<AccountModels.AuthResult>(LoginActivity.this) {
+                            @Override
+                            public void onSuccess(AccountModels.AuthResult result) {
+                                AppNotificationHelper.showSuccess(LoginActivity.this, "Đăng nhập thành công!");
+                                AuthFlow.onAuthenticated(LoginActivity.this, result);
+                            }
+
+                            @Override
+                            public void onError(String message) {
+                                button.setEnabled(true);
+                                AppNotificationHelper.showError(LoginActivity.this, message);
+                            }
+                        });
+            }
+
+            @Override
+            public void onError(String message) {
+                button.setEnabled(true);
+                if (message != null) AppNotificationHelper.showError(LoginActivity.this, message);
+            }
+        });
     }
 
     private void login(AppCompatButton button, String account, String password) {
