@@ -41,6 +41,7 @@
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/tv_edit_change_avatar"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:clickable="true"
@@ -127,6 +128,100 @@
                 android:textColor="@color/roomie_text_primary"
                 android:textSize="15sp" />
         </RelativeLayout>
+
+        <!-- Giới tính & Năm sinh -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="@string/label_gender"
+                android:textColor="@color/roomie_text_primary"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_edit_text"
+                android:padding="14dp">
+
+                <ImageView
+                    android:id="@+id/iv_gender_icon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:contentDescription="@string/label_gender"
+                    android:src="@drawable/ic_arrow_down" />
+
+                <TextView
+                    android:id="@+id/tv_edit_gender"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toStartOf="@id/iv_gender_icon"
+                    android:hint="@string/hint_choose"
+                    android:textColor="@color/roomie_text_primary"
+                    android:textColorHint="@color/roomie_text_secondary"
+                    android:textSize="15sp" />
+            </RelativeLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="@string/label_birth_year"
+                android:textColor="@color/roomie_text_primary"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_edit_text"
+                android:padding="14dp">
+
+                <ImageView
+                    android:id="@+id/iv_birth_year_icon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:contentDescription="@string/label_birth_year"
+                    android:src="@drawable/ic_arrow_down" />
+
+                <TextView
+                    android:id="@+id/tv_edit_birth_year"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toStartOf="@id/iv_birth_year_icon"
+                    android:hint="@string/hint_choose"
+                    android:textColor="@color/roomie_text_primary"
+                    android:textColorHint="@color/roomie_text_secondary"
+                    android:textSize="15sp" />
+            </RelativeLayout>
+        </LinearLayout>
+        </LinearLayout>
 
         <!-- Field 3: Trường học / nơi làm việc -->
         <TextView
@@ -243,6 +338,135 @@
                 android:textColor="@color/roomie_text_primary"
                 android:textSize="15sp" />
         </RelativeLayout>
+
+        <!-- Ngân sách & Ngày dọn vào -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="@string/label_budget"
+                android:textColor="@color/roomie_text_primary"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+            <EditText
+                android:id="@+id/et_edit_budget"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autofillHints="none"
+                android:background="@drawable/bg_edit_text"
+                android:hint="@string/hint_budget"
+                android:importantForAutofill="no"
+                android:inputType="text"
+                android:padding="14dp"
+                android:textColor="@color/roomie_text_primary"
+                android:textColorHint="@color/roomie_text_secondary"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="@string/label_move_in_date"
+                android:textColor="@color/roomie_text_primary"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_edit_text"
+                android:padding="14dp">
+
+                <ImageView
+                    android:id="@+id/iv_move_in_date_icon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:contentDescription="@string/label_move_in_date"
+                    android:src="@drawable/ic_calendar" />
+
+                <TextView
+                    android:id="@+id/tv_edit_move_in_date"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toStartOf="@id/iv_move_in_date_icon"
+                    android:hint="@string/hint_choose"
+                    android:textColor="@color/roomie_text_primary"
+                    android:textColorHint="@color/roomie_text_secondary"
+                    android:textSize="15sp" />
+            </RelativeLayout>
+        </LinearLayout>
+        </LinearLayout>
+
+        <!-- Bạn đang muốn tìm gì -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="@string/label_looking_for"
+            android:textColor="@color/roomie_text_primary"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/btn_edit_pill_find_room"
+                android:layout_width="wrap_content"
+                android:layout_height="42dp"
+                android:background="@drawable/bg_pill_unselected"
+                android:clickable="true"
+                android:focusable="true"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:paddingHorizontal="16dp"
+                android:text="@string/opt_find_room"
+                android:textColor="@color/text_title"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/btn_edit_pill_find_roommate"
+                android:layout_width="wrap_content"
+                android:layout_height="42dp"
+                android:layout_marginStart="10dp"
+                android:background="@drawable/bg_pill_unselected"
+                android:clickable="true"
+                android:focusable="true"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:paddingHorizontal="16dp"
+                android:text="@string/opt_find_roommate"
+                android:textColor="@color/text_title"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
         <!-- Disclaimer Note -->
         <TextView
