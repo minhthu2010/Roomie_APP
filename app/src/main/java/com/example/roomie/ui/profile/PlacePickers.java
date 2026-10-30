@@ -99,6 +99,7 @@ final class PlacePickers {
         EditText edtFilter = content.findViewById(R.id.edt_ward_filter);
         TextView tvStatus = content.findViewById(R.id.tv_ward_status);
         ListView list = content.findViewById(R.id.list_wards);
+        edtFilter.setHint(R.string.ward_search_hint);
 
         List<PlaceModels.Ward> all = new ArrayList<>();
         List<PlaceModels.Ward> shown = new ArrayList<>();
