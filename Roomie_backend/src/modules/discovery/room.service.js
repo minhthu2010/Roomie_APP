@@ -120,13 +120,21 @@ async function getNearby(viewerId, postId, { radiusKm, limit }) {
   if (r.latitude == null) {
     return { postId, title: r.title, addressText: r.street_address, latitude: null, longitude: null, places: [] };
   }
-  // Khoảng cách tính từ tọa độ thật; app chỉ nhận tọa độ gần đúng của phòng
+  // Khoảng cách tính từ tọa độ thật; app chỉ nhận tọa độ gần đúng của phòng.
+  // Mỗi loại lấy tối đa 2 địa điểm gần nhất, không thì danh sách toàn trạm xe buýt / cửa hàng tiện lợi.
   const distance = HAVERSINE_KM('$1', '$2', 'l.latitude', 'l.longitude');
   const { rows } = await db.query(
-    `SELECT l.landmark_id, l.landmark_type, l.name, l.short_name, l.subtitle, l.address_text,
-            l.latitude, l.longitude, ${distance} AS distance_km
-       FROM landmarks l
-      WHERE l.is_active AND ${distance} <= $3
+    `SELECT * FROM (
+       SELECT l.landmark_id, l.landmark_type, l.name, l.short_name, l.subtitle, l.address_text,
+              l.latitude, l.longitude, ${distance} AS distance_km,
+              ROW_NUMBER() OVER (PARTITION BY l.landmark_type ORDER BY ${distance}) AS type_rank
+         FROM landmarks l
+        WHERE l.is_active
+          AND l.latitude BETWEEN $1 - $3 / 111.0 AND $1 + $3 / 111.0
+          AND l.longitude BETWEEN $2 - $3 / 109.0 AND $2 + $3 / 109.0
+          AND ${distance} <= $3
+     ) near
+      WHERE type_rank <= 2
       ORDER BY distance_km
       LIMIT $4`, [r.latitude, r.longitude, radiusKm, limit]);
   const area = [r.street_address, r.district_legacy || r.ward_name].filter(Boolean).join(', ');
