@@ -40,6 +40,7 @@ import com.example.roomie.ui.map.MapSupport;
 import com.example.roomie.ui.room.ChiTietPhongActivity;
 import com.example.roomie.ui.room.ContactActions;
 import com.example.roomie.ui.saved.SaveToggle;
+import com.example.roomie.ui.search.ProvinceStore;
 import com.example.roomie.ui.search.RoomFormat;
 import com.example.roomie.ui.search.SearchActivity;
 import com.example.roomie.ui.search.SearchCriteria;
@@ -77,7 +78,6 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
         return new Intent(context, BanDoGiaPhongActivity.class).putExtra(SearchCriteria.EXTRA, criteria);
     }
 
-    private static final GeoPoint HCMC_CENTER = new GeoPoint(10.7790, 106.6850);
     private static final double DEFAULT_ZOOM = 13.0;
     private static final long RELOAD_DELAY_MS = 400;
     private static final int HIGH_MATCH = 80;
@@ -307,7 +307,9 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
             }
         });
         map.getController().setZoom(DEFAULT_ZOOM);
-        map.getController().setCenter(HCMC_CENTER);
+        // Mở ở tâm tỉnh/thành đang chọn
+        PlaceModels.Province province = ProvinceStore.get(this);
+        map.getController().setCenter(new GeoPoint(province.latitude, province.longitude));
         // Có địa chỉ / trường / phường đang tìm thì nhảy tới đó
         moveToSearchLocation();
         scheduleReload(0);

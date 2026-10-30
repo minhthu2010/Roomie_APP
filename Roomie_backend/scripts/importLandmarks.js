@@ -1,29 +1,30 @@
-// Nạp trường ĐH/CĐ, siêu thị, bệnh viện, trạm xe buýt thật (data/hcm-landmarks.json) vào bảng landmarks.
-// Chạy riêng: npm run import:landmarks   (seed.js cũng gọi hàm này)
+// Nạp trường ĐH/CĐ, siêu thị, bệnh viện, trạm xe buýt thật của cả nước (data/vn-landmarks.json) vào bảng landmarks.
+// Chạy riêng: npm run import:landmarks   (seed.js cũng gọi hàm này; cần chạy import:admin trước)
 // Chạy lại nhiều lần được: cập nhật theo mã OSM; địa điểm không còn trong file thì ẩn (is_active = false).
 const path = require('path');
 
-const DATA_FILE = path.join(__dirname, '..', 'data', 'hcm-landmarks.json');
-const PROVINCE_CODE = '79';
+const DATA_FILE = path.join(__dirname, '..', 'data', 'vn-landmarks.json');
 // Địa điểm mẫu cũ đang được bài đăng / hồ sơ trỏ tới: chuyển sang địa điểm thật cùng loại gần nhất trong bán kính này
 const REMAP_RADIUS_KM = 1.5;
 
 async function importLandmarks(c) {
   const { items } = require(DATA_FILE);
-  const col = (key) => items.map((i) => i[key]);
+  // Trường không có trong file (shortName, subtitle, address) -> NULL
+  const col = (key) => items.map((i) => i[key] ?? null);
   const refs = items.map((i) => `osm:${i.ref}`);
 
   await c.query(
     `INSERT INTO landmarks (source_ref, landmark_type, name, short_name, subtitle, address_text,
                             province_code, latitude, longitude, is_active)
-     SELECT ref, type, name, short_name, subtitle, address, $1, lat, lng, TRUE
-       FROM unnest($2::text[], $3::text[], $4::text[], $5::text[], $6::text[], $7::text[], $8::numeric[], $9::numeric[])
-            AS t(ref, type, name, short_name, subtitle, address, lat, lng)
+     SELECT ref, type, name, short_name, subtitle, address, province, lat, lng, TRUE
+       FROM unnest($1::text[], $2::text[], $3::text[], $4::text[], $5::text[], $6::text[], $7::text[],
+                   $8::numeric[], $9::numeric[])
+            AS t(ref, type, name, short_name, subtitle, address, province, lat, lng)
      ON CONFLICT (source_ref) WHERE source_ref IS NOT NULL DO UPDATE SET
        landmark_type = EXCLUDED.landmark_type, name = EXCLUDED.name, short_name = EXCLUDED.short_name,
-       subtitle = EXCLUDED.subtitle, address_text = EXCLUDED.address_text,
+       subtitle = EXCLUDED.subtitle, address_text = EXCLUDED.address_text, province_code = EXCLUDED.province_code,
        latitude = EXCLUDED.latitude, longitude = EXCLUDED.longitude, is_active = TRUE`,
-    [PROVINCE_CODE, refs, col('type'), col('name'), col('shortName'), col('subtitle'), col('address'),
+    [refs, col('type'), col('name'), col('shortName'), col('subtitle'), col('address'), col('provinceCode'),
      col('lat'), col('lng')]);
   await c.query(
     `UPDATE landmarks SET is_active = FALSE

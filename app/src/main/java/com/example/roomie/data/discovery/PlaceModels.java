@@ -32,6 +32,14 @@ public final class PlaceModels {
         public String kind;
     }
 
+    /** GET /admin-units/provinces: tỉnh/thành + tâm (trung tâm hành chính) */
+    public static class Province {
+        public String code;
+        public String name;
+        public Double latitude;
+        public Double longitude;
+    }
+
     /** GET /admin-units/wards/{code}/center (tọa độ có thể null nếu không tra được) */
     public static class WardCenter {
         public String code;

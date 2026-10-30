@@ -52,9 +52,9 @@ public class SearchActivity extends AppCompatActivity {
     private static final long SUGGEST_DELAY_MS = 300;
     private static final long FRESH_LOCATION_MS = 5 * 60 * 1000;
     private static final long LOCATE_TIMEOUT_MS = 15 * 1000;
-    // Khung bao TP.HCM sau sáp nhập (gồm Bình Dương, Bà Rịa - Vũng Tàu, Côn Đảo)
-    private static final double HCMC_MIN_LAT = 8.3, HCMC_MAX_LAT = 11.55;
-    private static final double HCMC_MIN_LNG = 105.95, HCMC_MAX_LNG = 108.5;
+    // Khung bao Việt Nam (gồm Hoàng Sa, Trường Sa): ngoài khung này thì chưa có phòng
+    private static final double VN_MIN_LAT = 7.5, VN_MAX_LAT = 23.5;
+    private static final double VN_MIN_LNG = 102.1, VN_MAX_LNG = 117.5;
 
     private final ActivityResultLauncher<String[]> locationPermission = registerForActivityResult(
             new ActivityResultContracts.RequestMultiplePermissions(), granted -> {
@@ -187,7 +187,7 @@ public class SearchActivity extends AppCompatActivity {
             criteria.area = area;
             RecentSearchStore.Entry e = new RecentSearchStore.Entry();
             e.title = area;
-            e.subtitle = getString(R.string.search_recent_area_sub);
+            e.subtitle = getString(R.string.search_recent_area_sub, ProvinceStore.shortName(ProvinceStore.get(this).name));
             e.area = area;
             recentStore.add(e);
             finishWithCriteria();
@@ -334,7 +334,7 @@ public class SearchActivity extends AppCompatActivity {
     private void searchNear(Location location) {
         double lat = location.getLatitude();
         double lng = location.getLongitude();
-        if (lat < HCMC_MIN_LAT || lat > HCMC_MAX_LAT || lng < HCMC_MIN_LNG || lng > HCMC_MAX_LNG) {
+        if (lat < VN_MIN_LAT || lat > VN_MAX_LAT || lng < VN_MIN_LNG || lng > VN_MAX_LNG) {
             AppNotificationHelper.showInfo(this, getString(R.string.search_near_me_outside));
             return;
         }
@@ -358,7 +358,7 @@ public class SearchActivity extends AppCompatActivity {
         layoutPlaces.setVisibility(View.VISIBLE);
         layoutPlaces.removeAllViews();
         layoutPlaces.addView(sectionNote(getString(R.string.places_searching)));
-        Call<ApiResponse<PlaceModels.Suggest>> call = api.suggestPlaces(q);
+        Call<ApiResponse<PlaceModels.Suggest>> call = api.suggestPlaces(q, ProvinceStore.code(this));
         placesCall = call;
         call.enqueue(new ApiCallback<PlaceModels.Suggest>(this) {
             @Override
@@ -396,10 +396,10 @@ public class SearchActivity extends AppCompatActivity {
         });
     }
 
-    /** 4 chip "Khu vực được quan tâm" = 4 phường thật có nhiều phòng nhất; lỗi thì giữ chip quận cũ */
+    /** 4 chip "Khu vực được quan tâm" = 4 phường thật có nhiều phòng nhất trong tỉnh đang chọn; lỗi thì giữ chip quận cũ */
     private void loadTopWards() {
         int[] chipIds = {R.id.chip_area_q10, R.id.chip_area_q3, R.id.chip_area_binh_thanh, R.id.chip_area_phu_nhuan};
-        api.getWards("79", null, chipIds.length).enqueue(new ApiCallback<List<PlaceModels.Ward>>(this) {
+        api.getWards(ProvinceStore.code(this), null, chipIds.length).enqueue(new ApiCallback<List<PlaceModels.Ward>>(this) {
             @Override
             public void onSuccess(List<PlaceModels.Ward> wards) {
                 if (wards == null || wards.size() < chipIds.length) return;
@@ -463,7 +463,7 @@ public class SearchActivity extends AppCompatActivity {
     private void loadSchools(String q) {
         if (suggestCall != null) suggestCall.cancel();
         Call<ApiResponse<List<SearchModels.Landmark>>> call =
-                api.suggestLandmarks(q == null || q.isEmpty() ? null : q, "university", 5);
+                api.suggestLandmarks(q == null || q.isEmpty() ? null : q, "university", 5, ProvinceStore.code(this));
         suggestCall = call;
         call.enqueue(new ApiCallback<List<SearchModels.Landmark>>(this) {
             @Override

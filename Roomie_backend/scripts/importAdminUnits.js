@@ -1,9 +1,11 @@
-// Nạp 34 tỉnh/thành + phường/xã thật (data/vn-admin-units.json) vào bảng provinces / wards.
+// Nạp 34 tỉnh/thành + phường/xã thật (data/vn-admin-units.json) và tâm tỉnh (data/vn-province-centers.json)
+// vào bảng provinces / wards.
 // Chạy riêng: npm run import:admin   (seed.js cũng gọi hàm này)
 // Chạy lại nhiều lần được: chỉ thêm / cập nhật tên, không xóa dữ liệu đang được dùng.
 const path = require('path');
 
 const DATA_FILE = path.join(__dirname, '..', 'data', 'vn-admin-units.json');
+const CENTERS_FILE = path.join(__dirname, '..', 'data', 'vn-province-centers.json');
 // TP.HCM và Hà Nội lên đầu danh sách chọn
 const DISPLAY_ORDER = { 79: 1, '01': 2 };
 
@@ -52,6 +54,14 @@ async function importAdminUnits(c) {
   // Phường test không còn ai dùng thì xóa
   await c.query(`DELETE FROM wards w WHERE w.ward_code LIKE 'DEV%'
                     AND NOT EXISTS (SELECT 1 FROM room_posts rp WHERE rp.ward_code = w.ward_code)`);
+
+  // Tâm tỉnh/thành (data/vn-province-centers.json, tải cùng địa điểm bằng npm run fetch:landmarks)
+  const { provinces: centers } = require(CENTERS_FILE);
+  await c.query(
+    `UPDATE provinces p SET center_lat = t.lat, center_lng = t.lng
+       FROM unnest($1::text[], $2::numeric[], $3::numeric[]) AS t(code, lat, lng)
+      WHERE p.province_code = t.code`,
+    [centers.map((x) => x.code), centers.map((x) => x.lat), centers.map((x) => x.lng)]);
 
   const { rows } = await c.query(
     'SELECT (SELECT COUNT(*) FROM provinces) AS provinces, (SELECT COUNT(*) FROM wards) AS wards');

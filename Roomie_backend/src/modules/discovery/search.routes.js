@@ -26,6 +26,8 @@ const filters = {
   nearLat: z.coerce.number().min(-90).max(90).optional(),
   nearLng: z.coerce.number().min(-180).max(180).optional(),
   wardCode: z.string().max(10).optional(),
+  // Tỉnh/thành người dùng chọn (feed Home, tìm theo từ khóa); không áp dụng khi tìm quanh 1 điểm
+  provinceCode: z.string().max(10).optional(),
   minRent: z.coerce.number().int().min(0).optional(),
   maxRent: z.coerce.number().int().min(0).optional(),
   roomTypes: csv(z.enum(ROOM_TYPES)),
@@ -76,6 +78,7 @@ router.get('/landmarks/suggest',
     query: z.object({
       q: z.string().trim().max(100).optional(),
       type: z.enum(['university', 'workplace', 'supermarket', 'bus_stop', 'hospital', 'other']).optional(),
+      provinceCode: z.string().max(10).optional(),
       limit: z.coerce.number().int().min(1).max(20).default(8),
       radiusKm: z.coerce.number().min(0.5).max(20).default(3),
     }),

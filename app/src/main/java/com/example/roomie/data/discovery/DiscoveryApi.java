@@ -80,7 +80,11 @@ public interface DiscoveryApi {
     // ---------- Phường/xã thật + tra địa chỉ ----------
 
     @GET("places/suggest")
-    Call<ApiResponse<PlaceModels.Suggest>> suggestPlaces(@Query("q") String q);
+    Call<ApiResponse<PlaceModels.Suggest>> suggestPlaces(@Query("q") String q,
+                                                         @Query("provinceCode") String provinceCode);
+
+    @GET("admin-units/provinces")
+    Call<ApiResponse<List<PlaceModels.Province>>> getProvinces();
 
     @GET("admin-units/wards")
     Call<ApiResponse<List<PlaceModels.Ward>>> getWards(@Query("provinceCode") String provinceCode,
@@ -93,5 +97,6 @@ public interface DiscoveryApi {
     @GET("landmarks/suggest")
     Call<ApiResponse<List<SearchModels.Landmark>>> suggestLandmarks(@Query("q") String q,
                                                                     @Query("type") String type,
-                                                                    @Query("limit") Integer limit);
+                                                                    @Query("limit") Integer limit,
+                                                                    @Query("provinceCode") String provinceCode);
 }

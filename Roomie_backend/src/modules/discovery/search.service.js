@@ -52,6 +52,7 @@ function toRoomCard(r, score, isSaved) {
  *   landmarkId  gần trường/địa điểm, trong bán kính radiusKm (mặc định 3km)
  *   nearLat/nearLng  quanh một địa chỉ đã tra (Photon), trong bán kính radiusKm
  *   wardCode    đúng phường/xã (mã hành chính thật)
+ *   provinceCode  trong tỉnh/thành đang chọn (bỏ qua khi tìm quanh 1 điểm hoặc theo phường)
  *   minRent, maxRent, roomTypes[], gender (female|male), amenities[] (phải có đủ)
  *   moveInBy (YYYY-MM-DD), minArea (m²), maxDeposit, minSlots (số người cần), occupation (student|worker)
  *   sort       match (mặc định) | newest | price_asc | price_desc | distance
@@ -94,6 +95,8 @@ async function searchRooms(userId, f) {
       OR lower(immutable_unaccent(coalesce(r.ward_name, ''))) = lower(immutable_unaccent(${area})))`);
   }
   if (f.wardCode) where.push(`r.ward_code = ${p(f.wardCode)}`);
+  // Tìm quanh trường / địa chỉ / vị trí thì bán kính có thể vượt ranh giới tỉnh -> bỏ qua tỉnh
+  if (f.provinceCode && !hasDistance && !f.wardCode) where.push(`r.province_code = ${p(f.provinceCode)}`);
   // Vùng đang xem trên bản đồ
   if (f.minLat != null && f.maxLat != null && f.minLng != null && f.maxLng != null) {
     where.push(`r.latitude BETWEEN ${p(f.minLat)} AND ${p(f.maxLat)}
@@ -165,11 +168,18 @@ async function searchRooms(userId, f) {
   };
 }
 
-// Gợi ý trường học / địa điểm cho ô tìm kiếm, kèm số phòng trong bán kính
-async function suggestLandmarks({ q, type, limit, radiusKm }) {
+// Gợi ý trường học / địa điểm cho ô tìm kiếm, kèm số phòng trong bán kính.
+// Có tỉnh: chưa gõ thì chỉ gợi ý trong tỉnh; đang gõ thì tìm cả nước, trường trong tỉnh lên trước
+async function suggestLandmarks({ q, type, limit, radiusKm, provinceCode }) {
   const params = [radiusKm];
   const where = ['l.is_active'];
+  let provinceFirst = '';
   if (type) { params.push(type); where.push(`l.landmark_type = $${params.length}`); }
+  if (provinceCode) {
+    params.push(provinceCode);
+    if (q) provinceFirst = `(l.province_code = $${params.length}) DESC, `;
+    else where.push(`l.province_code = $${params.length}`);
+  }
   if (q) {
     params.push(q);
     where.push(`immutable_unaccent(concat_ws(' ', l.name, l.short_name, l.address_text))
@@ -183,7 +193,7 @@ async function suggestLandmarks({ q, type, limit, radiusKm }) {
                 AND ${HAVERSINE_KM('l.latitude', 'l.longitude', 'r.latitude', 'r.longitude')} <= $1) AS room_count
        FROM landmarks l
       WHERE ${where.join(' AND ')}
-      ORDER BY room_count DESC, l.name
+      ORDER BY ${provinceFirst}room_count DESC, l.name
       LIMIT $${params.length}`, params);
   return rows.map((l) => ({
     id: l.landmark_id,

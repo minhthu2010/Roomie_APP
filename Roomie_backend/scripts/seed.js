@@ -71,7 +71,7 @@ const IDS = {
         [id, IDS.owner, title, type, rent, gender, ward, street, lat, lng, `${street}, TP. Hồ Chí Minh`, IDS.admin]);
     }
 
-    // Trường ĐH/CĐ, siêu thị, bệnh viện, trạm xe buýt thật từ OpenStreetMap (data/hcm-landmarks.json)
+    // Trường ĐH/CĐ, siêu thị, bệnh viện, trạm xe buýt thật của cả nước từ OpenStreetMap (data/vn-landmarks.json)
     const places = await importLandmarks(c);
     console.log('Địa điểm thật:', places.byType);
 

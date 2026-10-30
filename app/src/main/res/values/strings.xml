@@ -556,13 +556,13 @@
     <string name="chip_gender_male">Nam</string>
     <string name="chip_amenities">%1$d tiện ích</string>
     <string name="filter_area_all">Tất cả khu vực</string>
-    <string name="filter_area_suffix">%1$s, TP. Hồ Chí Minh</string>
+    <string name="filter_area_suffix">%1$s, %2$s</string>
     <string name="filter_budget_any">Mọi mức giá</string>
     <string name="filter_room_studio">Studio</string>
     <string name="search_school_sub">%1$s · %2$d phòng trong 3km</string>
     <string name="search_schools_empty">Không tìm thấy trường phù hợp.</string>
     <string name="search_recent_query_sub">Từ khóa</string>
-    <string name="search_recent_area_sub">Khu vực · TP. Hồ Chí Minh</string>
+    <string name="search_recent_area_sub">Khu vực · %1$s</string>
     <string name="search_recent_school_sub">Trường học · bán kính 3km</string>
 
     <!-- Chi tiết phòng / Ảnh / Đã lưu / Hồ sơ người đăng (người C) -->
@@ -654,7 +654,7 @@
     <string name="search_recent_ward_sub">Phường/xã · %1$s</string>
     <string name="chip_near_place">Quanh %1$s</string>
     <string name="sort_distance_place">Gần địa chỉ nhất</string>
-    <string name="filter_ward_title">Chọn phường / xã (TP. Hồ Chí Minh)</string>
+    <string name="filter_ward_title">Chọn phường / xã (%1$s)</string>
     <string name="filter_ward_hint">Gõ tên phường, VD: dien hong</string>
     <string name="filter_ward_loading">Đang tải danh sách phường/xã…</string>
     <string name="map_search_pin">Vị trí bạn tìm</string>
@@ -829,7 +829,7 @@
     <string name="search_near_me_label">Vị trí của bạn</string>
     <string name="search_near_me_denied">Cần quyền vị trí để tìm phòng gần bạn</string>
     <string name="search_near_me_failed">Không lấy được vị trí. Hãy bật GPS / định vị rồi thử lại</string>
-    <string name="search_near_me_outside">Vị trí của bạn đang ở ngoài TP.HCM nên chưa có phòng gần bạn</string>
+    <string name="search_near_me_outside">Vị trí của bạn đang ở ngoài Việt Nam nên chưa có phòng gần bạn</string>
     <string name="chip_near_me">Gần vị trí của bạn</string>
 
     <!-- Không có kết quả: gợi ý tìm rộng hơn -->
@@ -844,4 +844,11 @@
     <string name="map_price_between">%1$s–%2$s tr</string>
     <string name="map_price_over">Trên %1$s tr</string>
     <string name="map_chip_more_filters">Bộ lọc · %1$d</string>
+
+    <!-- Tỉnh/thành đang tìm phòng (ProvinceStore) -->
+    <string name="province_pick_title">Bạn tìm phòng ở đâu?</string>
+    <string name="header_city_pick">%1$s  ▾</string>
+    <string name="filter_area_all_in">Tất cả khu vực · %1$s</string>
+    <string name="feed_empty_province">Chưa có phòng nào đang tìm người ở %1$s.\nHãy thử tỉnh/thành khác hoặc quay lại sau.</string>
+    <string name="feed_empty_change_province">Đổi tỉnh/thành</string>
 </resources>
