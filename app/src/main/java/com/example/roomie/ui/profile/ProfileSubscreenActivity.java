@@ -1,5 +1,6 @@
 package com.example.roomie.ui.profile;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
@@ -35,6 +36,8 @@ import com.example.roomie.ui.auth.AuthFlow;
 import com.example.roomie.ui.auth.ForgotPasswordActivity;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Locale;
 
 public class ProfileSubscreenActivity extends AppCompatActivity {
     private static final String EXTRA_LAYOUT = "profile_subscreen_layout";
@@ -218,6 +221,62 @@ public class ProfileSubscreenActivity extends AppCompatActivity {
                 .setItems(ProfileUi.OCCUPATION_LABELS, (dialog, which) -> etOccupation.setText(ProfileUi.OCCUPATION_LABELS[which]))
                 .show());
 
+        View changeAvatar = root.findViewById(R.id.tv_edit_change_avatar);
+        if (changeAvatar != null) changeAvatar.setOnClickListener(ignored -> pickAvatar.launch("image/*"));
+
+        // Giới tính, năm sinh, ngày dọn vào, nhu cầu: giữ giá trị API trong mảng 1 phần tử để lambda sửa được
+        TextView tvGender = root.findViewById(R.id.tv_edit_gender);
+        TextView tvBirthYear = root.findViewById(R.id.tv_edit_birth_year);
+        EditText etBudget = root.findViewById(R.id.et_edit_budget);
+        TextView tvMoveIn = root.findViewById(R.id.tv_edit_move_in_date);
+        TextView pillFindRoom = root.findViewById(R.id.btn_edit_pill_find_room);
+        TextView pillFindRoommate = root.findViewById(R.id.btn_edit_pill_find_roommate);
+        String[] gender = {null};
+        Integer[] birthYear = {null};
+        String[] goal = {null};
+
+        tvGender.setOnClickListener(ignored -> new AlertDialog.Builder(this)
+                .setTitle("Chọn giới tính")
+                .setItems(ProfileUi.GENDER_LABELS, (dialog, which) -> {
+                    gender[0] = ProfileUi.GENDER_VALUES[which];
+                    tvGender.setText(ProfileUi.GENDER_LABELS[which]);
+                })
+                .show());
+
+        String[] years = ProfileUi.birthYears();
+        tvBirthYear.setOnClickListener(ignored -> new AlertDialog.Builder(this)
+                .setTitle("Chọn năm sinh")
+                .setItems(years, (dialog, which) -> {
+                    birthYear[0] = Integer.parseInt(years[which]);
+                    tvBirthYear.setText(years[which]);
+                })
+                .show());
+
+        tvMoveIn.setOnClickListener(ignored -> {
+            Calendar c = Calendar.getInstance();
+            DatePickerDialog picker = new DatePickerDialog(this,
+                    (view, year, month, day) -> tvMoveIn.setText(
+                            String.format(Locale.getDefault(), "%02d/%02d/%d", day, month + 1, year)),
+                    c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
+            picker.getDatePicker().setMinDate(c.getTimeInMillis() - 1000);
+            picker.show();
+        });
+
+        Runnable renderGoal = () -> {
+            boolean room = "find_room".equals(goal[0]) || "both".equals(goal[0]);
+            boolean mate = "find_roommate".equals(goal[0]) || "both".equals(goal[0]);
+            stylePill(pillFindRoom, room);
+            stylePill(pillFindRoommate, mate);
+        };
+        pillFindRoom.setOnClickListener(ignored -> {
+            goal[0] = "find_room";
+            renderGoal.run();
+        });
+        pillFindRoommate.setOnClickListener(ignored -> {
+            goal[0] = "find_roommate";
+            renderGoal.run();
+        });
+
         api.getMyProfile().enqueue(new ApiCallback<AccountModels.Profile>(this) {
             @Override
             public void onSuccess(AccountModels.Profile p) {
@@ -229,6 +288,16 @@ public class ProfileSubscreenActivity extends AppCompatActivity {
                 etAbout.setText(p.bio != null ? p.bio : "");
                 etArea.setText(p.livingAreaText != null ? p.livingAreaText : "");
                 ImageLoader.load(editAvatarView, p.avatarUrl, R.drawable.ic_avatar_profile);
+
+                gender[0] = p.gender;
+                tvGender.setText(ProfileUi.label(ProfileUi.GENDER_LABELS, ProfileUi.GENDER_VALUES, p.gender));
+                birthYear[0] = p.birthYear;
+                tvBirthYear.setText(p.birthYear != null ? String.valueOf(p.birthYear) : null);
+                String budget = ProfileUi.formatBudget(p.budgetMin, p.budgetMax);
+                etBudget.setText(budget != null ? budget : "");
+                tvMoveIn.setText(ProfileUi.toUiDate(p.moveInDate));
+                goal[0] = p.onboardingGoal;
+                renderGoal.run();
             }
 
             @Override
@@ -250,6 +319,22 @@ public class ProfileSubscreenActivity extends AppCompatActivity {
             body.schoolOrWorkplace = etSchool.getText().toString().trim();
             body.bio = etAbout.getText().toString().trim();
             body.livingAreaText = etArea.getText().toString().trim();
+            body.gender = gender[0];
+            body.birthYear = birthYear[0];
+            body.onboardingGoal = goal[0];
+            body.moveInDate = ProfileUi.toApiDate(tvMoveIn.getText().toString());
+
+            // Ô ngân sách để trống: giữ nguyên giá trị cũ
+            String budgetText = etBudget.getText().toString().trim();
+            if (!budgetText.isEmpty()) {
+                long[] budget = ProfileUi.parseBudget(budgetText);
+                if (budget == null) {
+                    AppNotificationHelper.showError(this, "Ngân sách chưa đúng, ví dụ: 2–4 triệu");
+                    return;
+                }
+                body.budgetMin = budget[0];
+                body.budgetMax = budget[1];
+            }
 
             save.setEnabled(false);
             api.updateMyProfile(body).enqueue(new ApiCallback<AccountModels.Profile>(this) {
@@ -267,6 +352,11 @@ public class ProfileSubscreenActivity extends AppCompatActivity {
                 }
             });
         });
+    }
+
+    private void stylePill(TextView pill, boolean selected) {
+        pill.setBackgroundResource(selected ? R.drawable.bg_pill_selected : R.drawable.bg_pill_unselected);
+        pill.setTextColor(getColor(selected ? R.color.text_white : R.color.text_title));
     }
 
     // ---------- Đổi mật khẩu (layout_change_password) ----------
