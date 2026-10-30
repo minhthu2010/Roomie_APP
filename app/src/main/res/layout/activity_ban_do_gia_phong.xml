@@ -372,6 +372,23 @@
                         android:text="@string/map_chip_match"
                         android:textColor="@color/color_text_primary"
                         android:textSize="12sp" />
+
+                    <!-- Chip 4: "Bộ lọc · 2" khi đang bật bộ lọc khác ngoài giá (ẩn nếu không có) -->
+                    <TextView
+                        android:id="@+id/chip_more_filters"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_chip_selected"
+                        android:clickable="true"
+                        android:elevation="2dp"
+                        android:focusable="true"
+                        android:paddingHorizontal="14dp"
+                        android:paddingVertical="7dp"
+                        android:textColor="@color/color_white"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
                 </LinearLayout>
             </HorizontalScrollView>
 

@@ -28,6 +28,7 @@ import com.example.roomie.data.discovery.DiscoveryApi;
 import com.example.roomie.data.discovery.PlaceModels;
 import com.example.roomie.data.remote.ApiCallback;
 import com.example.roomie.data.remote.ApiClient;
+import com.example.roomie.ui.search.ProvinceStore;
 import com.example.roomie.ui.search.RoomFormat;
 import com.example.roomie.ui.search.SearchCriteria;
 import com.google.android.material.slider.RangeSlider;
@@ -50,8 +51,6 @@ import java.util.function.Supplier;
 public class BoLocActivity extends AppCompatActivity {
 
     private static final float BUDGET_MAX = 10_000_000f;
-    /** Bộ lọc khu vực trong TP.HCM (app đang phục vụ TP.HCM) */
-    private static final String PROVINCE_CODE = "79";
 
     private SearchCriteria criteria;
     /** Phường/xã thật, tải 1 lần khi mở hộp chọn */
@@ -226,16 +225,28 @@ public class BoLocActivity extends AppCompatActivity {
     }
 
     private void bindAll() {
-        String area = criteria.wardName != null ? criteria.wardName : criteria.area;
-        tvArea.setText(area != null
-                ? getString(R.string.filter_area_suffix, area)
-                : getString(R.string.filter_area_all));
+        tvArea.setText(areaLabel());
         rangeBudget.setValues(
                 criteria.minRent != null ? (float) criteria.minRent : 0f,
                 criteria.maxRent != null ? (float) criteria.maxRent : BUDGET_MAX);
         tvBudget.setText(RoomFormat.budgetLabel(this, criteria.minRent, criteria.maxRent));
         bindChips();
         bindChoices();
+    }
+
+    /**
+     * Ô "Khu vực" ghi đúng vị trí đang tìm: quanh vị trí / địa chỉ / trường (khi đó không lọc theo tỉnh),
+     * phường / quận, từ khóa, hoặc cả tỉnh đang chọn
+     */
+    private String areaLabel() {
+        String province = ProvinceStore.shortName(ProvinceStore.get(this).name);
+        if (criteria.nearMe) return getString(R.string.chip_near_me);
+        if (criteria.landmarkName != null) return getString(R.string.chip_near, criteria.landmarkName);
+        if (criteria.placeName != null) return getString(R.string.chip_near_place, criteria.placeName);
+        String area = criteria.wardName != null ? criteria.wardName : criteria.area;
+        if (area != null) return getString(R.string.filter_area_suffix, area, province);
+        if (criteria.query != null) return getString(R.string.filter_area_query, criteria.query, province);
+        return getString(R.string.filter_area_all_in, province);
     }
 
     private void bindChips() {
@@ -275,7 +286,7 @@ public class BoLocActivity extends AppCompatActivity {
         v.setPadding((int) (horizontalDp * d), (int) (10 * d), (int) (horizontalDp * d), (int) (10 * d));
     }
 
-    /** Chọn phường/xã thật của TP.HCM (168 phường/xã sau 01/07/2025), gõ để lọc không dấu */
+    /** Chọn phường/xã thật của tỉnh/thành đang chọn (ProvinceStore), gõ để lọc không dấu */
     private void showAreaDialog() {
         View content = LayoutInflater.from(this).inflate(R.layout.dialog_ward_picker, null, false);
         EditText edtFilter = content.findViewById(R.id.edt_ward_filter);
@@ -288,7 +299,7 @@ public class BoLocActivity extends AppCompatActivity {
         list.setAdapter(adapter);
 
         AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle(R.string.filter_ward_title)
+                .setTitle(getString(R.string.filter_ward_title, ProvinceStore.shortName(ProvinceStore.get(this).name)))
                 .setView(content)
                 .setNegativeButton(R.string.btn_cancel, null)
                 .create();
@@ -298,7 +309,7 @@ public class BoLocActivity extends AppCompatActivity {
             shown.clear();
             adapter.clear();
             shown.add(null);
-            adapter.add(getString(R.string.filter_area_all));
+            adapter.add(getString(R.string.filter_area_all_in, ProvinceStore.shortName(ProvinceStore.get(this).name)));
             if (wards == null) return;
             for (PlaceModels.Ward w : wards) {
                 if (!q.isEmpty() && !normalize(w.name).contains(q)) continue;
@@ -337,7 +348,7 @@ public class BoLocActivity extends AppCompatActivity {
             refresh.run();
             return;
         }
-        ApiClient.create(this, DiscoveryApi.class).getWards(PROVINCE_CODE, null, 400)
+        ApiClient.create(this, DiscoveryApi.class).getWards(ProvinceStore.code(this), null, 400)
                 .enqueue(new ApiCallback<List<PlaceModels.Ward>>(this) {
                     @Override
                     public void onSuccess(List<PlaceModels.Ward> data) {

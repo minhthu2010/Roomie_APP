@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -39,9 +40,12 @@ import com.example.roomie.ui.map.MapSupport;
 import com.example.roomie.ui.room.ChiTietPhongActivity;
 import com.example.roomie.ui.room.ContactActions;
 import com.example.roomie.ui.saved.SaveToggle;
+import com.example.roomie.ui.search.ProvinceStore;
 import com.example.roomie.ui.search.RoomFormat;
 import com.example.roomie.ui.search.SearchActivity;
 import com.example.roomie.ui.search.SearchCriteria;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.slider.RangeSlider;
 
 import org.osmdroid.events.MapEventsReceiver;
 import org.osmdroid.events.MapListener;
@@ -59,6 +63,7 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import retrofit2.Call;
@@ -73,10 +78,12 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
         return new Intent(context, BanDoGiaPhongActivity.class).putExtra(SearchCriteria.EXTRA, criteria);
     }
 
-    private static final GeoPoint HCMC_CENTER = new GeoPoint(10.7790, 106.6850);
     private static final double DEFAULT_ZOOM = 13.0;
     private static final long RELOAD_DELAY_MS = 400;
     private static final int HIGH_MATCH = 80;
+    /** Bán kính mặc định của server khi không gửi radiusKm, và mức mở rộng tối đa */
+    private static final int DEFAULT_RADIUS_KM = 3;
+    private static final int MAX_RADIUS_KM = 10;
 
     private DiscoveryApi api;
     private SearchCriteria criteria = new SearchCriteria();
@@ -99,6 +106,7 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
     private TextView chipCount;
     private TextView chipPrice;
     private TextView chipMatch;
+    private TextView chipMoreFilters;
     private View btnMyLocation;
 
     private final ActivityResultLauncher<Intent> criteriaLauncher = registerForActivityResult(
@@ -145,6 +153,7 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
         chipCount = findViewById(R.id.chip_room_count);
         chipPrice = findViewById(R.id.chip_price_range);
         chipMatch = findViewById(R.id.chip_match_rate);
+        chipMoreFilters = findViewById(R.id.chip_more_filters);
         btnMyLocation = findViewById(R.id.btn_my_location);
 
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
@@ -153,7 +162,8 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
         View.OnClickListener openFilter = v -> criteriaLauncher.launch(
                 new Intent(this, BoLocActivity.class).putExtra(SearchCriteria.EXTRA, criteria));
         findViewById(R.id.btn_filter).setOnClickListener(openFilter);
-        chipPrice.setOnClickListener(openFilter);
+        chipMoreFilters.setOnClickListener(openFilter);
+        chipPrice.setOnClickListener(v -> showPricePicker());
         chipMatch.setOnClickListener(v -> {
             onlyHighMatch = !onlyHighMatch;
             bindHeader();
@@ -185,6 +195,93 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
 
         setupMap();
         bindHeader();
+    }
+
+    /** Đóng bản đồ (nút quay lại, cử chỉ back) thì trả điều kiện hiện tại về Home */
+    @Override
+    public void finish() {
+        setResult(RESULT_OK, new Intent().putExtra(SearchCriteria.EXTRA, criteria));
+        super.finish();
+    }
+
+    /** Dòng trạng thái dưới bản đồ: thường là nhãn trắng; có hành động (mở rộng bán kính) thì nút màu đỏ đậm */
+    private void styleStatus(View.OnClickListener action) {
+        styleChip(tvStatus, action != null);
+        tvStatus.setOnClickListener(action);
+        tvStatus.setClickable(action != null);
+    }
+
+    // ---------- Chọn giá nhanh ----------
+
+    private static final float PRICE_MAX = 10_000_000f;
+    /** Mức giá gợi ý {min, max} (đồng); null = không giới hạn đầu đó */
+    private static final long[][] PRICE_PRESETS = {
+            {0, 2_000_000}, {2_000_000, 3_000_000}, {3_000_000, 4_000_000}, {4_000_000, 5_000_000}, {5_000_000, 0}};
+
+    private void showPricePicker() {
+        BottomSheetDialog sheet = new BottomSheetDialog(this);
+        View content = getLayoutInflater().inflate(R.layout.dialog_price_picker, null, false);
+        sheet.setContentView(content);
+        TextView tvValue = content.findViewById(R.id.tv_price_value);
+        RangeSlider slider = content.findViewById(R.id.range_price);
+        slider.setTickVisible(false);
+        LinearLayout presets = content.findViewById(R.id.group_price_presets);
+        // Giá đang chọn trong hộp, chỉ áp dụng khi bấm "Xem phòng"
+        Long[] picked = {criteria.minRent, criteria.maxRent};
+
+        Runnable bind = () -> {
+            slider.setValues(picked[0] != null ? (float) picked[0] : 0f, picked[1] != null ? (float) picked[1] : PRICE_MAX);
+            tvValue.setText(RoomFormat.budgetLabel(this, picked[0], picked[1]));
+            for (int i = 0; i < presets.getChildCount(); i++) {
+                long[] p = PRICE_PRESETS[i];
+                boolean on = Objects.equals(picked[0], p[0] == 0 ? null : p[0])
+                        && Objects.equals(picked[1], p[1] == 0 ? null : p[1]);
+                styleChip((TextView) presets.getChildAt(i), on);
+            }
+        };
+        for (long[] p : PRICE_PRESETS) {
+            TextView chip = new TextView(this);
+            String min = RoomFormat.millions(p[0]);
+            String max = RoomFormat.millions(p[1]);
+            chip.setText(p[0] == 0 ? getString(R.string.map_price_under, max)
+                    : p[1] == 0 ? getString(R.string.map_price_over, min)
+                    : getString(R.string.map_price_between, min, max));
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            lp.setMarginEnd(Math.round(8 * getResources().getDisplayMetrics().density));
+            chip.setOnClickListener(v -> {
+                picked[0] = p[0] == 0 ? null : p[0];
+                picked[1] = p[1] == 0 ? null : p[1];
+                bind.run();
+            });
+            presets.addView(chip, lp);
+        }
+        slider.addOnChangeListener((s, value, fromUser) -> {
+            if (!fromUser) return;
+            List<Float> v = s.getValues();
+            picked[0] = v.get(0) <= 0 ? null : (long) (float) v.get(0);
+            picked[1] = v.get(1) >= PRICE_MAX ? null : (long) (float) v.get(1);
+            bind.run();
+        });
+        content.findViewById(R.id.btn_price_any).setOnClickListener(v -> {
+            applyPrice(null, null);
+            sheet.dismiss();
+        });
+        content.findViewById(R.id.btn_price_apply).setOnClickListener(v -> {
+            applyPrice(picked[0], picked[1]);
+            sheet.dismiss();
+        });
+        bind.run();
+        sheet.show();
+    }
+
+    private void applyPrice(Long min, Long max) {
+        if (Objects.equals(min, criteria.minRent) && Objects.equals(max, criteria.maxRent)) return;
+        criteria.minRent = min;
+        criteria.maxRent = max;
+        bindHeader();
+        hideCard();
+        scheduleReload(0);
     }
 
     // ---------- Bản đồ ----------
@@ -220,7 +317,9 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
             }
         });
         map.getController().setZoom(DEFAULT_ZOOM);
-        map.getController().setCenter(HCMC_CENTER);
+        // Mở ở tâm tỉnh/thành đang chọn
+        PlaceModels.Province province = ProvinceStore.get(this);
+        map.getController().setCenter(new GeoPoint(province.latitude, province.longitude));
         // Có địa chỉ / trường / phường đang tìm thì nhảy tới đó
         moveToSearchLocation();
         scheduleReload(0);
@@ -230,6 +329,22 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
      * Đưa bản đồ tới vị trí đang tìm và cắm ghim "Vị trí bạn tìm".
      * Phường/xã chưa có tọa độ thì hỏi backend tâm phường (tra Photon, có cache).
      */
+    /**
+     * Thu phóng vừa đủ cả vòng bán kính quanh tâm (bản đồ chỉ tải phòng trong vùng đang xem,
+     * nên vùng nhìn phải chứa hết vòng tìm kiếm). Gọi sau khi MapView đã đo xong kích thước.
+     */
+    private void fitRadius(GeoPoint center) {
+        double radius = criteria.radiusKm != null ? criteria.radiusKm : DEFAULT_RADIUS_KM;
+        double dLat = radius / 111.0;
+        double dLng = radius / (111.0 * Math.cos(Math.toRadians(center.getLatitude())));
+        BoundingBox box = new BoundingBox(center.getLatitude() + dLat, center.getLongitude() + dLng,
+                center.getLatitude() - dLat, center.getLongitude() - dLng);
+        map.post(() -> {
+            map.zoomToBoundingBox(box, false, Math.round(16 * getResources().getDisplayMetrics().density));
+            scheduleReload(0);
+        });
+    }
+
     private void moveToSearchLocation() {
         if (searchPin != null) {
             map.getOverlays().remove(searchPin);
@@ -237,9 +352,10 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
         }
         if (criteria.hasCenter()) {
             GeoPoint center = new GeoPoint(criteria.centerLat, criteria.centerLng);
-            // Đủ rộng để thấy phòng trong bán kính tìm kiếm (3km) quanh địa chỉ / trường; phường nhỏ hơn
-            map.getController().setZoom(criteria.wardCode != null ? 15.0 : 14.0);
             map.getController().setCenter(center);
+            // Quanh địa chỉ / trường / vị trí: thấy hết vòng bán kính; phường: phóng gần
+            if (criteria.hasDistanceOrigin()) fitRadius(center);
+            else map.getController().setZoom(15.0);
             searchPin = new Marker(map);
             searchPin.setPosition(center);
             searchPin.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
@@ -315,8 +431,20 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
                 firstLoad = false;
                 showRooms(data.items);
                 chipCount.setText(getString(R.string.map_room_count, data.items.size()));
+                styleStatus(null);
+                int radius = criteria.radiusKm != null ? criteria.radiusKm : DEFAULT_RADIUS_KM;
                 if (data.truncated) {
                     tvStatus.setText(getString(R.string.map_zoom_in, data.total));
+                } else if (data.items.isEmpty() && criteria.hasDistanceOrigin() && radius < MAX_RADIUS_KM) {
+                    // Tìm quanh 1 điểm mà trống: bấm để mở rộng bán kính (3 -> 5 -> 10 km)
+                    int wider = radius < 5 ? 5 : MAX_RADIUS_KM;
+                    tvStatus.setText(getString(R.string.map_empty_widen, radius, wider));
+                    styleStatus(v -> {
+                        criteria.radiusKm = wider;
+                        hideCard();
+                        moveToSearchLocation();
+                        scheduleReload(0);
+                    });
                 } else if (data.items.isEmpty()) {
                     tvStatus.setText(onlyHighMatch ? R.string.map_need_quiz : R.string.map_empty);
                 } else {
@@ -333,6 +461,7 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
             @Override
             public void onError(String message) {
                 tvStatus.setVisibility(View.VISIBLE);
+                styleStatus(null);
                 tvStatus.setText(message);
             }
         });
@@ -437,6 +566,9 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
         chipPrice.setText(RoomFormat.budgetLabel(this, criteria.minRent, criteria.maxRent));
         styleChip(chipPrice, criteria.minRent != null || criteria.maxRent != null);
         styleChip(chipMatch, onlyHighMatch);
+        int others = criteria.otherFilterCount();
+        chipMoreFilters.setVisibility(others > 0 ? View.VISIBLE : View.GONE);
+        chipMoreFilters.setText(getString(R.string.map_chip_more_filters, others));
     }
 
     private void styleChip(TextView chip, boolean selected) {

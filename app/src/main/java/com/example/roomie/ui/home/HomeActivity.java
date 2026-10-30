@@ -24,6 +24,7 @@ import com.example.roomie.data.discovery.SearchModels;
 import com.example.roomie.data.remote.ApiCallback;
 import com.example.roomie.data.remote.ApiClient;
 import com.example.roomie.ui.filter.BoLocActivity;
+import com.example.roomie.ui.search.ProvinceStore;
 import com.example.roomie.ui.search.RoomCardBinder;
 import com.example.roomie.ui.search.RoomFormat;
 import com.example.roomie.ui.search.SearchActivity;
@@ -31,6 +32,8 @@ import com.example.roomie.ui.search.SearchCriteria;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * Khám phá: feed "Phòng hợp với bạn" (sắp theo % phù hợp) và kết quả tìm kiếm / bộ lọc.
@@ -50,6 +53,7 @@ public class HomeActivity extends AppCompatActivity {
     private int loadedCount = 0;
     private boolean loading = false;
 
+    private TextView tvHeaderCity;
     private TextView tvSearchText;
     private View scrollChips;
     private LinearLayout layoutChips;
@@ -91,6 +95,12 @@ public class HomeActivity extends AppCompatActivity {
             if (saved != null) criteria = saved;
         }
 
+        tvHeaderCity = findViewById(R.id.tv_header_city);
+        tvHeaderCity.setOnClickListener(v -> ProvinceStore.pick(this, province -> {
+            // Phường / quận đã chọn thuộc tỉnh cũ -> bỏ
+            if (criteria.wardCode != null || criteria.area != null) criteria.clearLocation();
+            reload();
+        }));
         tvSearchText = findViewById(R.id.tv_search_text);
         scrollChips = findViewById(R.id.scroll_active_chips);
         layoutChips = findViewById(R.id.layout_active_chips);
@@ -113,7 +123,8 @@ public class HomeActivity extends AppCompatActivity {
         // "Xem bản đồ" button click opens "Bản đồ giá phòng" screen
         View btnViewMap = findViewById(R.id.btn_view_map);
         if (btnViewMap != null) {
-            btnViewMap.setOnClickListener(v -> startActivity(BanDoGiaPhongActivity.intent(this, criteria)));
+            // Bản đồ trả lại điều kiện đã đổi (giá, bộ lọc, vị trí) để danh sách khớp với bản đồ
+            btnViewMap.setOnClickListener(v -> criteriaLauncher.launch(BanDoGiaPhongActivity.intent(this, criteria)));
         }
 
         findViewById(R.id.layout_sort).setOnClickListener(v -> showSortDialog());
@@ -146,7 +157,10 @@ public class HomeActivity extends AppCompatActivity {
         if (loading) return;
         loading = true;
         btnLoadMore.setEnabled(false);
-        api.searchRooms(criteria.toQuery(page, PAGE_SIZE))
+        Map<String, String> query = criteria.toQuery(page, PAGE_SIZE);
+        // Feed / từ khóa chỉ trong tỉnh đang chọn (backend bỏ qua khi tìm quanh 1 điểm hoặc theo phường)
+        query.put("provinceCode", ProvinceStore.code(this));
+        api.searchRooms(query)
                 .enqueue(new ApiCallback<List<SearchModels.RoomCard>>(this) {
                     @Override
                     public void onSuccess(List<SearchModels.RoomCard> rooms) {
@@ -184,6 +198,11 @@ public class HomeActivity extends AppCompatActivity {
     private void showEmpty() {
         layoutEmptyActions.removeAllViews();
         String text = getString(R.string.feed_empty);
+        if (!criteria.hasLocation() && !criteria.hasFilters()) {
+            // Tỉnh đang chọn chưa có bài đăng nào
+            text = getString(R.string.feed_empty_province, ProvinceStore.shortName(ProvinceStore.get(this).name));
+            addEmptyAction(getString(R.string.feed_empty_change_province), null);
+        }
         if (criteria.hasDistanceOrigin()) {
             int radius = criteria.radiusKm != null ? criteria.radiusKm : DEFAULT_RADIUS_KM;
             text = getString(R.string.feed_empty_radius, radius);
@@ -207,10 +226,15 @@ public class HomeActivity extends AppCompatActivity {
         layoutEmptyActions.setVisibility(layoutEmptyActions.getChildCount() > 0 ? View.VISIBLE : View.GONE);
     }
 
+    /** change = null: nút "Đổi tỉnh/thành" (mở hộp chọn tỉnh, chọn xong mới tải lại) */
     private void addEmptyAction(String label, Runnable change) {
         TextView chip = (TextView) LayoutInflater.from(this).inflate(R.layout.item_filter_chip, layoutEmptyActions, false);
         chip.setText(label);
         chip.setOnClickListener(v -> {
+            if (change == null) {
+                tvHeaderCity.performClick();
+                return;
+            }
             change.run();
             reload();
         });
@@ -224,6 +248,8 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void bindHeader() {
+        tvHeaderCity.setText(getString(R.string.header_city_pick,
+                ProvinceStore.get(this).name.toUpperCase(new Locale("vi", "VN"))));
         boolean searching = criteria.hasLocation() || criteria.hasFilters();
         tvFeedTitle.setText(searching ? R.string.feed_title_search : R.string.feed_section_title);
         tvSortLabel.setText(sortLabel(criteria.sort));
@@ -289,6 +315,7 @@ public class HomeActivity extends AppCompatActivity {
 
     // "Gần trường nhất" hay "Gần địa chỉ nhất" tùy điểm gốc
     private int sortLabel(String sort) {
+        if (SearchCriteria.SORT_DISTANCE.equals(sort) && criteria.nearMe) return R.string.sort_distance_me;
         if (SearchCriteria.SORT_DISTANCE.equals(sort) && criteria.placeName != null) return R.string.sort_distance_place;
         return RoomFormat.sortLabel(sort);
     }
