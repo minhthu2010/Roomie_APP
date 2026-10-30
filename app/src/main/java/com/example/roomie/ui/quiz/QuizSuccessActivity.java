@@ -63,8 +63,9 @@ public class QuizSuccessActivity extends AppCompatActivity {
         }
 
         Runnable goToHome = () -> {
+            // Xóa các màn onboarding (thiết lập hồ sơ, bài test) khỏi back stack
             Intent intent = new Intent(QuizSuccessActivity.this, HomeActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
             finish();
         };

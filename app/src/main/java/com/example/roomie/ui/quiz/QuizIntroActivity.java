@@ -17,7 +17,7 @@ import com.example.roomie.data.discovery.DiscoveryApi;
 import com.example.roomie.data.discovery.QuizModels;
 import com.example.roomie.data.remote.ApiCallback;
 import com.example.roomie.data.remote.ApiClient;
-import com.example.roomie.ui.auth.MainActivity;
+import com.example.roomie.ui.home.HomeActivity;
 
 public class QuizIntroActivity extends AppCompatActivity {
 
@@ -33,19 +33,22 @@ public class QuizIntroActivity extends AppCompatActivity {
             return insets;
         });
 
+        ImageButton btnBack = findViewById(R.id.btn_back);
         ImageButton btnClose = findViewById(R.id.btn_close);
         AppCompatButton btnStartQuiz = findViewById(R.id.btn_start_quiz);
         TextView tvSkipQuiz = findViewById(R.id.tv_skip_quiz);
 
-        Runnable goToMain = () -> {
-            Intent intent = new Intent(QuizIntroActivity.this, MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        // Người dùng đã đăng nhập: bỏ qua bài test thì vào Home (không về màn chào mừng)
+        Runnable goToHome = () -> {
+            Intent intent = new Intent(QuizIntroActivity.this, HomeActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
             finish();
         };
 
-        if (btnClose != null) btnClose.setOnClickListener(v -> goToMain.run());
-        if (tvSkipQuiz != null) tvSkipQuiz.setOnClickListener(v -> goToMain.run());
+        if (btnBack != null) btnBack.setOnClickListener(v -> finish());
+        if (btnClose != null) btnClose.setOnClickListener(v -> goToHome.run());
+        if (tvSkipQuiz != null) tvSkipQuiz.setOnClickListener(v -> goToHome.run());
 
         if (btnStartQuiz != null) {
             btnStartQuiz.setOnClickListener(v -> {

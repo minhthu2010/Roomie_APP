@@ -21,24 +21,11 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true">
 
-            <ImageButton
-                android:id="@+id/btn_back"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:background="@drawable/bg_circle_button"
-                android:contentDescription="@string/back"
-                android:padding="10dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_arrow_back" />
-
             <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="16dp"
-                android:layout_toEndOf="@id/btn_back">
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true">
 
                 <TextView
                     android:id="@+id/tv_header_subtitle"
@@ -282,12 +269,141 @@
 
         </RelativeLayout>
 
+        <!-- Two-Column Row: Gender & Birth year -->
+        <RelativeLayout
+            android:id="@+id/layout_row_gender_birth"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/layout_row1_dropdowns"
+            android:layout_marginTop="16dp">
+
+            <!-- Left Col: Occupation -->
+            <RelativeLayout
+                android:id="@+id/col_gender"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_marginEnd="6dp"
+                android:layout_toStartOf="@id/view_center_divider_gb">
+
+                <TextView
+                    android:id="@+id/tv_label_gender"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="@string/label_gender"
+                    android:textColor="@color/text_title"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <RelativeLayout
+                    android:id="@+id/layout_spinner_gender"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_below="@id/tv_label_gender"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_edittext_outlined"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingHorizontal="12dp">
+
+                    <ImageView
+                        android:id="@+id/img_arrow_gender"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:contentDescription="@string/label_gender"
+                        android:src="@drawable/ic_chevron_down" />
+
+                    <TextView
+                        android:id="@+id/tv_val_gender"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="8dp"
+                        android:layout_toEndOf="@id/img_arrow_gender"
+                        android:hint="@string/hint_choose"
+                        android:textColor="@color/text_title"
+                        android:textColorHint="@color/text_subtitle"
+                        android:textSize="14sp" />
+
+                </RelativeLayout>
+
+            </RelativeLayout>
+
+            <!-- Center Divider Dummy View -->
+            <View
+                android:id="@+id/view_center_divider_gb"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:layout_centerHorizontal="true" />
+
+            <!-- Right Col: Location -->
+            <RelativeLayout
+                android:id="@+id/col_birth_year"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginStart="6dp"
+                android:layout_toEndOf="@id/view_center_divider_gb">
+
+                <TextView
+                    android:id="@+id/tv_label_birth_year"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="@string/label_birth_year"
+                    android:textColor="@color/text_title"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <RelativeLayout
+                    android:id="@+id/layout_spinner_birth_year"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_below="@id/tv_label_birth_year"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_edittext_outlined"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingHorizontal="12dp">
+
+                    <ImageView
+                        android:id="@+id/img_arrow_birth"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:contentDescription="@string/label_birth_year"
+                        android:src="@drawable/ic_chevron_down" />
+
+                    <TextView
+                        android:id="@+id/tv_val_birth_year"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="8dp"
+                        android:layout_toEndOf="@id/img_arrow_birth"
+                        android:hint="@string/hint_choose"
+                        android:textColor="@color/text_title"
+                        android:textColorHint="@color/text_subtitle"
+                        android:textSize="14sp" />
+
+                </RelativeLayout>
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+
         <!-- Field 3: Bio / Short Intro -->
         <TextView
             android:id="@+id/tv_label_bio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/layout_row1_dropdowns"
+            android:layout_below="@id/layout_row_gender_birth"
             android:layout_alignParentStart="true"
             android:layout_marginTop="16dp"
             android:fontFamily="sans-serif-medium"

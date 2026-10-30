@@ -1,5 +1,6 @@
 package com.example.roomie.ui.auth;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
@@ -20,11 +21,27 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.roomie.R;
 import com.example.roomie.common.AppNotificationHelper;
+import com.example.roomie.data.accounts.AccountModels;
+import com.example.roomie.data.accounts.AccountsApi;
+import com.example.roomie.data.remote.ApiCallback;
+import com.example.roomie.data.remote.ApiClient;
+import com.example.roomie.data.remote.SessionManager;
 
 public class ResetPasswordActivity extends AppCompatActivity {
 
+    private static final String EXTRA_ACCOUNT = "USER_INPUT";
+    private static final String EXTRA_RESET_TOKEN = "RESET_TOKEN";
+
     private boolean isNewPassVisible = false;
     private boolean isConfirmPassVisible = false;
+
+    /** resetToken: server cấp sau khi nhập đúng mã khôi phục, dùng một lần, hết hạn sau 10 phút. */
+    public static void open(Activity activity, String account, String resetToken) {
+        Intent intent = new Intent(activity, ResetPasswordActivity.class);
+        intent.putExtra(EXTRA_ACCOUNT, account);
+        intent.putExtra(EXTRA_RESET_TOKEN, resetToken);
+        activity.startActivity(intent);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,9 +55,11 @@ public class ResetPasswordActivity extends AppCompatActivity {
             return insets;
         });
 
-        String userInput = getIntent().getStringExtra("USER_INPUT");
-        if (userInput == null || userInput.isEmpty()) {
-            userInput = "linh.nguyen@email.com";
+        String userInput = getIntent().getStringExtra(EXTRA_ACCOUNT);
+        String resetToken = getIntent().getStringExtra(EXTRA_RESET_TOKEN);
+        if (userInput == null || resetToken == null) {
+            finish();
+            return;
         }
 
         ImageButton btnBack = findViewById(R.id.btn_back);
@@ -134,15 +153,42 @@ public class ResetPasswordActivity extends AppCompatActivity {
                     return;
                 }
 
+                if (!p1.matches(".*[a-z].*") || !p1.matches(".*[A-Z].*") || !p1.matches(".*\\d.*")) {
+                    AppNotificationHelper.showError(ResetPasswordActivity.this, "Mật khẩu cần có chữ hoa, chữ thường và số");
+                    return;
+                }
+
                 if (!p1.equals(p2)) {
                     AppNotificationHelper.showError(ResetPasswordActivity.this, "Hai mật khẩu chưa trùng nhau");
                     return;
                 }
 
-                Intent intent = new Intent(ResetPasswordActivity.this, ResetSuccessActivity.class);
-                intent.putExtra("USER_INPUT", finalUserInput);
-                startActivity(intent);
+                resetPassword(btnDoReset, resetToken, p1, finalUserInput);
             });
         }
+    }
+
+    private void resetPassword(AppCompatButton button, String resetToken, String newPassword, String account) {
+        button.setEnabled(false);
+        ApiClient.create(this, AccountsApi.class)
+                .resetPassword(new AccountModels.ResetPasswordRequest(resetToken, newPassword))
+                .enqueue(new ApiCallback<Object>(this) {
+                    @Override
+                    public void onSuccess(Object data) {
+                        // Server đã đăng xuất mọi thiết bị: xóa phiên cũ trên máy này nếu có
+                        new SessionManager(ResetPasswordActivity.this).clear();
+                        Intent intent = new Intent(ResetPasswordActivity.this, ResetSuccessActivity.class);
+                        intent.putExtra(EXTRA_ACCOUNT, account);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(intent);
+                        finish();
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        button.setEnabled(true);
+                        AppNotificationHelper.showError(ResetPasswordActivity.this, message);
+                    }
+                });
     }
 }

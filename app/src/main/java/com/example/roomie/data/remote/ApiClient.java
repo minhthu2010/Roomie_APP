@@ -28,8 +28,10 @@ public final class ApiClient {
                     ? HttpLoggingInterceptor.Level.BODY
                     : HttpLoggingInterceptor.Level.NONE);
 
+            SessionManager session = new SessionManager(context);
             OkHttpClient client = new OkHttpClient.Builder()
-                    .addInterceptor(new AuthInterceptor(new SessionManager(context)))
+                    .addInterceptor(new AuthInterceptor(session))
+                    .authenticator(new TokenAuthenticator(context, session))
                     .addInterceptor(logging)
                     .connectTimeout(15, TimeUnit.SECONDS)
                     .readTimeout(20, TimeUnit.SECONDS)

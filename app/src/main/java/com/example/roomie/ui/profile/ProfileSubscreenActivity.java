@@ -2,14 +2,19 @@ package com.example.roomie.ui.profile;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.net.Uri;
 import android.provider.Settings;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.LayoutRes;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,8 +23,16 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.roomie.R;
+import com.example.roomie.common.AppNotificationHelper;
 import com.example.roomie.common.BottomNavHelper;
-import com.example.roomie.ui.auth.MainActivity;
+import com.example.roomie.common.ImageLoader;
+import com.example.roomie.data.accounts.AccountModels;
+import com.example.roomie.data.accounts.AccountsApi;
+import com.example.roomie.data.remote.ApiCallback;
+import com.example.roomie.data.remote.ApiClient;
+import com.example.roomie.data.remote.SessionManager;
+import com.example.roomie.ui.auth.AuthFlow;
+import com.example.roomie.ui.auth.ForgotPasswordActivity;
 
 import java.util.ArrayList;
 
@@ -27,6 +40,16 @@ public class ProfileSubscreenActivity extends AppCompatActivity {
     private static final String EXTRA_LAYOUT = "profile_subscreen_layout";
     private static final String STATE_LAYOUTS = "profile_subscreen_history";
     private final ArrayList<Integer> layoutHistory = new ArrayList<>();
+    private AccountsApi api;
+    private ImageView editAvatarView;
+
+    private final ActivityResultLauncher<String> pickAvatar = registerForActivityResult(
+            new ActivityResultContracts.GetContent(), uri -> {
+                if (uri != null && editAvatarView != null) {
+                    ProfileUi.uploadAvatar(this, uri,
+                            profile -> ImageLoader.load(editAvatarView, profile.avatarUrl, R.drawable.ic_avatar_profile));
+                }
+            });
 
     public static void open(AppCompatActivity activity, @LayoutRes int layout) {
         Intent intent = new Intent(activity, ProfileSubscreenActivity.class);
@@ -41,6 +64,7 @@ public class ProfileSubscreenActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_profile_subscreen);
         BottomNavHelper.bind(this);
+        api = ApiClient.create(this, AccountsApi.class);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.rootProfileSubscreen), (view, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -144,13 +168,14 @@ public class ProfileSubscreenActivity extends AppCompatActivity {
         bindBack(screen, R.id.btn_cancel_edit_profile);
         bindBack(screen, R.id.btn_cancel_change_pass);
         bindBack(screen, R.id.btn_cancel_feedback);
-        showUnavailable(screen, R.id.btn_save_profile_changes);
-        showUnavailable(screen, R.id.btn_save_password);
+        bindEditProfile(screen);
+        bindChangePassword(screen);
         showUnavailable(screen, R.id.btn_submit_feedback_final);
         showUnavailable(screen, R.id.btn_reverify_phone);
         showUnavailable(screen, R.id.btn_send_email_code);
-        showUnavailable(screen, R.id.iv_edit_avatar);
-        showUnavailable(screen, R.id.btn_forgot_pass_link);
+        View forgotPass = screen.findViewById(R.id.btn_forgot_pass_link);
+        if (forgotPass != null) forgotPass.setOnClickListener(ignored ->
+                startActivity(new Intent(this, ForgotPasswordActivity.class)));
 
         int attachmentId = screen.getResources().getIdentifier("area_feedback_attachment", "id", getPackageName());
         if (attachmentId != 0) showUnavailable(screen, attachmentId);
@@ -164,8 +189,144 @@ public class ProfileSubscreenActivity extends AppCompatActivity {
         showUnavailableOnParent(screen, R.id.iv_chevron_faq3);
         showUnavailableOnParent(screen, R.id.iv_chevron_faq4);
         showUnavailableOnParent(screen, R.id.iv_chevron_faq5);
-        bindNotificationActions(screen);
+        NotificationsScreen.bind(this, screen);
+        SettingsSwitches.bind(this, screen);
         bindBack(screen, R.id.btn_stay_logged_in);
+    }
+
+    // ---------- Chỉnh sửa hồ sơ (layout_edit_profile) ----------
+
+    private void bindEditProfile(View root) {
+        View save = root.findViewById(R.id.btn_save_profile_changes);
+        if (save == null) return;
+        EditText etName = root.findViewById(R.id.et_edit_display_name);
+        EditText etOccupation = root.findViewById(R.id.et_edit_occupation);
+        EditText etSchool = root.findViewById(R.id.et_edit_school);
+        EditText etAbout = root.findViewById(R.id.et_edit_about_me);
+        EditText etArea = root.findViewById(R.id.et_edit_living_area);
+        editAvatarView = root.findViewById(R.id.iv_edit_avatar);
+
+        // Bỏ chữ mẫu trong layout, chờ dữ liệu thật
+        for (EditText field : new EditText[]{etName, etOccupation, etSchool, etAbout, etArea}) field.setText("");
+
+        editAvatarView.setOnClickListener(ignored -> pickAvatar.launch("image/*"));
+
+        // Nghề nghiệp chọn từ danh sách cố định (DB chỉ nhận student/worker/other)
+        etOccupation.setFocusable(false);
+        etOccupation.setOnClickListener(ignored -> new AlertDialog.Builder(this)
+                .setTitle("Chọn nghề nghiệp")
+                .setItems(ProfileUi.OCCUPATION_LABELS, (dialog, which) -> etOccupation.setText(ProfileUi.OCCUPATION_LABELS[which]))
+                .show());
+
+        api.getMyProfile().enqueue(new ApiCallback<AccountModels.Profile>(this) {
+            @Override
+            public void onSuccess(AccountModels.Profile p) {
+                if (p == null) return;
+                etName.setText(p.displayName);
+                String occ = ProfileUi.label(ProfileUi.OCCUPATION_LABELS, ProfileUi.OCCUPATION_VALUES, p.occupation);
+                etOccupation.setText(occ != null ? occ : "");
+                etSchool.setText(p.schoolOrWorkplace != null ? p.schoolOrWorkplace : "");
+                etAbout.setText(p.bio != null ? p.bio : "");
+                etArea.setText(p.livingAreaText != null ? p.livingAreaText : "");
+                ImageLoader.load(editAvatarView, p.avatarUrl, R.drawable.ic_avatar_profile);
+            }
+
+            @Override
+            public void onError(String message) {
+                AppNotificationHelper.showError(ProfileSubscreenActivity.this, message);
+            }
+        });
+
+        save.setOnClickListener(ignored -> {
+            String name = etName.getText().toString().trim();
+            if (name.isEmpty()) {
+                AppNotificationHelper.showError(this, "Vui lòng nhập tên hiển thị");
+                return;
+            }
+            AccountModels.UpdateProfileRequest body = new AccountModels.UpdateProfileRequest();
+            body.displayName = name;
+            body.occupation = ProfileUi.value(ProfileUi.OCCUPATION_LABELS, ProfileUi.OCCUPATION_VALUES,
+                    etOccupation.getText().toString());
+            body.schoolOrWorkplace = etSchool.getText().toString().trim();
+            body.bio = etAbout.getText().toString().trim();
+            body.livingAreaText = etArea.getText().toString().trim();
+
+            save.setEnabled(false);
+            api.updateMyProfile(body).enqueue(new ApiCallback<AccountModels.Profile>(this) {
+                @Override
+                public void onSuccess(AccountModels.Profile profile) {
+                    AppNotificationHelper.showSuccess(ProfileSubscreenActivity.this, "Đã lưu thay đổi");
+                    save.setEnabled(true);
+                    onBackPressed();
+                }
+
+                @Override
+                public void onError(String message) {
+                    save.setEnabled(true);
+                    AppNotificationHelper.showError(ProfileSubscreenActivity.this, message);
+                }
+            });
+        });
+    }
+
+    // ---------- Đổi mật khẩu (layout_change_password) ----------
+
+    private void bindChangePassword(View root) {
+        View save = root.findViewById(R.id.btn_save_password);
+        if (save == null) return;
+        EditText etCurrent = root.findViewById(R.id.et_current_pass);
+        EditText etNew = root.findViewById(R.id.et_new_pass);
+        EditText etConfirm = root.findViewById(R.id.et_confirm_pass);
+        for (EditText field : new EditText[]{etCurrent, etNew, etConfirm}) field.setText("");
+        bindPasswordToggle(root.findViewById(R.id.iv_eye1), etCurrent);
+        bindPasswordToggle(root.findViewById(R.id.iv_eye2), etNew);
+        bindPasswordToggle(root.findViewById(R.id.iv_eye3), etConfirm);
+
+        save.setOnClickListener(ignored -> {
+            String current = etCurrent.getText().toString();
+            String next = etNew.getText().toString();
+            String error = null;
+            if (current.isEmpty()) error = "Vui lòng nhập mật khẩu hiện tại";
+            else if (next.length() < 8) error = "Mật khẩu mới tối thiểu 8 ký tự";
+            else if (!next.matches(".*[a-z].*") || !next.matches(".*[A-Z].*") || !next.matches(".*\\d.*"))
+                error = "Mật khẩu mới cần có chữ hoa, chữ thường và số";
+            else if (!next.equals(etConfirm.getText().toString())) error = "Hai mật khẩu mới không trùng nhau";
+            if (error != null) {
+                AppNotificationHelper.showError(this, error);
+                return;
+            }
+
+            save.setEnabled(false);
+            api.changePassword(new AccountModels.ChangePasswordRequest(current, next))
+                    .enqueue(new ApiCallback<AccountModels.AuthResult>(this) {
+                        @Override
+                        public void onSuccess(AccountModels.AuthResult result) {
+                            // Server đã đăng xuất các thiết bị khác và cấp token mới cho máy này
+                            new SessionManager(ProfileSubscreenActivity.this)
+                                    .saveTokens(result.accessToken, result.refreshToken);
+                            AppNotificationHelper.showSuccess(ProfileSubscreenActivity.this, "Đã đổi mật khẩu");
+                            save.setEnabled(true);
+                            onBackPressed();
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            save.setEnabled(true);
+                            AppNotificationHelper.showError(ProfileSubscreenActivity.this, message);
+                        }
+                    });
+        });
+    }
+
+    private void bindPasswordToggle(View eye, EditText field) {
+        if (eye == null || field == null) return;
+        eye.setOnClickListener(ignored -> {
+            boolean hidden = (field.getInputType() & InputType.TYPE_TEXT_VARIATION_PASSWORD) == InputType.TYPE_TEXT_VARIATION_PASSWORD;
+            field.setInputType(InputType.TYPE_CLASS_TEXT | (hidden
+                    ? InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                    : InputType.TYPE_TEXT_VARIATION_PASSWORD));
+            field.setSelection(field.getText().length());
+        });
     }
 
     private void bind(View root, int viewId, @LayoutRes int layout) {
@@ -209,12 +370,7 @@ public class ProfileSubscreenActivity extends AppCompatActivity {
                 .setTitle(R.string.box_logout_confirm_title)
                 .setMessage(R.string.box_logout_confirm_sub)
                 .setNegativeButton(R.string.btn_stay, null)
-                .setPositiveButton(R.string.btn_logout, (dialog, which) -> {
-                    Intent intent = new Intent(ProfileSubscreenActivity.this, MainActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                    finish();
-                })
+                .setPositiveButton(R.string.btn_logout, (dialog, which) -> AuthFlow.logout(this))
                 .show());
     }
 
@@ -225,33 +381,6 @@ public class ProfileSubscreenActivity extends AppCompatActivity {
             Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                     Uri.parse("package:" + getPackageName()));
             startActivity(intent);
-        });
-    }
-
-    private void bindNotificationActions(View root) {
-        int markReadId = root.getResources().getIdentifier("btn_mark_notification_read", "id", getPackageName());
-        int deleteId = root.getResources().getIdentifier("btn_delete_notification", "id", getPackageName());
-        View markRead = markReadId != 0 ? root.findViewById(markReadId) : null;
-        View delete = markReadId != 0 ? root.findViewById(deleteId) : null;
-
-        View unreadCount = root.findViewById(R.id.tv_count_unread);
-        View timeBox = root.findViewById(R.id.box_notif1_time);
-        View notificationCard = root.findViewById(R.id.box_notif1_icon);
-        View card = notificationCard == null ? null : (View) notificationCard.getParent();
-        if (markRead != null) markRead.setOnClickListener(ignored -> {
-            markRead.setVisibility(View.GONE);
-            if (unreadCount instanceof TextView) {
-                ((TextView) unreadCount).setText(R.string.count_unread_one);
-            }
-            if (timeBox instanceof ViewGroup && ((ViewGroup) timeBox).getChildCount() > 1) {
-                ((ViewGroup) timeBox).getChildAt(1).setVisibility(View.GONE);
-            }
-        });
-        if (delete != null) delete.setOnClickListener(ignored -> {
-            if (card != null) card.setVisibility(View.GONE);
-            if (unreadCount instanceof TextView) {
-                ((TextView) unreadCount).setText(R.string.count_unread_one);
-            }
         });
     }
 }

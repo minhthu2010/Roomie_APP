@@ -794,6 +794,17 @@
     <string name="box_logout_confirm_sub">Bạn cần đăng nhập lại để xem phòng đã lưu và quản lý bài đăng. Bài đăng đã xuất bản không bị xóa.</string>
     <string name="btn_stay">Ở lại</string>
     <string name="footer_account_mail">Roomie · Tài khoản Mai Linh</string>
+    <string name="label_gender">Giới tính</string>
+    <string name="label_birth_year">Năm sinh</string>
+    <string name="hint_choose">Chọn</string>
+    <string name="label_email">Email</string>
+    <string name="label_retype_password">Nhập lại mật khẩu</string>
+    <string name="hint_confirm_password">Nhập lại mật khẩu ở trên</string>
+    <string name="link_mark_all_read">Đọc tất cả</string>
+    <string name="notifications_empty">Bạn chưa có thông báo nào</string>
+    <string name="load_more">Xem thêm</string>
+    <string name="count_unread_format">%1$d chưa đọc</string>
+    <string name="count_all_read">Đã đọc hết</string>
 
     <!-- Bộ lọc mở rộng: bán kính, đối tượng, ngày chuyển vào, số người, diện tích, tiền cọc -->
     <string name="filter_radius_title">Bán kính tìm</string>

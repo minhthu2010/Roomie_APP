@@ -1,5 +1,6 @@
 package com.example.roomie.ui.auth;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -20,11 +21,29 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.roomie.R;
 import com.example.roomie.common.AppNotificationHelper;
+import com.example.roomie.data.accounts.AccountModels;
+import com.example.roomie.data.accounts.AccountsApi;
+import com.example.roomie.data.remote.ApiCallback;
+import com.example.roomie.data.remote.ApiClient;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
+/** Nhập mã khôi phục mật khẩu (bước 2 của Quên mật khẩu). */
 public class VerifyOtpActivity extends AppCompatActivity {
 
+    private static final String EXTRA_ACCOUNT = "USER_INPUT";
+    private static final String EXTRA_MASKED_EMAIL = "MASKED_EMAIL";
+    private static final String EXTRA_EXPIRES_AT = "EXPIRES_AT";
+    private static final String EXTRA_RESEND_AT = "RESEND_AVAILABLE_AT";
+    private static final long DEFAULT_EXPIRY_MS = 5 * 60_000;
+    private static final long DEFAULT_RESEND_MS = 30_000;
+
+    private String account;
+    private AccountsApi api;
     private EditText[] otpBoxes;
     private TextView tvVerifySubtext;
     private TextView tvOtpExpiryTimer;
@@ -32,6 +51,18 @@ public class VerifyOtpActivity extends AppCompatActivity {
     private TextView tvOtpError;
     private CountDownTimer expiryTimer;
     private CountDownTimer resendTimer;
+
+    /** challenge null: vừa gửi mã trước đó, dùng thời gian mặc định. */
+    public static void open(Activity activity, String account, AccountModels.OtpChallenge challenge) {
+        Intent intent = new Intent(activity, VerifyOtpActivity.class);
+        intent.putExtra(EXTRA_ACCOUNT, account);
+        if (challenge != null) {
+            intent.putExtra(EXTRA_MASKED_EMAIL, challenge.email);
+            intent.putExtra(EXTRA_EXPIRES_AT, challenge.expiresAt);
+            intent.putExtra(EXTRA_RESEND_AT, challenge.resendAvailableAt);
+        }
+        activity.startActivity(intent);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,10 +76,12 @@ public class VerifyOtpActivity extends AppCompatActivity {
             return insets;
         });
 
-        String userInput = getIntent().getStringExtra("USER_INPUT");
-        if (userInput == null || userInput.isEmpty()) {
-            userInput = "linh.nguyen@email.com";
+        account = getIntent().getStringExtra(EXTRA_ACCOUNT);
+        if (account == null || account.isEmpty()) {
+            finish();
+            return;
         }
+        api = ApiClient.create(this, AccountsApi.class);
 
         ImageButton btnBack = findViewById(R.id.btn_back);
         tvVerifySubtext = findViewById(R.id.tv_verify_subtext);
@@ -58,10 +91,7 @@ public class VerifyOtpActivity extends AppCompatActivity {
         AppCompatButton btnVerify = findViewById(R.id.btn_verify);
         TextView tvChangeEmail = findViewById(R.id.tv_change_email);
 
-        String maskedInput = maskInput(userInput);
-        if (tvVerifySubtext != null) {
-            tvVerifySubtext.setText("Mã 6 số đã được gửi đến " + maskedInput + ". Mã có hiệu lực trong 05:00.");
-        }
+        showDestination(getIntent().getStringExtra(EXTRA_MASKED_EMAIL));
 
         if (btnBack != null) {
             btnBack.setOnClickListener(v -> finish());
@@ -81,10 +111,9 @@ public class VerifyOtpActivity extends AppCompatActivity {
         };
 
         setupOtpInputs();
-        startExpiryTimer();
-        startResendTimer();
+        startExpiryTimer(millisUntil(getIntent().getStringExtra(EXTRA_EXPIRES_AT), DEFAULT_EXPIRY_MS));
+        startResendTimer(millisUntil(getIntent().getStringExtra(EXTRA_RESEND_AT), DEFAULT_RESEND_MS));
 
-        final String finalUserInput = userInput;
         if (btnVerify != null) {
             btnVerify.setOnClickListener(v -> {
                 StringBuilder otpBuilder = new StringBuilder();
@@ -95,21 +124,70 @@ public class VerifyOtpActivity extends AppCompatActivity {
                 }
                 String otp = otpBuilder.toString();
                 if (otp.length() < 6) {
-                    if (tvOtpError != null) {
-                        tvOtpError.setText("Mã chưa đủ 6 số. Vui lòng kiểm tra và nhập lại.");
-                        tvOtpError.setVisibility(View.VISIBLE);
-                    }
+                    showOtpError("Mã chưa đủ 6 số. Vui lòng kiểm tra và nhập lại.");
                 } else {
-                    if (tvOtpError != null) {
-                        tvOtpError.setVisibility(View.GONE);
-                    }
-                    AppNotificationHelper.showSuccess(VerifyOtpActivity.this, "Xác thực mã khôi phục thành công!");
-                    Intent intent = new Intent(VerifyOtpActivity.this, ResetPasswordActivity.class);
-                    intent.putExtra("USER_INPUT", finalUserInput);
-                    startActivity(intent);
+                    if (tvOtpError != null) tvOtpError.setVisibility(View.GONE);
+                    verify(btnVerify, otp);
                 }
             });
         }
+    }
+
+    private void showDestination(String maskedEmail) {
+        if (tvVerifySubtext == null) return;
+        String target = maskedEmail != null ? maskedEmail : "email của tài khoản";
+        tvVerifySubtext.setText("Mã 6 số đã được gửi đến " + target + ". Mã có hiệu lực trong 05:00.");
+    }
+
+    private void showOtpError(String message) {
+        if (tvOtpError != null) {
+            tvOtpError.setText(message);
+            tvOtpError.setVisibility(View.VISIBLE);
+        } else {
+            AppNotificationHelper.showError(this, message);
+        }
+    }
+
+    private void verify(AppCompatButton button, String otp) {
+        button.setEnabled(false);
+        api.verifyResetOtp(new AccountModels.VerifyResetOtpRequest(account, otp))
+                .enqueue(new ApiCallback<AccountModels.ResetToken>(this) {
+                    @Override
+                    public void onSuccess(AccountModels.ResetToken result) {
+                        button.setEnabled(true);
+                        AppNotificationHelper.showSuccess(VerifyOtpActivity.this, "Xác thực mã khôi phục thành công!");
+                        ResetPasswordActivity.open(VerifyOtpActivity.this, account, result.resetToken);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        button.setEnabled(true);
+                        showOtpError(message);
+                        clearOtp();
+                    }
+                });
+    }
+
+    private void resend() {
+        if (tvResendCode != null) tvResendCode.setOnClickListener(null);
+        api.forgotPassword(new AccountModels.AccountRequest(account))
+                .enqueue(new ApiCallback<AccountModels.OtpChallenge>(this) {
+                    @Override
+                    public void onSuccess(AccountModels.OtpChallenge challenge) {
+                        AppNotificationHelper.showInfo(VerifyOtpActivity.this, "Đã gửi lại mã xác thực mới!");
+                        if (tvOtpError != null) tvOtpError.setVisibility(View.GONE);
+                        clearOtp();
+                        showDestination(challenge.email);
+                        startExpiryTimer(millisUntil(challenge.expiresAt, DEFAULT_EXPIRY_MS));
+                        startResendTimer(millisUntil(challenge.resendAvailableAt, DEFAULT_RESEND_MS));
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        AppNotificationHelper.showError(VerifyOtpActivity.this, message);
+                        startResendTimer(0);
+                    }
+                });
     }
 
     private void setupOtpInputs() {
@@ -145,9 +223,16 @@ public class VerifyOtpActivity extends AppCompatActivity {
         }
     }
 
-    private void startExpiryTimer() {
+    private void clearOtp() {
+        for (EditText box : otpBoxes) {
+            if (box != null) box.setText("");
+        }
+        if (otpBoxes[0] != null) otpBoxes[0].requestFocus();
+    }
+
+    private void startExpiryTimer(long durationMs) {
         if (expiryTimer != null) expiryTimer.cancel();
-        expiryTimer = new CountDownTimer(300000, 1000) {
+        expiryTimer = new CountDownTimer(durationMs, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
                 long minutes = (millisUntilFinished / 1000) / 60;
@@ -166,14 +251,16 @@ public class VerifyOtpActivity extends AppCompatActivity {
         }.start();
     }
 
-    private void startResendTimer() {
+    private void startResendTimer(long durationMs) {
         if (resendTimer != null) resendTimer.cancel();
-        resendTimer = new CountDownTimer(24000, 1000) {
+        if (tvResendCode != null) tvResendCode.setOnClickListener(null);
+        resendTimer = new CountDownTimer(durationMs, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
                 long seconds = millisUntilFinished / 1000;
                 if (tvResendCode != null) {
-                    tvResendCode.setText(String.format(Locale.getDefault(), "Chưa nhận được mã? Gửi lại sau %02d:%02d", 0, seconds));
+                    tvResendCode.setText(String.format(Locale.getDefault(),
+                            "Chưa nhận được mã? Gửi lại sau %02d:%02d", seconds / 60, seconds % 60));
                 }
             }
 
@@ -181,26 +268,23 @@ public class VerifyOtpActivity extends AppCompatActivity {
             public void onFinish() {
                 if (tvResendCode != null) {
                     tvResendCode.setText("Gửi lại mã ngay");
-                    tvResendCode.setOnClickListener(v -> {
-                        AppNotificationHelper.showInfo(VerifyOtpActivity.this, "Đã gửi lại mã xác thực mới!");
-                        startResendTimer();
-                    });
+                    tvResendCode.setOnClickListener(v -> resend());
                 }
             }
         }.start();
     }
 
-    private String maskInput(String input) {
-        if (input.contains("@")) {
-            int atIndex = input.indexOf("@");
-            if (atIndex > 2) {
-                return input.substring(0, 2) + "•••" + input.substring(atIndex);
-            }
-            return input;
-        } else if (input.length() >= 7) {
-            return input.substring(0, 3) + " ••• " + input.substring(input.length() - 4);
+    /** Thời gian còn lại tới mốc ISO (UTC) server trả về; không đọc được thì dùng mặc định. */
+    private static long millisUntil(String isoUtc, long fallback) {
+        if (isoUtc == null) return fallback;
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        try {
+            Date date = format.parse(isoUtc);
+            return date == null ? fallback : Math.max(0, date.getTime() - System.currentTimeMillis());
+        } catch (ParseException e) {
+            return fallback;
         }
-        return input;
     }
 
     @Override

@@ -1,4 +1,5 @@
 const db = require('../db');
+const { sendPush } = require('../modules/accounts/push');
 
 const TYPE_TO_SETTING = {
   room_match: 'notify_room_matches',
@@ -18,8 +19,13 @@ async function notify(userId, type, title, body, payload = {}, client = db) {
     `INSERT INTO notifications (user_id, notification_type, title, body, payload)
      VALUES ($1, $2, $3, $4, $5) RETURNING notification_id`,
     [userId, type, title, body, payload]);
-  // TODO (A): gửi push FCM tới device_tokens của userId
-  return rows[0].notification_id;
+  const notificationId = rows[0].notification_id;
+  // Gửi push sau khi trả kết quả, lỗi push không làm hỏng thao tác chính (duyệt bài, ...)
+  setImmediate(() => {
+    sendPush(userId, { notificationId, type, title, body, payload })
+      .catch((err) => console.error('Gửi push thất bại:', err.message));
+  });
+  return notificationId;
 }
 
 module.exports = { notify };

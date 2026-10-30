@@ -19,6 +19,8 @@ public abstract class ApiCallback<T> implements Callback<ApiResponse<T>> {
 
     private final Activity activity;
     private ApiResponse.Meta meta;
+    private String errorCode;
+    private int httpStatus;
 
     protected ApiCallback(Activity activity) {
         this.activity = activity;
@@ -33,6 +35,16 @@ public abstract class ApiCallback<T> implements Callback<ApiResponse<T>> {
 
     public abstract void onError(String message);
 
+    /** Mã lỗi backend (vd. "EMAIL_NOT_VERIFIED") khi đang ở trong onError; null nếu lỗi mạng. */
+    protected String getErrorCode() {
+        return errorCode;
+    }
+
+    /** HTTP status khi đang ở trong onError; 0 nếu lỗi mạng. */
+    protected int getHttpStatus() {
+        return httpStatus;
+    }
+
     @Override
     public void onResponse(@NonNull Call<ApiResponse<T>> call, @NonNull Response<ApiResponse<T>> response) {
         if (isGone()) return;
@@ -40,6 +52,7 @@ public abstract class ApiCallback<T> implements Callback<ApiResponse<T>> {
             meta = response.body().meta;
             onSuccess(response.body().data);
         } else {
+            httpStatus = response.code();
             onError(readErrorMessage(response));
         }
     }
@@ -54,11 +67,12 @@ public abstract class ApiCallback<T> implements Callback<ApiResponse<T>> {
         return activity != null && (activity.isFinishing() || activity.isDestroyed());
     }
 
-    private static String readErrorMessage(Response<?> response) {
+    private String readErrorMessage(Response<?> response) {
         try {
             if (response.errorBody() != null) {
                 JsonObject root = JsonParser.parseString(response.errorBody().string()).getAsJsonObject();
                 JsonObject error = root.getAsJsonObject("error");
+                if (error != null && error.has("code")) errorCode = error.get("code").getAsString();
                 if (error != null && error.has("details") && error.get("details").isJsonArray()
                         && error.getAsJsonArray("details").size() > 0) {
                     JsonObject first = error.getAsJsonArray("details").get(0).getAsJsonObject();
