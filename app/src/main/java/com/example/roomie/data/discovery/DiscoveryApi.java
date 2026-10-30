@@ -83,6 +83,9 @@ public interface DiscoveryApi {
     Call<ApiResponse<PlaceModels.Suggest>> suggestPlaces(@Query("q") String q,
                                                          @Query("provinceCode") String provinceCode);
 
+    @GET("me/search-defaults")
+    Call<ApiResponse<PlaceModels.SearchDefaults>> getSearchDefaults();
+
     @GET("admin-units/provinces")
     Call<ApiResponse<List<PlaceModels.Province>>> getProvinces();
 

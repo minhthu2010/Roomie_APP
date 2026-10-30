@@ -40,6 +40,13 @@ public final class PlaceModels {
         public Double longitude;
     }
 
+    /** GET /me/search-defaults: tỉnh / phường / trường trong hồ sơ (null nếu hồ sơ chưa có) */
+    public static class SearchDefaults {
+        public Province province;
+        public Ward ward;
+        public SearchModels.Landmark school;
+    }
+
     /** GET /admin-units/wards/{code}/center (tọa độ có thể null nếu không tra được) */
     public static class WardCenter {
         public String code;

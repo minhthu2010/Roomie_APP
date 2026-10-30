@@ -158,4 +158,95 @@ async function wardCenter(wardCode) {
   };
 }
 
-module.exports = { searchAddresses, listProvinces, searchWards, wardCenter, normalize };
+// ---------- Mặc định tìm kiếm lấy từ hồ sơ ----------
+
+// Cách viết tắt tên thành phố hay gặp trong tên trường gõ tay -> chữ có trong tên đầy đủ (không dấu)
+const CITY_ALIASES = [
+  ['tp hcm', 'ho chi minh'], ['tphcm', 'ho chi minh'], ['hcm', 'ho chi minh'], ['ho chi minh', 'ho chi minh'],
+  ['sai gon', 'ho chi minh'], ['ha noi', 'ha noi'], ['hn', 'ha noi'], ['da nang', 'da nang'],
+  ['can tho', 'can tho'], ['hue', 'hue'], ['hai phong', 'hai phong'],
+];
+
+/**
+ * GET /me/search-defaults: tỉnh / phường / trường trong hồ sơ người dùng, để app tự đặt tỉnh ở Home
+ * và hiện lối tắt "Khu vực của bạn", "Gần trường của bạn". Hồ sơ chỉ là gợi ý, không lọc bớt phòng.
+ * Hồ sơ cũ chỉ có chữ (living_area_text, school_or_workplace) thì thử khớp tên với dữ liệu thật.
+ */
+async function searchDefaults(userId) {
+  const { rows } = await db.query(
+    `SELECT living_province_code, living_ward_code, living_area_text, landmark_id, school_or_workplace
+       FROM user_profiles WHERE user_id = $1`, [userId]);
+  const p = rows[0] || {};
+  let provinceCode = p.living_province_code;
+  let wardCode = p.living_ward_code;
+  let landmarkId = p.landmark_id;
+
+  // "Phường Xuân Hoà, TP. Hồ Chí Minh" / "Xuân Hòa" / "Đà Nẵng" -> mã phường hoặc tỉnh thật
+  if (!wardCode && p.living_area_text) {
+    const parts = p.living_area_text.split(',').map((x) => normalize(x)).filter(Boolean);
+    const { rows: w } = await db.query(
+      `SELECT ward_code, province_code FROM wards
+        WHERE lower(immutable_unaccent(ward_name)) = ANY($1::text[])
+           OR lower(immutable_unaccent(regexp_replace(ward_name, '^(Phường|Xã|Đặc khu) ', ''))) = ANY($1::text[])
+        ORDER BY (province_code = $2) DESC NULLS LAST LIMIT 1`, [parts, provinceCode || null]);
+    if (w[0]) { wardCode = w[0].ward_code; provinceCode = provinceCode || w[0].province_code; }
+  }
+  if (!provinceCode && p.living_area_text) {
+    const text = normalize(p.living_area_text);
+    const { rows: all } = await db.query('SELECT province_code, province_name FROM provinces');
+    const hit = all.find((x) => text.includes(normalize(x.province_name.replace(/^(Thành phố|Tỉnh) /u, ''))));
+    if (hit) provinceCode = hit.province_code;
+  }
+  // Trường gõ tay ("ĐH Bách Khoa TP.HCM"): tìm trường thật có đủ các chữ chính ("bach khoa"),
+  // ưu tiên trường ở thành phố ghi kèm ("TP.HCM" -> "ho chi minh"), rồi ở tỉnh của người dùng
+  if (!landmarkId && p.school_or_workplace && p.school_or_workplace.trim().length >= 4) {
+    let text = ` ${normalize(p.school_or_workplace).replace(/[^a-z0-9 ]/g, ' ')} `;
+    const city = CITY_ALIASES.find(([alias]) => text.includes(` ${alias} `));
+    if (city) text = text.replace(` ${city[0]} `, ' ');
+    // "ĐH ..." thì ưu tiên trường đại học, "CĐ ..." thì cao đẳng
+    const level = / (dh|dai hoc) /.test(text) ? '%dai hoc%' : / (cd|cao dang) /.test(text) ? '%cao dang%' : '';
+    let words = text.replace(/ (dh|truong|dai hoc|hoc vien|cd|cao dang|tp|thanh pho) /g, ' ')
+      .split(' ').filter((x) => x.length > 1);
+    // "Đại học Đà Nẵng": tên trường chính là tên thành phố
+    if (!words.length && city) words = city[1].split(' ');
+    if (words.length) {
+      const { rows: l } = await db.query(
+        `SELECT landmark_id FROM landmarks
+          WHERE is_active AND landmark_type = 'university'
+            AND lower(immutable_unaccent(name)) LIKE ALL($1::text[])
+          ORDER BY (lower(immutable_unaccent(name)) LIKE $2) DESC, (lower(immutable_unaccent(name)) LIKE $3) DESC,
+                   (province_code = $4) DESC NULLS LAST, length(name)
+          LIMIT 1`,
+        [words.map((x) => `%${x}%`), city ? `%${city[1]}%` : '', level, provinceCode || null]);
+      if (l[0]) landmarkId = l[0].landmark_id;
+    }
+  }
+
+  const [province, ward, school] = await Promise.all([
+    provinceCode ? db.query(
+      'SELECT province_code, province_name, center_lat, center_lng FROM provinces WHERE province_code = $1',
+      [provinceCode]) : { rows: [] },
+    wardCode ? db.query(
+      'SELECT ward_code, ward_name, province_code FROM wards WHERE ward_code = $1', [wardCode]) : { rows: [] },
+    landmarkId ? db.query(
+      `SELECT landmark_id, name, short_name, latitude, longitude, province_code FROM landmarks
+        WHERE landmark_id = $1 AND is_active`, [landmarkId]) : { rows: [] },
+  ]);
+  // Chưa có tỉnh nhưng có trường -> lấy tỉnh của trường
+  if (!province.rows[0] && school.rows[0]) {
+    province.rows = (await db.query(
+      'SELECT province_code, province_name, center_lat, center_lng FROM provinces WHERE province_code = $1',
+      [school.rows[0].province_code])).rows;
+  }
+  const pr = province.rows[0];
+  const wd = ward.rows[0];
+  const sc = school.rows[0];
+  return {
+    province: pr ? { code: pr.province_code, name: pr.province_name, latitude: pr.center_lat, longitude: pr.center_lng } : null,
+    ward: wd ? { code: wd.ward_code, name: wd.ward_name, provinceCode: wd.province_code } : null,
+    school: sc ? { id: sc.landmark_id, name: sc.name, shortName: sc.short_name,
+      latitude: sc.latitude, longitude: sc.longitude, provinceCode: sc.province_code } : null,
+  };
+}
+
+module.exports = { searchAddresses, listProvinces, searchWards, wardCenter, searchDefaults, normalize };

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Chip phường ở "Khu vực được quan tâm" (màn Tìm kiếm); thêm từ code -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="10dp"
+    android:background="@drawable/bg_chip_unselected"
+    android:clickable="true"
+    android:focusable="true"
+    android:paddingHorizontal="18dp"
+    android:paddingVertical="9dp"
+    android:textColor="@color/text_primary"
+    android:textSize="14sp"
+    tools:text="Diên Hồng" />

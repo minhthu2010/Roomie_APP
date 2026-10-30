@@ -1,10 +1,16 @@
 package com.example.roomie.ui.search;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 
 import com.example.roomie.R;
 import com.example.roomie.common.AppNotificationHelper;
@@ -44,6 +50,76 @@ public final class ProvinceStore {
         province.latitude = (double) p.getFloat(KEY_LAT, (float) DEFAULT_LAT);
         province.longitude = (double) p.getFloat(KEY_LNG, (float) DEFAULT_LNG);
         return province;
+    }
+
+    /** Đã có tỉnh (người dùng chọn, hoặc lấy từ hồ sơ / GPS) hay vẫn đang dùng mặc định TP.HCM */
+    public static boolean isSet(Context context) {
+        return prefs(context).contains(KEY_CODE);
+    }
+
+    /**
+     * Lần đầu mở app: đặt tỉnh theo hồ sơ (khu vực / trường); hồ sơ chưa có thì theo vị trí GPS
+     * gần đúng (chỉ khi đã có quyền vị trí, không hỏi quyền ở đây). Xong thì gọi onSet.
+     */
+    public static void initDefault(Activity activity, Runnable onSet) {
+        if (isSet(activity)) return;
+        DiscoveryApi api = ApiClient.create(activity, DiscoveryApi.class);
+        api.getSearchDefaults().enqueue(new ApiCallback<PlaceModels.SearchDefaults>(activity) {
+            @Override
+            public void onSuccess(PlaceModels.SearchDefaults data) {
+                if (data != null && data.province != null) {
+                    save(activity, data.province);
+                    onSet.run();
+                } else {
+                    fromLocation(activity, api, onSet);
+                }
+            }
+
+            @Override
+            public void onError(String message) {
+                fromLocation(activity, api, onSet);
+            }
+        });
+    }
+
+    /** Tỉnh có tâm hành chính gần vị trí cuối cùng của máy nhất (đủ dùng để chọn tỉnh mặc định) */
+    @SuppressLint("MissingPermission")
+    private static void fromLocation(Activity activity, DiscoveryApi api, Runnable onSet) {
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) return;
+        LocationManager lm = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
+        Location last = null;
+        for (String provider : lm.getProviders(true)) {
+            Location l = lm.getLastKnownLocation(provider);
+            if (l != null && (last == null || l.getTime() > last.getTime())) last = l;
+        }
+        if (last == null) return;
+        double lat = last.getLatitude();
+        double lng = last.getLongitude();
+        api.getProvinces().enqueue(new ApiCallback<List<PlaceModels.Province>>(activity) {
+            @Override
+            public void onSuccess(List<PlaceModels.Province> provinces) {
+                PlaceModels.Province best = null;
+                double bestD = Double.MAX_VALUE;
+                for (PlaceModels.Province p : provinces) {
+                    if (p.latitude == null || p.longitude == null) continue;
+                    double dLat = p.latitude - lat;
+                    double dLng = (p.longitude - lng) * Math.cos(Math.toRadians(lat));
+                    double d = dLat * dLat + dLng * dLng;
+                    if (d < bestD) { bestD = d; best = p; }
+                }
+                // Xa hơn ~2 độ (ngoài Việt Nam, ví dụ máy ảo ở Mỹ) thì giữ mặc định
+                if (best != null && bestD < 4) {
+                    save(activity, best);
+                    onSet.run();
+                }
+            }
+
+            @Override
+            public void onError(String message) {
+                // Giữ mặc định TP.HCM
+            }
+        });
     }
 
     public static String code(Context context) {

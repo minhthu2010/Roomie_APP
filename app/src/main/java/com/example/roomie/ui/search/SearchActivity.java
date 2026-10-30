@@ -50,6 +50,8 @@ import retrofit2.Call;
 public class SearchActivity extends AppCompatActivity {
 
     private static final long SUGGEST_DELAY_MS = 300;
+    /** Gõ từ 2 ký tự trở lên mới hiện gợi ý (thay phần lối tắt) */
+    private static final int MIN_TYPED = 2;
     private static final long FRESH_LOCATION_MS = 5 * 60 * 1000;
     private static final long LOCATE_TIMEOUT_MS = 15 * 1000;
     // Khung bao Việt Nam (gồm Hoàng Sa, Trường Sa): ngoài khung này thì chưa có phòng
@@ -74,10 +76,16 @@ public class SearchActivity extends AppCompatActivity {
     private LinearLayout layoutRecent;
     private LinearLayout layoutSchools;
     private LinearLayout layoutPlaces;
+    private LinearLayout layoutTypedWards;
+    private LinearLayout layoutTypedSchools;
+    private LinearLayout layoutTypedAddresses;
+    private View layoutIdle;
+    private LinearLayout layoutPopular;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private Runnable pendingSuggest;
     private Call<?> suggestCall;
+    private Call<?> typedSchoolsCall;
     private Call<?> placesCall;
 
     @Override
@@ -102,6 +110,11 @@ public class SearchActivity extends AppCompatActivity {
         layoutRecent = findViewById(R.id.layout_recent);
         layoutSchools = findViewById(R.id.layout_schools);
         layoutPlaces = findViewById(R.id.layout_places);
+        layoutTypedWards = findViewById(R.id.layout_typed_wards);
+        layoutTypedSchools = findViewById(R.id.layout_typed_schools);
+        layoutTypedAddresses = findViewById(R.id.layout_typed_addresses);
+        layoutIdle = findViewById(R.id.layout_idle);
+        layoutPopular = findViewById(R.id.layout_popular);
 
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
         findViewById(R.id.btn_search_room).setOnClickListener(v -> searchByText());
@@ -122,7 +135,8 @@ public class SearchActivity extends AppCompatActivity {
             }
             return false;
         });
-        // Gõ đến đâu gợi ý trường đến đó (chờ 300ms để không gọi API mỗi phím)
+        // Đang gõ: một danh sách gợi ý gộp (phường, trường, địa chỉ), ẩn phần lối tắt bên dưới.
+        // Chờ 300ms sau phím cuối để không gọi API mỗi phím.
         edtSearch.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -134,18 +148,22 @@ public class SearchActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
                 if (pendingSuggest != null) handler.removeCallbacks(pendingSuggest);
                 String q = s.toString().trim();
+                boolean typing = q.length() >= MIN_TYPED;
+                layoutIdle.setVisibility(typing ? View.GONE : View.VISIBLE);
+                layoutPlaces.setVisibility(typing ? View.VISIBLE : View.GONE);
+                if (!typing) {
+                    if (placesCall != null) placesCall.cancel();
+                    if (typedSchoolsCall != null) typedSchoolsCall.cancel();
+                    return;
+                }
                 pendingSuggest = () -> {
-                    loadSchools(q);
+                    loadTypedSchools(q);
                     loadPlaces(q);
                 };
                 handler.postDelayed(pendingSuggest, SUGGEST_DELAY_MS);
             }
         });
 
-        bindAreaChip(R.id.chip_area_q10);
-        bindAreaChip(R.id.chip_area_q3);
-        bindAreaChip(R.id.chip_area_binh_thanh);
-        bindAreaChip(R.id.chip_area_phu_nhuan);
         loadTopWards();
 
         renderNearMe();
@@ -158,6 +176,7 @@ public class SearchActivity extends AppCompatActivity {
         stopLocating();
         if (pendingSuggest != null) handler.removeCallbacks(pendingSuggest);
         if (suggestCall != null) suggestCall.cancel();
+        if (typedSchoolsCall != null) typedSchoolsCall.cancel();
         if (placesCall != null) placesCall.cancel();
         super.onDestroy();
     }
@@ -178,24 +197,9 @@ public class SearchActivity extends AppCompatActivity {
         finishWithCriteria();
     }
 
-    private void bindAreaChip(int chipId) {
-        TextView chip = findViewById(chipId);
-        if (chip == null) return;
-        chip.setOnClickListener(v -> {
-            String area = chip.getText().toString();
-            criteria.clearLocation();
-            criteria.area = area;
-            RecentSearchStore.Entry e = new RecentSearchStore.Entry();
-            e.title = area;
-            e.subtitle = getString(R.string.search_recent_area_sub, ProvinceStore.shortName(ProvinceStore.get(this).name));
-            e.area = area;
-            recentStore.add(e);
-            finishWithCriteria();
-        });
-    }
-
     private void chooseSchool(SearchModels.Landmark school) {
-        String name = school.shortName != null ? school.shortName : school.name;
+        // Tên đầy đủ: tên viết tắt trên OSM ("ĐHKT", "HUST") khó nhận ra
+        String name = school.name;
         criteria.clearLocation();
         criteria.landmarkId = school.id;
         criteria.landmarkName = name;
@@ -261,6 +265,42 @@ public class SearchActivity extends AppCompatActivity {
                     Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION});
         });
         container.addView(row);
+        loadProfileShortcuts(container);
+    }
+
+    /**
+     * Lối tắt lấy từ hồ sơ: "Gần [trường của bạn]" và "[phường] · khu vực của bạn".
+     * Hồ sơ chỉ là gợi ý, bấm vào mới tìm; hồ sơ chưa có thì không hiện gì.
+     */
+    private void loadProfileShortcuts(LinearLayout container) {
+        api.getSearchDefaults().enqueue(new ApiCallback<PlaceModels.SearchDefaults>(this) {
+            @Override
+            public void onSuccess(PlaceModels.SearchDefaults data) {
+                if (data == null || isFinishing()) return;
+                if (data.school != null && data.school.latitude != null) {
+                    SearchModels.Landmark school = data.school;
+                    // Tên đầy đủ: tên viết tắt trên OSM ("ĐHKT") khó nhận ra
+                    View row = inflateRow(container, getString(R.string.search_my_school_title, school.name),
+                            getString(R.string.search_my_school_sub), R.drawable.ic_school);
+                    row.setOnClickListener(v -> chooseSchool(school));
+                    container.addView(row);
+                }
+                if (data.ward != null) {
+                    PlaceModels.Ward ward = data.ward;
+                    ward.provinceName = data.province != null ? data.province.name : "";
+                    View row = inflateRow(container, ward.name,
+                            getString(R.string.search_my_area_sub, ProvinceStore.shortName(ward.provinceName)),
+                            R.drawable.ic_location);
+                    row.setOnClickListener(v -> chooseWard(ward));
+                    container.addView(row);
+                }
+            }
+
+            @Override
+            public void onError(String message) {
+                // Chưa đăng nhập / chưa có hồ sơ: chỉ hiện "Phòng gần vị trí của tôi"
+            }
+        });
     }
 
     private boolean hasLocationPermission() {
@@ -347,73 +387,100 @@ public class SearchActivity extends AppCompatActivity {
         finishWithCriteria();
     }
 
-    // ---------- Gợi ý phường/xã + địa chỉ khi gõ ----------
+    // ---------- Đang gõ: gợi ý gộp phường/xã, trường học, địa chỉ ----------
 
+    /** Phường/xã (trong tỉnh đang chọn) và địa chỉ cụ thể (Photon, ưu tiên gần tỉnh đang chọn) */
     private void loadPlaces(String q) {
         if (placesCall != null) placesCall.cancel();
-        if (q == null || q.length() < 2) {
-            layoutPlaces.setVisibility(View.GONE);
-            return;
-        }
-        layoutPlaces.setVisibility(View.VISIBLE);
-        layoutPlaces.removeAllViews();
-        layoutPlaces.addView(sectionNote(getString(R.string.places_searching)));
+        layoutTypedWards.removeAllViews();
+        layoutTypedAddresses.removeAllViews();
+        layoutTypedAddresses.addView(sectionNote(getString(R.string.places_searching)));
         Call<ApiResponse<PlaceModels.Suggest>> call = api.suggestPlaces(q, ProvinceStore.code(this));
         placesCall = call;
         call.enqueue(new ApiCallback<PlaceModels.Suggest>(this) {
             @Override
             public void onSuccess(PlaceModels.Suggest data) {
-                layoutPlaces.removeAllViews();
-                if (data == null || (data.wards.isEmpty() && data.addresses.isEmpty())) {
-                    layoutPlaces.addView(sectionNote(getString(R.string.places_empty)));
-                    return;
-                }
+                layoutTypedWards.removeAllViews();
+                layoutTypedAddresses.removeAllViews();
+                if (data == null) return;
                 if (!data.wards.isEmpty()) {
-                    layoutPlaces.addView(sectionTitle(getString(R.string.places_wards_title)));
+                    layoutTypedWards.addView(sectionTitle(getString(R.string.places_wards_title)));
                     for (PlaceModels.Ward w : data.wards) {
-                        View row = inflateRow(layoutPlaces, w.name,
+                        View row = inflateRow(layoutTypedWards, w.name,
                                 getString(R.string.places_ward_sub, w.provinceName, w.roomCount), R.drawable.ic_location);
                         row.setOnClickListener(v -> chooseWard(w));
-                        layoutPlaces.addView(row);
+                        layoutTypedWards.addView(row);
                     }
                 }
                 if (!data.addresses.isEmpty()) {
-                    layoutPlaces.addView(sectionTitle(getString(R.string.places_addresses_title)));
+                    layoutTypedAddresses.addView(sectionTitle(getString(R.string.places_addresses_title)));
                     for (PlaceModels.Address a : data.addresses) {
-                        View row = inflateRow(layoutPlaces, a.title, a.subtitle, R.drawable.ic_location_on);
+                        View row = inflateRow(layoutTypedAddresses, a.title, a.subtitle, R.drawable.ic_location_on);
                         row.setOnClickListener(v -> choosePlace(a));
-                        layoutPlaces.addView(row);
+                        layoutTypedAddresses.addView(row);
                     }
-                    layoutPlaces.addView(sectionNote(getString(R.string.places_source)));
+                    layoutTypedAddresses.addView(sectionNote(getString(R.string.places_source)));
+                } else if (data.wards.isEmpty() && layoutTypedSchools.getChildCount() == 0) {
+                    layoutTypedAddresses.addView(sectionNote(getString(R.string.places_empty)));
                 }
             }
 
             @Override
             public void onError(String message) {
-                layoutPlaces.removeAllViews();
-                layoutPlaces.addView(sectionNote(message));
+                layoutTypedAddresses.removeAllViews();
+                layoutTypedAddresses.addView(sectionNote(message));
             }
         });
     }
 
-    /** 4 chip "Khu vực được quan tâm" = 4 phường thật có nhiều phòng nhất trong tỉnh đang chọn; lỗi thì giữ chip quận cũ */
-    private void loadTopWards() {
-        int[] chipIds = {R.id.chip_area_q10, R.id.chip_area_q3, R.id.chip_area_binh_thanh, R.id.chip_area_phu_nhuan};
-        api.getWards(ProvinceStore.code(this), null, chipIds.length).enqueue(new ApiCallback<List<PlaceModels.Ward>>(this) {
+    /** Trường khớp chữ đang gõ (cả nước, trường trong tỉnh đang chọn lên trước) */
+    private void loadTypedSchools(String q) {
+        if (typedSchoolsCall != null) typedSchoolsCall.cancel();
+        layoutTypedSchools.removeAllViews();
+        Call<ApiResponse<List<SearchModels.Landmark>>> call =
+                api.suggestLandmarks(q, "university", 4, ProvinceStore.code(this));
+        typedSchoolsCall = call;
+        call.enqueue(new ApiCallback<List<SearchModels.Landmark>>(this) {
             @Override
-            public void onSuccess(List<PlaceModels.Ward> wards) {
-                if (wards == null || wards.size() < chipIds.length) return;
-                for (int i = 0; i < chipIds.length; i++) {
-                    TextView chip = findViewById(chipIds[i]);
-                    PlaceModels.Ward w = wards.get(i);
-                    chip.setText(w.name.replaceFirst("^(Phường|Xã) ", ""));
-                    chip.setOnClickListener(v -> chooseWard(w));
+            public void onSuccess(List<SearchModels.Landmark> schools) {
+                layoutTypedSchools.removeAllViews();
+                if (schools == null || schools.isEmpty()) return;
+                layoutTypedSchools.addView(sectionTitle(getString(R.string.places_schools_title)));
+                for (SearchModels.Landmark school : schools) {
+                    View row = inflateRow(layoutTypedSchools, school.name, schoolSubtitle(school), R.drawable.ic_school);
+                    row.setOnClickListener(v -> chooseSchool(school));
+                    layoutTypedSchools.addView(row);
                 }
             }
 
             @Override
             public void onError(String message) {
-                // Giữ chip quận mặc định
+                layoutTypedSchools.removeAllViews();
+            }
+        });
+    }
+
+    /** "Khu vực được quan tâm" = 4 phường có nhiều phòng nhất trong tỉnh đang chọn; không tải được thì ẩn cả mục */
+    private void loadTopWards() {
+        api.getWards(ProvinceStore.code(this), null, 4).enqueue(new ApiCallback<List<PlaceModels.Ward>>(this) {
+            @Override
+            public void onSuccess(List<PlaceModels.Ward> wards) {
+                layoutPopular.removeAllViews();
+                if (wards == null || wards.isEmpty()) return;
+                for (PlaceModels.Ward w : wards) {
+                    TextView chip = (TextView) LayoutInflater.from(SearchActivity.this)
+                            .inflate(R.layout.item_area_chip, layoutPopular, false);
+                    chip.setText(w.name.replaceFirst("^(Phường|Xã|Đặc khu) ", ""));
+                    chip.setOnClickListener(v -> chooseWard(w));
+                    layoutPopular.addView(chip);
+                }
+                findViewById(R.id.tv_popular_title).setVisibility(View.VISIBLE);
+                findViewById(R.id.scroll_popular).setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onError(String message) {
+                // Ẩn mục, các lối tắt khác vẫn dùng được
             }
         });
     }
@@ -477,9 +544,7 @@ public class SearchActivity extends AppCompatActivity {
                     layoutSchools.addView(empty);
                 }
                 for (SearchModels.Landmark school : schools) {
-                    String sub = getString(R.string.search_school_sub,
-                            school.addressText != null ? school.addressText : "", school.roomCount);
-                    View row = inflateRow(layoutSchools, school.name, sub, R.drawable.ic_school);
+                    View row = inflateRow(layoutSchools, school.name, schoolSubtitle(school), R.drawable.ic_school);
                     row.setOnClickListener(v -> chooseSchool(school));
                     layoutSchools.addView(row);
                 }
@@ -491,6 +556,12 @@ public class SearchActivity extends AppCompatActivity {
                 layoutSchools.removeAllViews();
             }
         });
+    }
+
+    /** "268 Lý Thường Kiệt · 3 phòng trong 3km" (bỏ phần địa chỉ nếu OSM không có) */
+    private String schoolSubtitle(SearchModels.Landmark school) {
+        String rooms = getString(R.string.search_school_rooms, school.roomCount);
+        return school.addressText != null ? school.addressText + " · " + rooms : rooms;
     }
 
     private View inflateRow(LinearLayout parent, String title, String subtitle, int iconRes) {

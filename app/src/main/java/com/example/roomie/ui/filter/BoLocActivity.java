@@ -4,59 +4,43 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.roomie.R;
-import com.example.roomie.data.discovery.DiscoveryApi;
-import com.example.roomie.data.discovery.PlaceModels;
-import com.example.roomie.data.remote.ApiCallback;
-import com.example.roomie.data.remote.ApiClient;
-import com.example.roomie.ui.search.ProvinceStore;
 import com.example.roomie.ui.search.RoomFormat;
 import com.example.roomie.ui.search.SearchCriteria;
 import com.google.android.material.slider.RangeSlider;
 
-import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * Bộ lọc phòng: khu vực, ngân sách, loại chỗ ở, giới tính, tiện ích.
- * Nhận và trả SearchCriteria (SearchCriteria.EXTRA); "Xem phòng" áp dụng, "Xóa lọc" bỏ hết.
+ * Bộ lọc phòng: ngân sách, loại chỗ ở, giới tính, tiện ích, ngày chuyển vào...
+ * Không chọn địa chỉ ở đây (ô tìm kiếm lo phần "ở đâu"); chỉ có bán kính khi đang tìm quanh 1 điểm.
+ * Nhận và trả SearchCriteria (SearchCriteria.EXTRA); "Xem phòng" áp dụng, "Xóa lọc" bỏ hết bộ lọc.
  */
 public class BoLocActivity extends AppCompatActivity {
 
     private static final float BUDGET_MAX = 10_000_000f;
 
     private SearchCriteria criteria;
-    /** Phường/xã thật, tải 1 lần khi mở hộp chọn */
-    private List<PlaceModels.Ward> wards;
 
-    private TextView tvArea;
     private TextView tvBudget;
     private RangeSlider rangeBudget;
     // chip -> giá trị gửi API
@@ -95,19 +79,16 @@ public class BoLocActivity extends AppCompatActivity {
         amenityChips.put(R.id.img_amenity_kitchen, "kitchen");
         amenityChips.put(R.id.img_amenity_parking, "parking");
 
-        tvArea = findViewById(R.id.tv_filter_area);
         tvBudget = findViewById(R.id.tv_budget_range);
         rangeBudget = findViewById(R.id.range_budget);
         tvRadiusNote = findViewById(R.id.tv_radius_note);
         rangeBudget.setTickVisible(false);   // bước 500.000đ tạo 20 dấu chấm trên thanh
 
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
-        findViewById(R.id.row_filter_area).setOnClickListener(v -> showAreaDialog());
 
-        // "Đặt lại" và "Xóa lọc": bỏ bộ lọc (giữ từ khóa / trường đang tìm)
+        // "Đặt lại" và "Xóa lọc": bỏ bộ lọc; vị trí đang tìm (ô tìm kiếm) giữ nguyên
         View.OnClickListener reset = v -> {
             criteria.clearFilters();
-            if (criteria.area != null || criteria.wardCode != null) criteria.clearLocation();
             bindAll();
         };
         findViewById(R.id.btn_reset).setOnClickListener(reset);
@@ -215,9 +196,14 @@ public class BoLocActivity extends AppCompatActivity {
 
     private void bindChoices() {
         for (Runnable r : choiceBinders) r.run();
-        tvRadiusNote.setText(criteria.hasDistanceOrigin()
-                ? getString(R.string.filter_radius_note_on, criteria.locationLabel())
-                : getString(R.string.filter_radius_note_off));
+        // Bán kính chỉ có nghĩa khi đang tìm quanh trường / địa chỉ / vị trí của bạn
+        int radius = criteria.hasDistanceOrigin() ? View.VISIBLE : View.GONE;
+        findViewById(R.id.tv_radius_title).setVisibility(radius);
+        findViewById(R.id.scroll_radius).setVisibility(radius);
+        tvRadiusNote.setVisibility(radius);
+        if (criteria.hasDistanceOrigin()) {
+            tvRadiusNote.setText(getString(R.string.filter_radius_note_on, criteria.locationLabel()));
+        }
     }
 
     private int dp(int value) {
@@ -225,28 +211,12 @@ public class BoLocActivity extends AppCompatActivity {
     }
 
     private void bindAll() {
-        tvArea.setText(areaLabel());
         rangeBudget.setValues(
                 criteria.minRent != null ? (float) criteria.minRent : 0f,
                 criteria.maxRent != null ? (float) criteria.maxRent : BUDGET_MAX);
         tvBudget.setText(RoomFormat.budgetLabel(this, criteria.minRent, criteria.maxRent));
         bindChips();
         bindChoices();
-    }
-
-    /**
-     * Ô "Khu vực" ghi đúng vị trí đang tìm: quanh vị trí / địa chỉ / trường (khi đó không lọc theo tỉnh),
-     * phường / quận, từ khóa, hoặc cả tỉnh đang chọn
-     */
-    private String areaLabel() {
-        String province = ProvinceStore.shortName(ProvinceStore.get(this).name);
-        if (criteria.nearMe) return getString(R.string.chip_near_me);
-        if (criteria.landmarkName != null) return getString(R.string.chip_near, criteria.landmarkName);
-        if (criteria.placeName != null) return getString(R.string.chip_near_place, criteria.placeName);
-        String area = criteria.wardName != null ? criteria.wardName : criteria.area;
-        if (area != null) return getString(R.string.filter_area_suffix, area, province);
-        if (criteria.query != null) return getString(R.string.filter_area_query, criteria.query, province);
-        return getString(R.string.filter_area_all_in, province);
     }
 
     private void bindChips() {
@@ -286,86 +256,4 @@ public class BoLocActivity extends AppCompatActivity {
         v.setPadding((int) (horizontalDp * d), (int) (10 * d), (int) (horizontalDp * d), (int) (10 * d));
     }
 
-    /** Chọn phường/xã thật của tỉnh/thành đang chọn (ProvinceStore), gõ để lọc không dấu */
-    private void showAreaDialog() {
-        View content = LayoutInflater.from(this).inflate(R.layout.dialog_ward_picker, null, false);
-        EditText edtFilter = content.findViewById(R.id.edt_ward_filter);
-        TextView tvStatus = content.findViewById(R.id.tv_ward_status);
-        ListView list = content.findViewById(R.id.list_wards);
-
-        // Mục đầu "Tất cả khu vực" (ward = null)
-        List<PlaceModels.Ward> shown = new ArrayList<>();
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, new ArrayList<>());
-        list.setAdapter(adapter);
-
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle(getString(R.string.filter_ward_title, ProvinceStore.shortName(ProvinceStore.get(this).name)))
-                .setView(content)
-                .setNegativeButton(R.string.btn_cancel, null)
-                .create();
-
-        Runnable refresh = () -> {
-            String q = normalize(edtFilter.getText().toString());
-            shown.clear();
-            adapter.clear();
-            shown.add(null);
-            adapter.add(getString(R.string.filter_area_all_in, ProvinceStore.shortName(ProvinceStore.get(this).name)));
-            if (wards == null) return;
-            for (PlaceModels.Ward w : wards) {
-                if (!q.isEmpty() && !normalize(w.name).contains(q)) continue;
-                shown.add(w);
-                // "Phường Diên Hồng · 2 phòng"
-                adapter.add(w.roomCount > 0 ? getString(R.string.places_ward_sub, w.name, w.roomCount) : w.name);
-            }
-            adapter.notifyDataSetChanged();
-            tvStatus.setVisibility(View.GONE);
-        };
-        edtFilter.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                refresh.run();
-            }
-        });
-        list.setOnItemClickListener((parent, view, position, id) -> {
-            PlaceModels.Ward w = shown.get(position);
-            criteria.clearLocation();
-            if (w != null) {
-                criteria.wardCode = w.code;
-                criteria.wardName = w.name;
-            }
-            dialog.dismiss();
-            bindAll();
-        });
-
-        dialog.show();
-        if (wards != null) {
-            refresh.run();
-            return;
-        }
-        ApiClient.create(this, DiscoveryApi.class).getWards(ProvinceStore.code(this), null, 400)
-                .enqueue(new ApiCallback<List<PlaceModels.Ward>>(this) {
-                    @Override
-                    public void onSuccess(List<PlaceModels.Ward> data) {
-                        wards = data != null ? data : new ArrayList<>();
-                        refresh.run();
-                    }
-
-                    @Override
-                    public void onError(String message) {
-                        tvStatus.setText(message);
-                    }
-                });
-    }
-
-    /** "Phường Xuân Hoà" -> "phuong xuan hoa" để lọc không dấu */
-    private static String normalize(String s) {
-        return Normalizer.normalize(s, Normalizer.Form.NFD).replaceAll("\\p{M}", "")
-                .replace('đ', 'd').replace('Đ', 'D').toLowerCase(Locale.ROOT).trim();
-    }
 }
