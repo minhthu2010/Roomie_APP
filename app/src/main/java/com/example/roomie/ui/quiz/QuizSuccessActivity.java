@@ -13,6 +13,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.roomie.R;
+import com.example.roomie.data.remote.SessionManager;
 import com.example.roomie.ui.home.HomeActivity;
 
 import java.util.Locale;
@@ -38,6 +39,9 @@ public class QuizSuccessActivity extends AppCompatActivity {
         // TODO: lấy tên hiển thị từ API hồ sơ khi A làm xong
         String userName = getIntent().getStringExtra("USER_NAME");
         if (userName == null || userName.isEmpty()) {
+            userName = new SessionManager(this).getGreetingName();
+        }
+        if (userName == null) {
             userName = "bạn";
         }
 

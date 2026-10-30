@@ -23,6 +23,7 @@ import com.example.roomie.data.discovery.DiscoveryApi;
 import com.example.roomie.data.discovery.SearchModels;
 import com.example.roomie.data.remote.ApiCallback;
 import com.example.roomie.data.remote.ApiClient;
+import com.example.roomie.data.remote.SessionManager;
 import com.example.roomie.ui.filter.BoLocActivity;
 import com.example.roomie.ui.search.ProvinceStore;
 import com.example.roomie.ui.search.RoomCardBinder;
@@ -350,5 +351,21 @@ public class HomeActivity extends AppCompatActivity {
                     }
                 })
                 .show();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        showGreeting();
+    }
+
+    // "Chào Linh, tìm tổ ấm nhé" theo tên người đang đăng nhập (người A lưu trong SessionManager)
+    private void showGreeting() {
+        TextView tvGreeting = findViewById(R.id.tv_header_greeting);
+        if (tvGreeting == null) return;
+        String name = new SessionManager(this).getGreetingName();
+        tvGreeting.setText(name != null
+                ? getString(R.string.header_greeting_name, name)
+                : getString(R.string.header_greeting));
     }
 }

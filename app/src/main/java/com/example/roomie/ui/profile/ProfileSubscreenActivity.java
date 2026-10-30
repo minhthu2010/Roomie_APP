@@ -192,6 +192,7 @@ public class ProfileSubscreenActivity extends AppCompatActivity {
         showUnavailableOnParent(screen, R.id.iv_chevron_faq3);
         showUnavailableOnParent(screen, R.id.iv_chevron_faq4);
         showUnavailableOnParent(screen, R.id.iv_chevron_faq5);
+        showAccountName(screen);
         NotificationsScreen.bind(this, screen);
         SettingsSwitches.bind(this, screen);
         bindBack(screen, R.id.btn_stay_logged_in);
@@ -341,6 +342,7 @@ public class ProfileSubscreenActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(AccountModels.Profile profile) {
                     AppNotificationHelper.showSuccess(ProfileSubscreenActivity.this, "Đã lưu thay đổi");
+                    new SessionManager(ProfileSubscreenActivity.this).saveDisplayName(profile.displayName);
                     save.setEnabled(true);
                     onBackPressed();
                 }
@@ -352,6 +354,16 @@ public class ProfileSubscreenActivity extends AppCompatActivity {
                 }
             });
         });
+    }
+
+    // Tên người đang đăng nhập ở màn Xác minh & an toàn và cuối màn Quyền riêng tư
+    private void showAccountName(View root) {
+        String name = new SessionManager(this).getDisplayName();
+        if (name == null) return;
+        TextView verifiedSub = root.findViewById(R.id.tv_verified_sub);
+        if (verifiedSub != null) verifiedSub.setText(getString(R.string.verified_sub_name, name));
+        TextView footer = root.findViewById(R.id.tv_footer_account);
+        if (footer != null) footer.setText(getString(R.string.footer_account_name, name));
     }
 
     private void stylePill(TextView pill, boolean selected) {

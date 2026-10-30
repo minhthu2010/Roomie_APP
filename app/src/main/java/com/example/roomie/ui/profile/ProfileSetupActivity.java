@@ -25,6 +25,7 @@ import com.example.roomie.data.accounts.AccountModels;
 import com.example.roomie.data.accounts.AccountsApi;
 import com.example.roomie.data.remote.ApiCallback;
 import com.example.roomie.data.remote.ApiClient;
+import com.example.roomie.data.remote.SessionManager;
 import com.example.roomie.ui.quiz.QuizIntroActivity;
 
 import java.util.Calendar;
@@ -240,6 +241,7 @@ public class ProfileSetupActivity extends AppCompatActivity {
             @Override
             public void onSuccess(AccountModels.Profile profile) {
                 AppNotificationHelper.showSuccess(ProfileSetupActivity.this, "Đã lưu hồ sơ thành công!");
+                new SessionManager(ProfileSetupActivity.this).saveDisplayName(profile.displayName);
                 button.setEnabled(true);
                 if (getIntent().getBooleanExtra(EXTRA_FIRST_SETUP, false)) {
                     // Giữ màn này dưới bài test để nút quay lại ở bước 3 trở về đây

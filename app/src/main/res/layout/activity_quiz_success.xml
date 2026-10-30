@@ -142,7 +142,7 @@
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="16dp"
                 android:fontFamily="sans-serif-medium"
-                android:text="Xong rồi, Linh!"
+                android:text="Xong rồi!"
                 android:textColor="@color/text_white"
                 android:textSize="26sp"
                 android:textStyle="bold" />
