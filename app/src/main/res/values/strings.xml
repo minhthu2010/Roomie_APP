@@ -25,7 +25,7 @@
     <string name="login_welcome_back">CHÀO MỪNG TRỜ LẠI</string>
     <string name="login_title">Đăng nhập</string>
     <string name="login_desc">Tiếp tục khám phá các phòng phù hợp với thói quen sống của bạn.</string>
-    <string name="label_email_or_phone">Số điện thoại hoặc email</string>
+    <string name="label_email_or_phone">Email</string>
     <string name="hint_email_or_phone">linh.nguyen@email.com</string>
     <string name="label_password">Mật khẩu</string>
     <string name="hint_password">••••••••</string>
@@ -40,8 +40,8 @@
     <string name="forgot_header_subtitle">KHÔI PHỤC TÀI KHOẢN</string>
     <string name="forgot_header_title">Quên mật khẩu</string>
     <string name="forgot_heading">Lấy lại quyền truy cập</string>
-    <string name="forgot_subtext">Nhập số điện thoại hoặc email bạn đã dùng để đăng ký Roomie.</string>
-    <string name="forgot_input_example">Ví dụ: 0901234567 hoặc ten@email.com</string>
+    <string name="forgot_subtext">Nhập email bạn đã dùng để đăng ký Roomie.</string>
+    <string name="forgot_input_example">Ví dụ: ten@email.com</string>
     <string name="forgot_banner_info">Roomie sẽ gửi mã 6 số để xác thực trước khi bạn đặt mật khẩu mới.</string>
     <string name="btn_send_recovery_code">Gửi mã khôi phục</string>
     <string name="back_to_login">Quay lại đăng nhập</string>
@@ -59,7 +59,7 @@
     <string name="otp_expiry_timer">Mã hết hạn sau 04:36</string>
     <string name="otp_resend_timer">Chưa nhận được mã? Gửi lại sau 00:24</string>
     <string name="btn_verify">Xác thực</string>
-    <string name="change_email_or_phone">Đổi số điện thoại hoặc email</string>
+    <string name="change_email_or_phone">Đổi email</string>
 
     <!-- Reset Password Strings -->
     <string name="reset_header_subtitle">KHÔI PHỤC - MẬT KHẨU MỚI</string>

@@ -47,12 +47,12 @@ public final class AccountModels {
     }
 
     public static class LoginRequest {
-        public final String account;
+        public final String email;
         public final String password;
         public final String deviceLabel = deviceLabel();
 
-        public LoginRequest(String account, String password) {
-            this.account = account;
+        public LoginRequest(String email, String password) {
+            this.email = email;
             this.password = password;
         }
     }
@@ -76,21 +76,12 @@ public final class AccountModels {
         }
     }
 
-    /** Email hoặc số điện thoại (màn Quên mật khẩu) */
-    public static class AccountRequest {
-        public final String account;
-
-        public AccountRequest(String account) {
-            this.account = account;
-        }
-    }
-
     public static class VerifyResetOtpRequest {
-        public final String account;
+        public final String email;
         public final String code;
 
-        public VerifyResetOtpRequest(String account, String code) {
-            this.account = account;
+        public VerifyResetOtpRequest(String email, String code) {
+            this.email = email;
             this.code = code;
         }
     }

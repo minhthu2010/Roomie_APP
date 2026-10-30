@@ -135,8 +135,14 @@ public class VerifyOtpActivity extends AppCompatActivity {
 
     private void showDestination(String maskedEmail) {
         if (tvVerifySubtext == null) return;
-        String target = maskedEmail != null ? maskedEmail : "email của tài khoản";
+        String target = maskEmail(maskedEmail != null ? maskedEmail : account);
         tvVerifySubtext.setText("Mã 6 số đã được gửi đến " + target + ". Mã có hiệu lực trong 05:00.");
+    }
+
+    /** "mailinh@roomie.test" -> "ma•••@roomie.test" */
+    private static String maskEmail(String email) {
+        int at = email.indexOf('@');
+        return at > 2 ? email.substring(0, 2) + "•••" + email.substring(at) : email;
     }
 
     private void showOtpError(String message) {
@@ -170,7 +176,7 @@ public class VerifyOtpActivity extends AppCompatActivity {
 
     private void resend() {
         if (tvResendCode != null) tvResendCode.setOnClickListener(null);
-        api.forgotPassword(new AccountModels.AccountRequest(account))
+        api.forgotPassword(new AccountModels.EmailRequest(account))
                 .enqueue(new ApiCallback<AccountModels.OtpChallenge>(this) {
                     @Override
                     public void onSuccess(AccountModels.OtpChallenge challenge) {

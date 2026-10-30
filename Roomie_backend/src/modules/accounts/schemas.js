@@ -6,8 +6,7 @@ const strongPassword = z.string().min(8, 'Mật khẩu mới tối thiểu 8 ký
   .regex(/[A-Z]/, 'Mật khẩu mới cần có chữ hoa')
   .regex(/\d/, 'Mật khẩu mới cần có chữ số');
 
-const email = z.string().trim().toLowerCase().max(254).pipe(z.email('Email không hợp lệ'));
+const email = z.string('Vui lòng nhập email').trim().toLowerCase().max(254).pipe(z.email('Email không hợp lệ'));
 const otpCode = z.string().trim().regex(/^\d{6}$/, 'Mã xác thực gồm 6 chữ số');
-const account = z.string().trim().min(1, 'Vui lòng nhập số điện thoại hoặc email').max(254);
 
-module.exports = { strongPassword, email, otpCode, account };
+module.exports = { strongPassword, email, otpCode };

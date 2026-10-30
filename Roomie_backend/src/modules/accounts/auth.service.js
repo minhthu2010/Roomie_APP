@@ -97,18 +97,12 @@ async function verifySignup({ email, code, deviceLabel }) {
   });
 }
 
-// Đăng nhập bằng email hoặc số điện thoại + mật khẩu
-async function login({ account, password, deviceLabel }) {
-  const isEmail = account.includes('@');
-  const value = isEmail ? account : account.replace(/[\s.-]/g, '');
-  const { rows } = await db.query(
-    `SELECT user_id, email, password_hash, account_status, email_verified_at
-       FROM users
-      WHERE deleted_at IS NULL AND ${isEmail ? 'LOWER(email) = LOWER($1)' : 'phone_number = $1'}`, [value]);
-  const user = rows[0];
+// Đăng nhập bằng email + mật khẩu
+async function login({ email, password, deviceLabel }) {
+  const user = await findActiveUserByEmail(email);
 
   const ok = user && user.password_hash && await bcrypt.compare(password, user.password_hash);
-  if (!ok) throw new AppError(401, 'INVALID_CREDENTIALS', 'Tài khoản hoặc mật khẩu không đúng');
+  if (!ok) throw new AppError(401, 'INVALID_CREDENTIALS', 'Email hoặc mật khẩu không đúng');
   if (user.account_status !== 'active') throw new AppError(403, 'ACCOUNT_SUSPENDED', 'Tài khoản của bạn đã bị khóa');
   if (!user.email_verified_at) {
     throw new AppError(403, 'EMAIL_NOT_VERIFIED', 'Tài khoản chưa xác thực email', { email: user.email });
