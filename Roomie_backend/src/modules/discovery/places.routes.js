@@ -2,7 +2,13 @@ const router = require('express').Router();
 const { z } = require('zod');
 const validate = require('../../common/validate');
 const { ok } = require('../../common/response');
+const { requireAuth } = require('../../middleware/auth');
 const places = require('./places.service');
+
+// Tỉnh / phường / trường trong hồ sơ: app dùng làm mặc định khi tìm phòng (không lọc bớt phòng)
+router.get('/me/search-defaults', requireAuth, async (req, res) => {
+  ok(res, await places.searchDefaults(req.user.userId));
+});
 
 // Gợi ý khi gõ ở ô tìm kiếm: phường/xã thật (DB) + địa chỉ cụ thể có tọa độ (Photon).
 // provinceCode: tỉnh người dùng đang chọn -> phường trong tỉnh đó, địa chỉ ưu tiên gần tỉnh đó
