@@ -86,13 +86,11 @@ public class BoLocActivity extends AppCompatActivity {
 
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
 
-        // "Đặt lại" và "Xóa lọc": bỏ bộ lọc; vị trí đang tìm (ô tìm kiếm) giữ nguyên
-        View.OnClickListener reset = v -> {
+        // "Xóa lọc": bỏ bộ lọc; vị trí đang tìm (ô tìm kiếm) giữ nguyên
+        findViewById(R.id.btn_clear_filter).setOnClickListener(v -> {
             criteria.clearFilters();
             bindAll();
-        };
-        findViewById(R.id.btn_reset).setOnClickListener(reset);
-        findViewById(R.id.btn_clear_filter).setOnClickListener(reset);
+        });
 
         findViewById(R.id.btn_apply_filter).setOnClickListener(v -> {
             setResult(RESULT_OK, new Intent().putExtra(SearchCriteria.EXTRA, criteria));
