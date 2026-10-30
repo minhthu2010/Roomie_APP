@@ -114,7 +114,12 @@ public final class AccountModels {
         public Integer birthYear;
         public String occupation;
         public String schoolOrWorkplace;
+        /** Trường chọn từ gợi ý; 0 = bỏ trường đã chọn (Gson không gửi null) */
+        public Integer landmarkId;
         public String livingAreaText;
+        /** Khu vực muốn tìm phòng; livingWardCode "" = cả tỉnh */
+        public String livingProvinceCode;
+        public String livingWardCode;
         public Long budgetMin;
         public Long budgetMax;
         /** yyyy-MM-dd */
@@ -184,7 +189,14 @@ public final class AccountModels {
         public Integer birthYear;
         public String occupation;
         public String schoolOrWorkplace;
+        public Integer landmarkId;
+        public String landmarkName;
+        public String landmarkShortName;
         public String livingAreaText;
+        public String livingProvinceCode;
+        public String livingProvinceName;
+        public String livingWardCode;
+        public String livingWardName;
         public Long budgetMin;
         public Long budgetMax;
         public String moveInDate;

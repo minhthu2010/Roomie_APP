@@ -110,7 +110,7 @@
     <string name="label_display_name">Tên hiển thị</string>
     <string name="hint_display_name">Mai Linh</string>
     <string name="label_occupation">Nghề nghiệp</string>
-    <string name="label_location">Khu vực</string>
+    <string name="label_location">Khu vực muốn tìm phòng</string>
     <string name="label_bio">Giới thiệu ngắn</string>
     <string name="hint_bio">Mình là sinh viên, thích không gian gọn gàng và yên tĩnh để học.</string>
     <string name="label_budget">Ngân sách / tháng</string>
@@ -692,7 +692,7 @@
     <string name="sample_school_workplace">ĐH Bách Khoa TP.HCM</string>
     <string name="label_about_me">Giới thiệu bản thân</string>
     <string name="sample_about_me">Mình thích không gian gọn gàng, yên tĩnh để học. Mong tìm được bạn cùng phòng tôn trọng và chia sẻ việc nhà.</string>
-    <string name="label_living_area">Khu vực sinh sống</string>
+    <string name="label_living_area">Khu vực muốn tìm phòng</string>
     <string name="sample_living_area">Quận 10, TP. Hồ Chí Minh</string>
     <string name="disclaimer_edit_profile">Thông tin này xuất hiện trên hồ sơ của bạn. Bạn có thể điều chỉnh hiển thị trong Quyền riêng tư.</string>
     <string name="btn_save_changes">Lưu thay đổi</string>
@@ -868,4 +868,12 @@
     <string name="header_greeting_name">Chào %1$s, tìm tổ ấm nhé</string>
     <string name="verified_sub_name">%1$s · Xác minh giúp kết nối tin cậy hơn.</string>
     <string name="footer_account_name">Roomie · Tài khoản %1$s</string>
+    <string name="area_whole_province">Toàn bộ %1$s</string>
+    <string name="area_pick_ward_title">Chọn phường/xã ở %1$s</string>
+    <string name="school_pick_title">Chọn trường / nơi làm</string>
+    <string name="school_pick_hint">Gõ tên trường, VD: bach khoa</string>
+    <string name="school_other">Nơi làm khác: “%1$s”</string>
+    <string name="school_none">Bỏ chọn</string>
+    <string name="loading">Đang tải…</string>
+    <string name="no_result">Không tìm thấy kết quả</string>
 </resources>

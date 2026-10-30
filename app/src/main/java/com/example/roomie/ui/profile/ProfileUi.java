@@ -34,8 +34,11 @@ final class ProfileUi {
     static final String[] GENDER_LABELS = {"Nữ", "Nam", "Khác", "Không muốn nói"};
     static final String[] GENDER_VALUES = {"female", "male", "other", "prefer_not_to_say"};
 
-    static final String[] AREAS = {"Quận 1", "Quận 3", "Quận 5", "Quận 7", "Quận 10", "Bình Thạnh",
-            "Thủ Đức", "Tân Bình", "Gò Vấp", "Phú Nhuận", "Khác"};
+    /** Khu vực muốn tìm phòng đã lưu; null nếu chưa chọn tỉnh/phường thật */
+    static PlacePickers.Area areaOf(AccountModels.Profile p) {
+        if (p.livingProvinceCode == null) return null;
+        return new PlacePickers.Area(p.livingProvinceCode, p.livingProvinceName, p.livingWardCode, p.livingWardName);
+    }
 
     static String label(String[] labels, String[] values, String value) {
         if (value == null) return null;
@@ -61,12 +64,14 @@ final class ProfileUi {
         return years.toArray(new String[0]);
     }
 
-    /** "Sinh viên · Quận 10" cho thẻ hồ sơ */
+    /** "Sinh viên · Phường Bàn Cờ, TP. Hồ Chí Minh" cho thẻ hồ sơ */
     static String subtitle(AccountModels.Profile p) {
         List<String> parts = new ArrayList<>();
         String occ = label(OCCUPATION_LABELS, OCCUPATION_VALUES, p.occupation);
         if (occ != null) parts.add(occ);
-        if (p.livingAreaText != null && !p.livingAreaText.isEmpty()) parts.add(p.livingAreaText);
+        PlacePickers.Area area = areaOf(p);
+        if (area != null) parts.add(area.label());
+        else if (p.livingAreaText != null && !p.livingAreaText.isEmpty()) parts.add(p.livingAreaText);
         else if (p.schoolOrWorkplace != null && !p.schoolOrWorkplace.isEmpty()) parts.add(p.schoolOrWorkplace);
         if (parts.isEmpty()) return p.email;
         return android.text.TextUtils.join(" · ", parts);
