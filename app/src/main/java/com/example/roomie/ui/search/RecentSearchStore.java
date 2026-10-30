@@ -23,10 +23,16 @@ public class RecentSearchStore {
         public String query;
         public String area;
         public Integer landmarkId;
+        /** Địa chỉ đã tra: tên + tọa độ */
+        public String placeName;
+        public String wardCode;
+        public Double lat;
+        public Double lng;
 
         boolean sameTarget(Entry o) {
             return Objects.equals(query, o.query) && Objects.equals(area, o.area)
-                    && Objects.equals(landmarkId, o.landmarkId);
+                    && Objects.equals(landmarkId, o.landmarkId) && Objects.equals(wardCode, o.wardCode)
+                    && Objects.equals(placeName, o.placeName) && Objects.equals(lat, o.lat);
         }
 
         /** Áp mục này vào điều kiện tìm kiếm (giữ nguyên bộ lọc) */
@@ -36,6 +42,12 @@ public class RecentSearchStore {
             c.area = area;
             c.landmarkId = landmarkId;
             c.landmarkName = landmarkId != null ? title : null;
+            c.placeName = placeName;
+            c.wardCode = wardCode;
+            c.wardName = wardCode != null ? title : null;
+            c.centerLat = lat;
+            c.centerLng = lng;
+            if (c.hasDistanceOrigin()) c.sort = SearchCriteria.SORT_DISTANCE;
         }
     }
 

@@ -77,6 +77,19 @@ public interface DiscoveryApi {
     @GET("room-posts/{postId}/nearby")
     Call<ApiResponse<MapModels.Nearby>> getNearby(@Path("postId") String postId);
 
+    // ---------- Phường/xã thật + tra địa chỉ ----------
+
+    @GET("places/suggest")
+    Call<ApiResponse<PlaceModels.Suggest>> suggestPlaces(@Query("q") String q);
+
+    @GET("admin-units/wards")
+    Call<ApiResponse<List<PlaceModels.Ward>>> getWards(@Query("provinceCode") String provinceCode,
+                                                       @Query("q") String q,
+                                                       @Query("limit") Integer limit);
+
+    @GET("admin-units/wards/{wardCode}/center")
+    Call<ApiResponse<PlaceModels.WardCenter>> getWardCenter(@Path("wardCode") String wardCode);
+
     @GET("landmarks/suggest")
     Call<ApiResponse<List<SearchModels.Landmark>>> suggestLandmarks(@Query("q") String q,
                                                                     @Query("type") String type,

@@ -112,6 +112,14 @@
                 android:textColor="@color/text_secondary"
                 android:textSize="12sp" />
 
+            <!-- Gợi ý khi gõ: phường/xã thật + địa chỉ có tọa độ (item_search_suggestion thêm từ code) -->
+            <LinearLayout
+                android:id="@+id/layout_places"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone" />
+
             <!-- Section 2: Tìm kiếm gần đây (lưu trên máy, item_search_suggestion thêm từ code) -->
             <RelativeLayout
                 android:id="@+id/layout_recent_header"

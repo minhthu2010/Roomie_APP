@@ -1,6 +1,7 @@
 package com.example.roomie.ui.search;
 
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -22,6 +23,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.roomie.R;
 import com.example.roomie.data.discovery.DiscoveryApi;
+import com.example.roomie.data.discovery.PlaceModels;
 import com.example.roomie.data.discovery.SearchModels;
 import com.example.roomie.data.remote.ApiCallback;
 import com.example.roomie.data.remote.ApiClient;
@@ -47,10 +49,12 @@ public class SearchActivity extends AppCompatActivity {
     private View layoutRecentHeader;
     private LinearLayout layoutRecent;
     private LinearLayout layoutSchools;
+    private LinearLayout layoutPlaces;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private Runnable pendingSuggest;
     private Call<?> suggestCall;
+    private Call<?> placesCall;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +77,7 @@ public class SearchActivity extends AppCompatActivity {
         layoutRecentHeader = findViewById(R.id.layout_recent_header);
         layoutRecent = findViewById(R.id.layout_recent);
         layoutSchools = findViewById(R.id.layout_schools);
+        layoutPlaces = findViewById(R.id.layout_places);
 
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
         findViewById(R.id.btn_search_room).setOnClickListener(v -> searchByText());
@@ -81,8 +86,7 @@ public class SearchActivity extends AppCompatActivity {
             renderRecent();
         });
 
-        String current = criteria.landmarkName != null ? criteria.landmarkName
-                : criteria.area != null ? criteria.area : criteria.query;
+        String current = criteria.locationLabel();
         if (current != null) {
             edtSearch.setText(current);
             edtSearch.setSelection(current.length());
@@ -105,7 +109,11 @@ public class SearchActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {
                 if (pendingSuggest != null) handler.removeCallbacks(pendingSuggest);
-                pendingSuggest = () -> loadSchools(s.toString().trim());
+                String q = s.toString().trim();
+                pendingSuggest = () -> {
+                    loadSchools(q);
+                    loadPlaces(q);
+                };
                 handler.postDelayed(pendingSuggest, SUGGEST_DELAY_MS);
             }
         });
@@ -114,6 +122,7 @@ public class SearchActivity extends AppCompatActivity {
         bindAreaChip(R.id.chip_area_q3);
         bindAreaChip(R.id.chip_area_binh_thanh);
         bindAreaChip(R.id.chip_area_phu_nhuan);
+        loadTopWards();
 
         renderRecent();
         loadSchools(null);
@@ -123,6 +132,7 @@ public class SearchActivity extends AppCompatActivity {
     protected void onDestroy() {
         if (pendingSuggest != null) handler.removeCallbacks(pendingSuggest);
         if (suggestCall != null) suggestCall.cancel();
+        if (placesCall != null) placesCall.cancel();
         super.onDestroy();
     }
 
@@ -163,11 +173,15 @@ public class SearchActivity extends AppCompatActivity {
         criteria.clearLocation();
         criteria.landmarkId = school.id;
         criteria.landmarkName = name;
+        criteria.centerLat = school.latitude;
+        criteria.centerLng = school.longitude;
         criteria.sort = SearchCriteria.SORT_DISTANCE;
         RecentSearchStore.Entry e = new RecentSearchStore.Entry();
         e.title = name;
         e.subtitle = getString(R.string.search_recent_school_sub);
         e.landmarkId = school.id;
+        e.lat = school.latitude;
+        e.lng = school.longitude;
         recentStore.add(e);
         finishWithCriteria();
     }
@@ -175,6 +189,130 @@ public class SearchActivity extends AppCompatActivity {
     private void finishWithCriteria() {
         setResult(RESULT_OK, new Intent().putExtra(SearchCriteria.EXTRA, criteria));
         finish();
+    }
+
+    /** Phường/xã thật: lọc đúng mã phường; tâm bản đồ tra sau ở màn Bản đồ */
+    private void chooseWard(PlaceModels.Ward ward) {
+        criteria.clearLocation();
+        criteria.wardCode = ward.code;
+        criteria.wardName = ward.name;
+        RecentSearchStore.Entry e = new RecentSearchStore.Entry();
+        e.title = ward.name;
+        e.subtitle = getString(R.string.search_recent_ward_sub, ward.provinceName);
+        e.wardCode = ward.code;
+        recentStore.add(e);
+        finishWithCriteria();
+    }
+
+    /** Địa chỉ cụ thể: tìm phòng quanh tọa độ đó, sắp theo khoảng cách */
+    private void choosePlace(PlaceModels.Address place) {
+        criteria.clearLocation();
+        criteria.placeName = place.title;
+        criteria.centerLat = place.latitude;
+        criteria.centerLng = place.longitude;
+        criteria.sort = SearchCriteria.SORT_DISTANCE;
+        RecentSearchStore.Entry e = new RecentSearchStore.Entry();
+        e.title = place.title;
+        e.subtitle = getString(R.string.search_recent_place_sub);
+        e.placeName = place.title;
+        e.lat = place.latitude;
+        e.lng = place.longitude;
+        recentStore.add(e);
+        finishWithCriteria();
+    }
+
+    // ---------- Gợi ý phường/xã + địa chỉ khi gõ ----------
+
+    private void loadPlaces(String q) {
+        if (placesCall != null) placesCall.cancel();
+        if (q == null || q.length() < 2) {
+            layoutPlaces.setVisibility(View.GONE);
+            return;
+        }
+        layoutPlaces.setVisibility(View.VISIBLE);
+        layoutPlaces.removeAllViews();
+        layoutPlaces.addView(sectionNote(getString(R.string.places_searching)));
+        Call<ApiResponse<PlaceModels.Suggest>> call = api.suggestPlaces(q);
+        placesCall = call;
+        call.enqueue(new ApiCallback<PlaceModels.Suggest>(this) {
+            @Override
+            public void onSuccess(PlaceModels.Suggest data) {
+                layoutPlaces.removeAllViews();
+                if (data == null || (data.wards.isEmpty() && data.addresses.isEmpty())) {
+                    layoutPlaces.addView(sectionNote(getString(R.string.places_empty)));
+                    return;
+                }
+                if (!data.wards.isEmpty()) {
+                    layoutPlaces.addView(sectionTitle(getString(R.string.places_wards_title)));
+                    for (PlaceModels.Ward w : data.wards) {
+                        View row = inflateRow(layoutPlaces, w.name,
+                                getString(R.string.places_ward_sub, w.provinceName, w.roomCount), R.drawable.ic_location);
+                        row.setOnClickListener(v -> chooseWard(w));
+                        layoutPlaces.addView(row);
+                    }
+                }
+                if (!data.addresses.isEmpty()) {
+                    layoutPlaces.addView(sectionTitle(getString(R.string.places_addresses_title)));
+                    for (PlaceModels.Address a : data.addresses) {
+                        View row = inflateRow(layoutPlaces, a.title, a.subtitle, R.drawable.ic_location_on);
+                        row.setOnClickListener(v -> choosePlace(a));
+                        layoutPlaces.addView(row);
+                    }
+                    layoutPlaces.addView(sectionNote(getString(R.string.places_source)));
+                }
+            }
+
+            @Override
+            public void onError(String message) {
+                layoutPlaces.removeAllViews();
+                layoutPlaces.addView(sectionNote(message));
+            }
+        });
+    }
+
+    /** 4 chip "Khu vực được quan tâm" = 4 phường thật có nhiều phòng nhất; lỗi thì giữ chip quận cũ */
+    private void loadTopWards() {
+        int[] chipIds = {R.id.chip_area_q10, R.id.chip_area_q3, R.id.chip_area_binh_thanh, R.id.chip_area_phu_nhuan};
+        api.getWards("79", null, chipIds.length).enqueue(new ApiCallback<List<PlaceModels.Ward>>(this) {
+            @Override
+            public void onSuccess(List<PlaceModels.Ward> wards) {
+                if (wards == null || wards.size() < chipIds.length) return;
+                for (int i = 0; i < chipIds.length; i++) {
+                    TextView chip = findViewById(chipIds[i]);
+                    PlaceModels.Ward w = wards.get(i);
+                    chip.setText(w.name.replaceFirst("^(Phường|Xã) ", ""));
+                    chip.setOnClickListener(v -> chooseWard(w));
+                }
+            }
+
+            @Override
+            public void onError(String message) {
+                // Giữ chip quận mặc định
+            }
+        });
+    }
+
+    private TextView sectionTitle(String text) {
+        TextView tv = new TextView(this);
+        tv.setText(text);
+        tv.setTextColor(getColor(R.color.text_primary));
+        tv.setTextSize(14);
+        tv.setTypeface(null, Typeface.BOLD);
+        tv.setPadding(0, dp(16), 0, 0);
+        return tv;
+    }
+
+    private TextView sectionNote(String text) {
+        TextView tv = new TextView(this);
+        tv.setText(text);
+        tv.setTextColor(getColor(R.color.text_secondary));
+        tv.setTextSize(12);
+        tv.setPadding(0, dp(8), 0, 0);
+        return tv;
+    }
+
+    private int dp(int v) {
+        return Math.round(v * getResources().getDisplayMetrics().density);
     }
 
     // ---------- Tìm kiếm gần đây ----------
@@ -187,7 +325,6 @@ public class SearchActivity extends AppCompatActivity {
             View row = inflateRow(layoutRecent, item.title, item.subtitle, R.drawable.ic_history);
             row.setOnClickListener(v -> {
                 item.applyTo(criteria);
-                if (item.landmarkId != null) criteria.sort = SearchCriteria.SORT_DISTANCE;
                 recentStore.add(item);
                 finishWithCriteria();
             });

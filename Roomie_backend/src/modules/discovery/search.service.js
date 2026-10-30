@@ -50,6 +50,8 @@ function toRoomCard(r, score, isSaved) {
  *   q           từ khóa không dấu: "ly thuong kiet", "binh thanh", "bach khoa"
  *   area        tên quận/phường: "Quận 10"
  *   landmarkId  gần trường/địa điểm, trong bán kính radiusKm (mặc định 3km)
+ *   nearLat/nearLng  quanh một địa chỉ đã tra (Photon), trong bán kính radiusKm
+ *   wardCode    đúng phường/xã (mã hành chính thật)
  *   minRent, maxRent, roomTypes[], gender (female|male), amenities[] (phải có đủ)
  *   sort        match (mặc định) | newest | price_asc | price_desc | distance
  */
@@ -68,7 +70,12 @@ async function searchRooms(userId, f) {
     if (!landmark) throw AppError.notFound('Không tìm thấy trường / địa điểm');
     distanceSql = HAVERSINE_KM(p(landmark.latitude), p(landmark.longitude), 'r.latitude', 'r.longitude');
     where.push(`r.latitude IS NOT NULL AND ${distanceSql} <= ${p(f.radiusKm)}`);
+  } else if (f.nearLat != null && f.nearLng != null) {
+    // Quanh một địa chỉ người dùng chọn (số nhà, đường, địa danh)
+    distanceSql = HAVERSINE_KM(p(f.nearLat), p(f.nearLng), 'r.latitude', 'r.longitude');
+    where.push(`r.latitude IS NOT NULL AND ${distanceSql} <= ${p(f.radiusKm)}`);
   }
+  const hasDistance = distanceSql !== 'NULL::float';
 
   if (f.q) {
     const q = p(f.q);
@@ -82,6 +89,7 @@ async function searchRooms(userId, f) {
     where.push(`(lower(immutable_unaccent(coalesce(r.district_legacy, ''))) = lower(immutable_unaccent(${area}))
       OR lower(immutable_unaccent(coalesce(r.ward_name, ''))) = lower(immutable_unaccent(${area})))`);
   }
+  if (f.wardCode) where.push(`r.ward_code = ${p(f.wardCode)}`);
   // Vùng đang xem trên bản đồ
   if (f.minLat != null && f.maxLat != null && f.minLng != null && f.maxLng != null) {
     where.push(`r.latitude BETWEEN ${p(f.minLat)} AND ${p(f.maxLat)}
@@ -104,7 +112,7 @@ async function searchRooms(userId, f) {
     newest: 'r.first_published_at DESC NULLS LAST',
     price_asc: 'r.monthly_rent ASC',
     price_desc: 'r.monthly_rent DESC',
-    distance: landmark ? 'distance_km ASC' : 'r.first_published_at DESC NULLS LAST',
+    distance: hasDistance ? 'distance_km ASC' : 'r.first_published_at DESC NULLS LAST',
     match: 'r.first_published_at DESC NULLS LAST',   // sắp lại theo % ở dưới
   }[f.sort];
 
@@ -158,7 +166,7 @@ async function suggestLandmarks({ q, type, limit, radiusKm }) {
   }
   params.push(limit);
   const { rows } = await db.query(
-    `SELECT l.landmark_id, l.landmark_type, l.name, l.short_name, l.address_text, l.subtitle,
+    `SELECT l.landmark_id, l.landmark_type, l.name, l.short_name, l.address_text, l.subtitle, l.latitude, l.longitude,
             (SELECT COUNT(*) FROM public_room_posts r
               WHERE r.latitude IS NOT NULL
                 AND ${HAVERSINE_KM('l.latitude', 'l.longitude', 'r.latitude', 'r.longitude')} <= $1) AS room_count
@@ -173,6 +181,8 @@ async function suggestLandmarks({ q, type, limit, radiusKm }) {
     shortName: l.short_name,
     addressText: l.address_text,
     subtitle: l.subtitle,
+    latitude: l.latitude,
+    longitude: l.longitude,
     roomCount: l.room_count,
   }));
 }
