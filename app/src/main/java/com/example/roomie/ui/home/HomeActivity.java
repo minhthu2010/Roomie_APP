@@ -184,10 +184,9 @@ public class HomeActivity extends AppCompatActivity {
     private void bindHeader() {
         boolean searching = criteria.hasLocation() || criteria.hasFilters();
         tvFeedTitle.setText(searching ? R.string.feed_title_search : R.string.feed_section_title);
-        tvSortLabel.setText(RoomFormat.sortLabel(criteria.sort));
+        tvSortLabel.setText(sortLabel(criteria.sort));
 
-        String location = criteria.landmarkName != null ? criteria.landmarkName
-                : criteria.area != null ? criteria.area : criteria.query;
+        String location = criteria.locationLabel();
         tvSearchText.setText(location != null ? location : getString(R.string.hint_search));
         tvSearchText.setTextColor(getColor(location != null ? R.color.text_primary : R.color.text_secondary));
 
@@ -195,6 +194,10 @@ public class HomeActivity extends AppCompatActivity {
         layoutChips.removeAllViews();
         if (criteria.landmarkId != null) {
             addChip(getString(R.string.chip_near, criteria.landmarkName), () -> criteria.clearLocation());
+        } else if (criteria.placeName != null) {
+            addChip(getString(R.string.chip_near_place, criteria.placeName), () -> criteria.clearLocation());
+        } else if (criteria.wardName != null) {
+            addChip(criteria.wardName, () -> criteria.clearLocation());
         } else if (criteria.area != null) {
             addChip(criteria.area, () -> criteria.clearLocation());
         } else if (criteria.query != null) {
@@ -219,6 +222,12 @@ public class HomeActivity extends AppCompatActivity {
         scrollChips.setVisibility(layoutChips.getChildCount() > 0 ? View.VISIBLE : View.GONE);
     }
 
+    // "Gần trường nhất" hay "Gần địa chỉ nhất" tùy điểm gốc
+    private int sortLabel(String sort) {
+        if (SearchCriteria.SORT_DISTANCE.equals(sort) && criteria.placeName != null) return R.string.sort_distance_place;
+        return RoomFormat.sortLabel(sort);
+    }
+
     private void addChip(String label, Runnable onRemove) {
         TextView chip = (TextView) LayoutInflater.from(this).inflate(R.layout.item_filter_chip, layoutChips, false);
         chip.setText(getString(R.string.chip_remove, label));
@@ -235,10 +244,10 @@ public class HomeActivity extends AppCompatActivity {
         sorts.add(SearchCriteria.SORT_NEWEST);
         sorts.add(SearchCriteria.SORT_PRICE_ASC);
         sorts.add(SearchCriteria.SORT_PRICE_DESC);
-        if (criteria.landmarkId != null) sorts.add(SearchCriteria.SORT_DISTANCE);
+        if (criteria.hasDistanceOrigin()) sorts.add(SearchCriteria.SORT_DISTANCE);
 
         String[] labels = new String[sorts.size()];
-        for (int i = 0; i < sorts.size(); i++) labels[i] = getString(RoomFormat.sortLabel(sorts.get(i)));
+        for (int i = 0; i < sorts.size(); i++) labels[i] = getString(sortLabel(sorts.get(i)));
         new AlertDialog.Builder(this)
                 .setTitle(R.string.sort_title)
                 .setSingleChoiceItems(labels, Math.max(0, sorts.indexOf(criteria.sort)), (dialog, which) -> {

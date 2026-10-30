@@ -102,6 +102,21 @@ public final class MapSupport {
         return toDrawable(ctx, row);
     }
 
+    /** Ghim "Vị trí bạn tìm" (địa chỉ / trường / phường đang tìm) */
+    public static Drawable searchPin(Context ctx) {
+        ImageView pin = new ImageView(ctx);
+        pin.setImageResource(R.drawable.ic_location_on);
+        pin.setImageTintList(android.content.res.ColorStateList.valueOf(
+                ContextCompat.getColor(ctx, R.color.primary_maroon)));
+        int size = dp(ctx, 40);
+        pin.measure(View.MeasureSpec.makeMeasureSpec(size, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(size, View.MeasureSpec.EXACTLY));
+        pin.layout(0, 0, size, size);
+        Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+        pin.draw(new Canvas(bitmap));
+        return new BitmapDrawable(ctx.getResources(), bitmap);
+    }
+
     public static int placeIcon(String type) {
         if (type == null) return R.drawable.ic_location;
         switch (type) {

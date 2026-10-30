@@ -4,9 +4,15 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -17,13 +23,19 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.roomie.R;
+import com.example.roomie.data.discovery.DiscoveryApi;
+import com.example.roomie.data.discovery.PlaceModels;
+import com.example.roomie.data.remote.ApiCallback;
+import com.example.roomie.data.remote.ApiClient;
 import com.example.roomie.ui.search.RoomFormat;
 import com.example.roomie.ui.search.SearchCriteria;
 import com.google.android.material.slider.RangeSlider;
 
-import java.util.Arrays;
+import java.text.Normalizer;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -33,11 +45,12 @@ import java.util.Map;
 public class BoLocActivity extends AppCompatActivity {
 
     private static final float BUDGET_MAX = 10_000_000f;
-    // Quận hay tìm; khớp district_legacy của bài đăng
-    private static final String[] AREAS = {
-            "Quận 1", "Quận 3", "Quận 5", "Quận 10", "Bình Thạnh", "Phú Nhuận", "Gò Vấp", "Tân Bình", "Thủ Đức"};
+    /** Bộ lọc khu vực trong TP.HCM (app đang phục vụ TP.HCM) */
+    private static final String PROVINCE_CODE = "79";
 
     private SearchCriteria criteria;
+    /** Phường/xã thật, tải 1 lần khi mở hộp chọn */
+    private List<PlaceModels.Ward> wards;
 
     private TextView tvArea;
     private TextView tvBudget;
@@ -86,7 +99,7 @@ public class BoLocActivity extends AppCompatActivity {
         // "Đặt lại" và "Xóa lọc": bỏ bộ lọc (giữ từ khóa / trường đang tìm)
         View.OnClickListener reset = v -> {
             criteria.clearFilters();
-            if (criteria.area != null) criteria.clearLocation();
+            if (criteria.area != null || criteria.wardCode != null) criteria.clearLocation();
             bindAll();
         };
         findViewById(R.id.btn_reset).setOnClickListener(reset);
@@ -130,8 +143,9 @@ public class BoLocActivity extends AppCompatActivity {
     }
 
     private void bindAll() {
-        tvArea.setText(criteria.area != null
-                ? getString(R.string.filter_area_suffix, criteria.area)
+        String area = criteria.wardName != null ? criteria.wardName : criteria.area;
+        tvArea.setText(area != null
+                ? getString(R.string.filter_area_suffix, area)
                 : getString(R.string.filter_area_all));
         rangeBudget.setValues(
                 criteria.minRent != null ? (float) criteria.minRent : 0f,
@@ -177,19 +191,86 @@ public class BoLocActivity extends AppCompatActivity {
         v.setPadding((int) (horizontalDp * d), (int) (10 * d), (int) (horizontalDp * d), (int) (10 * d));
     }
 
+    /** Chọn phường/xã thật của TP.HCM (168 phường/xã sau 01/07/2025), gõ để lọc không dấu */
     private void showAreaDialog() {
-        String[] items = new String[AREAS.length + 1];
-        items[0] = getString(R.string.filter_area_all);
-        System.arraycopy(AREAS, 0, items, 1, AREAS.length);
-        int checked = criteria.area == null ? 0 : Arrays.asList(AREAS).indexOf(criteria.area) + 1;
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.filter_area_title)
-                .setSingleChoiceItems(items, checked, (dialog, which) -> {
-                    dialog.dismiss();
-                    criteria.clearLocation();
-                    if (which > 0) criteria.area = AREAS[which - 1];
-                    bindAll();
-                })
-                .show();
+        View content = LayoutInflater.from(this).inflate(R.layout.dialog_ward_picker, null, false);
+        EditText edtFilter = content.findViewById(R.id.edt_ward_filter);
+        TextView tvStatus = content.findViewById(R.id.tv_ward_status);
+        ListView list = content.findViewById(R.id.list_wards);
+
+        // Mục đầu "Tất cả khu vực" (ward = null)
+        List<PlaceModels.Ward> shown = new ArrayList<>();
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, new ArrayList<>());
+        list.setAdapter(adapter);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.filter_ward_title)
+                .setView(content)
+                .setNegativeButton(R.string.btn_cancel, null)
+                .create();
+
+        Runnable refresh = () -> {
+            String q = normalize(edtFilter.getText().toString());
+            shown.clear();
+            adapter.clear();
+            shown.add(null);
+            adapter.add(getString(R.string.filter_area_all));
+            if (wards == null) return;
+            for (PlaceModels.Ward w : wards) {
+                if (!q.isEmpty() && !normalize(w.name).contains(q)) continue;
+                shown.add(w);
+                // "Phường Diên Hồng · 2 phòng"
+                adapter.add(w.roomCount > 0 ? getString(R.string.places_ward_sub, w.name, w.roomCount) : w.name);
+            }
+            adapter.notifyDataSetChanged();
+            tvStatus.setVisibility(View.GONE);
+        };
+        edtFilter.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                refresh.run();
+            }
+        });
+        list.setOnItemClickListener((parent, view, position, id) -> {
+            PlaceModels.Ward w = shown.get(position);
+            criteria.clearLocation();
+            if (w != null) {
+                criteria.wardCode = w.code;
+                criteria.wardName = w.name;
+            }
+            dialog.dismiss();
+            bindAll();
+        });
+
+        dialog.show();
+        if (wards != null) {
+            refresh.run();
+            return;
+        }
+        ApiClient.create(this, DiscoveryApi.class).getWards(PROVINCE_CODE, null, 400)
+                .enqueue(new ApiCallback<List<PlaceModels.Ward>>(this) {
+                    @Override
+                    public void onSuccess(List<PlaceModels.Ward> data) {
+                        wards = data != null ? data : new ArrayList<>();
+                        refresh.run();
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        tvStatus.setText(message);
+                    }
+                });
+    }
+
+    /** "Phường Xuân Hoà" -> "phuong xuan hoa" để lọc không dấu */
+    private static String normalize(String s) {
+        return Normalizer.normalize(s, Normalizer.Form.NFD).replaceAll("\\p{M}", "")
+                .replace('đ', 'd').replace('Đ', 'D').toLowerCase(Locale.ROOT).trim();
     }
 }

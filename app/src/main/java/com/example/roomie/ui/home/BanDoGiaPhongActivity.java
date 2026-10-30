@@ -28,6 +28,7 @@ import com.example.roomie.common.BottomNavHelper;
 import com.example.roomie.common.ImageLoader;
 import com.example.roomie.data.discovery.DiscoveryApi;
 import com.example.roomie.data.discovery.MapModels;
+import com.example.roomie.data.discovery.PlaceModels;
 import com.example.roomie.data.discovery.RoomModels;
 import com.example.roomie.data.discovery.SearchModels;
 import com.example.roomie.data.remote.ApiCallback;
@@ -85,6 +86,7 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
     private MyLocationNewOverlay myLocation;
     private final List<Marker> roomMarkers = new ArrayList<>();
     private SearchModels.RoomCard selected;
+    private Marker searchPin;
     private Marker selectedMarker;
     private RoomModels.Contact selectedContact;
 
@@ -107,6 +109,8 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
                         criteria = c;
                         bindHeader();
                         hideCard();
+                        firstLoad = true;
+                        moveToSearchLocation();
                         scheduleReload(0);
                     }
                 }
@@ -217,9 +221,52 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
         });
         map.getController().setZoom(DEFAULT_ZOOM);
         map.getController().setCenter(HCMC_CENTER);
-        // Đang tìm gần trường: lần tải đầu lấy cả thành phố (backend đã giới hạn bán kính quanh trường)
-        // rồi đặt tâm bản đồ vào phòng gần trường nhất
+        // Có địa chỉ / trường / phường đang tìm thì nhảy tới đó
+        moveToSearchLocation();
         scheduleReload(0);
+    }
+
+    /**
+     * Đưa bản đồ tới vị trí đang tìm và cắm ghim "Vị trí bạn tìm".
+     * Phường/xã chưa có tọa độ thì hỏi backend tâm phường (tra Photon, có cache).
+     */
+    private void moveToSearchLocation() {
+        if (searchPin != null) {
+            map.getOverlays().remove(searchPin);
+            searchPin = null;
+        }
+        if (criteria.hasCenter()) {
+            GeoPoint center = new GeoPoint(criteria.centerLat, criteria.centerLng);
+            // Đủ rộng để thấy phòng trong bán kính tìm kiếm (3km) quanh địa chỉ / trường; phường nhỏ hơn
+            map.getController().setZoom(criteria.wardCode != null ? 15.0 : 14.0);
+            map.getController().setCenter(center);
+            searchPin = new Marker(map);
+            searchPin.setPosition(center);
+            searchPin.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+            searchPin.setIcon(MapSupport.searchPin(this));
+            searchPin.setTitle(getString(R.string.map_search_pin));
+            searchPin.setInfoWindow(null);
+            // Ghim nằm dưới nhãn giá để vẫn chạm được nhãn
+            map.getOverlays().add(Math.min(1, map.getOverlays().size()), searchPin);
+            map.invalidate();
+        } else if (criteria.wardCode != null) {
+            String wardCode = criteria.wardCode;
+            api.getWardCenter(wardCode).enqueue(new ApiCallback<PlaceModels.WardCenter>(this) {
+                @Override
+                public void onSuccess(PlaceModels.WardCenter data) {
+                    if (data == null || data.latitude == null || !wardCode.equals(criteria.wardCode)) return;
+                    criteria.centerLat = data.latitude;
+                    criteria.centerLng = data.longitude;
+                    moveToSearchLocation();
+                    scheduleReload(0);
+                }
+
+                @Override
+                public void onError(String message) {
+                    // Không tra được tâm phường: giữ vị trí hiện tại, vẫn lọc đúng phường
+                }
+            });
+        }
     }
 
     /** Chờ người dùng ngừng kéo rồi mới gọi API, tránh gọi liên tục */
@@ -239,8 +286,9 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
         Map<String, String> query = criteria.toQuery(1, 1);
         query.remove("page");
         query.remove("limit");
-        // Tìm gần trường thì để cả thành phố, bán kính do backend giới hạn
-        if (!(firstLoad && criteria.landmarkId != null)) {
+        // Tìm gần trường nhưng chưa biết tọa độ trường (mục tìm gần đây cũ): lần đầu lấy cả thành phố,
+        // backend đã giới hạn bán kính quanh trường, rồi đặt tâm vào phòng gần nhất
+        if (!(firstLoad && criteria.landmarkId != null && !criteria.hasCenter())) {
             query.put("minLat", String.valueOf(box.getLatSouth()));
             query.put("maxLat", String.valueOf(box.getLatNorth()));
             query.put("minLng", String.valueOf(box.getLonWest()));
@@ -262,7 +310,8 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
             @Override
             public void onSuccess(MapModels.MapRooms data) {
                 if (data == null) return;
-                boolean centerOnResults = firstLoad && criteria.landmarkId != null && !data.items.isEmpty();
+                boolean centerOnResults = firstLoad && criteria.landmarkId != null && !criteria.hasCenter()
+                        && !data.items.isEmpty();
                 firstLoad = false;
                 showRooms(data.items);
                 chipCount.setText(getString(R.string.map_room_count, data.items.size()));
@@ -382,8 +431,7 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
     // ---------- Thanh trên ----------
 
     private void bindHeader() {
-        String location = criteria.landmarkName != null ? criteria.landmarkName
-                : criteria.area != null ? criteria.area : criteria.query;
+        String location = criteria.locationLabel();
         TextView tvSearch = findViewById(R.id.tv_map_search_text);
         tvSearch.setText(location != null ? location : getString(R.string.hint_search));
         chipPrice.setText(RoomFormat.budgetLabel(this, criteria.minRent, criteria.maxRent));

@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const { pool, withTransaction } = require('../src/db');
 const { writeSampleImages } = require('./sampleImages');
+const { importAdminUnits } = require('./importAdminUnits');
 
 const IDS = {
   admin: '00000000-0000-0000-0000-000000000001',
@@ -12,9 +13,9 @@ const IDS = {
   const hash = await bcrypt.hash('Roomie@123', 10);
 
   await withTransaction(async (c) => {
-    await c.query(`INSERT INTO wards (ward_code, province_code, ward_name) VALUES
-      ('DEV001','79','Phường Diên Hồng'), ('DEV002','79','Phường Bàn Cờ'), ('DEV003','79','Phường Gia Định')
-      ON CONFLICT DO NOTHING`);
+    // 34 tỉnh/thành + 3.321 phường/xã thật (data/vn-admin-units.json)
+    const admin = await importAdminUnits(c);
+    console.log(`Hành chính: ${admin.provinces} tỉnh/thành, ${admin.wards} phường/xã`);
 
     const users = [
       [IDS.admin, 'admin@roomie.test', 'Quản trị Roomie', 'Admin'],
@@ -34,9 +35,9 @@ const IDS = {
                    SELECT $1, role_id FROM roles WHERE role_code = 'admin' ON CONFLICT DO NOTHING`, [IDS.admin]);
 
     const posts = [
-      ['10000000-0000-0000-0000-000000000001', 'Phòng sáng thoáng, ở ghép cùng 2 bạn nữ', 'shared_room', 3200000, 'DEV001', '268 Lý Thường Kiệt', 10.7725, 106.6580],
-      ['10000000-0000-0000-0000-000000000002', 'Căn hộ có ban công gần ĐH Kinh tế', 'apartment', 3800000, 'DEV002', 'Nguyễn Đình Chiểu', 10.7800, 106.6900],
-      ['10000000-0000-0000-0000-000000000003', 'Studio đủ nội thất, vào ở ngay', 'studio', 4300000, 'DEV003', 'Điện Biên Phủ', 10.8010, 106.7100],
+      ['10000000-0000-0000-0000-000000000001', 'Phòng sáng thoáng, ở ghép cùng 2 bạn nữ', 'shared_room', 3200000, '27169', '268 Lý Thường Kiệt', 10.7725, 106.6580],
+      ['10000000-0000-0000-0000-000000000002', 'Căn hộ có ban công gần ĐH Kinh tế', 'apartment', 3800000, '27139', 'Nguyễn Đình Chiểu', 10.7800, 106.6900],
+      ['10000000-0000-0000-0000-000000000003', 'Studio đủ nội thất, vào ở ngay', 'studio', 4300000, '26944', 'Điện Biên Phủ', 10.8010, 106.7100],
     ];
         for (const [id, title, type, rent, ward, street, lat, lng] of posts) {
       await c.query(
@@ -53,9 +54,9 @@ const IDS = {
 
     // Thêm phòng để thử tìm kiếm / bộ lọc (khác quận, giá, loại phòng, giới tính)
     const morePosts = [
-      ['10000000-0000-0000-0000-000000000004', 'Phòng riêng có gác, gần ĐH Khoa học Tự nhiên', 'private_room', 2800000, 'any', 'DEV001', '280 An Dương Vương', 10.7615, 106.6825],
-      ['10000000-0000-0000-0000-000000000005', 'Nhà nguyên căn yên tĩnh, cần thêm 1 bạn', 'whole_house', 4100000, 'male', 'DEV003', 'Phan Xích Long', 10.7990, 106.6870],
-      ['10000000-0000-0000-0000-000000000006', 'Ở ghép giá rẻ cho sinh viên, gần Bách Khoa', 'shared_room', 1900000, 'female', 'DEV001', 'Tô Hiến Thành', 10.7760, 106.6630],
+      ['10000000-0000-0000-0000-000000000004', 'Phòng riêng có gác, gần ĐH Khoa học Tự nhiên', 'private_room', 2800000, 'any', '27301', '280 An Dương Vương', 10.7615, 106.6825],
+      ['10000000-0000-0000-0000-000000000005', 'Nhà nguyên căn yên tĩnh, cần thêm 1 bạn', 'whole_house', 4100000, 'male', '27058', 'Phan Xích Long', 10.7990, 106.6870],
+      ['10000000-0000-0000-0000-000000000006', 'Ở ghép giá rẻ cho sinh viên, gần Bách Khoa', 'shared_room', 1900000, 'female', '27169', 'Tô Hiến Thành', 10.7760, 106.6630],
     ];
     for (const [id, title, type, rent, gender, ward, street, lat, lng] of morePosts) {
       await c.query(
@@ -141,6 +142,16 @@ const IDS = {
       '10000000-0000-0000-0000-000000000006': ['Phòng ở ghép 4 người, giá rẻ cho sinh viên, đi bộ 7 phút tới Bách Khoa.', 1900000, 'Điện nước khoán 150.000đ/người', 3, 'Mong bạn nữ sinh viên, hòa đồng và giữ vệ sinh chung.'],
     };
     await c.query('ALTER TABLE room_posts DISABLE TRIGGER trg_room_posts_material_reapproval');
+    // Phường thật của phòng mẫu (tra từ tọa độ); DB seed cũ đang gắn phường test DEV00x
+    await c.query(
+      `UPDATE room_posts rp SET ward_code = v.ward_code
+         FROM (VALUES ('10000000-0000-0000-0000-000000000001'::uuid, '27169'),
+                      ('10000000-0000-0000-0000-000000000002'::uuid, '27139'),
+                      ('10000000-0000-0000-0000-000000000003'::uuid, '26944'),
+                      ('10000000-0000-0000-0000-000000000004'::uuid, '27301'),
+                      ('10000000-0000-0000-0000-000000000005'::uuid, '27058'),
+                      ('10000000-0000-0000-0000-000000000006'::uuid, '27169')) AS v(post_id, ward_code)
+        WHERE rp.post_id = v.post_id AND rp.ward_code IS DISTINCT FROM v.ward_code`);
     for (const [postId, [desc, deposit, bills, occupants, expectations]] of Object.entries(details)) {
       await c.query(
         `UPDATE room_posts SET description = $2, deposit_amount = $3, utility_cost_note = $4,

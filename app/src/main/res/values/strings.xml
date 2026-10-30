@@ -642,6 +642,22 @@
     <string name="loc_approx_note">Vị trí trên bản đồ là gần đúng (±150 m). Hỏi chủ phòng địa chỉ chính xác.</string>
     <string name="loc_directions">Chỉ đường</string>
     <string name="loc_no_location">Phòng chưa ghim vị trí trên bản đồ.</string>
+
+    <!-- Phường/xã thật + tra địa chỉ (người C) -->
+    <string name="places_wards_title">Phường / xã</string>
+    <string name="places_addresses_title">Địa chỉ</string>
+    <string name="places_ward_sub">%1$s · %2$d phòng</string>
+    <string name="places_searching">Đang tìm địa chỉ…</string>
+    <string name="places_empty">Không tìm thấy địa chỉ phù hợp. Thử gõ tên đường kèm số nhà hoặc tên phường.</string>
+    <string name="places_source">Địa chỉ từ OpenStreetMap (Photon)</string>
+    <string name="search_recent_place_sub">Địa chỉ · bán kính 3km</string>
+    <string name="search_recent_ward_sub">Phường/xã · %1$s</string>
+    <string name="chip_near_place">Quanh %1$s</string>
+    <string name="sort_distance_place">Gần địa chỉ nhất</string>
+    <string name="filter_ward_title">Chọn phường / xã (TP. Hồ Chí Minh)</string>
+    <string name="filter_ward_hint">Gõ tên phường, VD: dien hong</string>
+    <string name="filter_ward_loading">Đang tải danh sách phường/xã…</string>
+    <string name="map_search_pin">Vị trí bạn tìm</string>
     <string name="profile_no_bio">Chưa có giới thiệu.</string>
     <string name="profile_no_habits">Chưa làm bài kiểm tra thói quen.</string>
     <string name="profile_posts_title">Bài đăng đang tìm người (%1$d)</string>

@@ -32,6 +32,8 @@ public final class SearchModels {
         public String shortName;
         public String addressText;
         public String subtitle;
+        public Double latitude;
+        public Double longitude;
         public int roomCount;
     }
 }
