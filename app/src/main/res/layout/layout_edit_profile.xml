@@ -78,11 +78,10 @@
             android:layout_marginBottom="16dp"
             android:autofillHints="name"
             android:background="@drawable/bg_edit_text"
-            android:hint="@string/label_display_name"
+            android:hint="@string/hint_display_name"
             android:importantForAutofill="no"
             android:inputType="textPersonName"
             android:padding="14dp"
-            android:text="@string/profile_name_sample"
             android:textColor="@color/roomie_text_primary"
             android:textSize="15sp" />
 
@@ -121,10 +120,9 @@
                 android:layout_toStartOf="@id/iv_dropdown_occ"
                 android:autofillHints="none"
                 android:background="@null"
-                android:hint="@string/label_occupation"
+                android:hint="@string/hint_choose_occupation"
                 android:importantForAutofill="no"
                 android:inputType="text"
-                android:text="@string/sample_occupation"
                 android:textColor="@color/roomie_text_primary"
                 android:textSize="15sp" />
         </RelativeLayout>
@@ -172,7 +170,7 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:layout_toStartOf="@id/iv_gender_icon"
-                    android:hint="@string/hint_choose"
+                    android:hint="@string/hint_choose_gender"
                     android:textColor="@color/roomie_text_primary"
                     android:textColorHint="@color/roomie_text_secondary"
                     android:textSize="15sp" />
@@ -215,7 +213,7 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:layout_toStartOf="@id/iv_birth_year_icon"
-                    android:hint="@string/hint_choose"
+                    android:hint="@string/hint_choose_birth_year"
                     android:textColor="@color/roomie_text_primary"
                     android:textColorHint="@color/roomie_text_secondary"
                     android:textSize="15sp" />
@@ -259,10 +257,9 @@
                 android:layout_toEndOf="@id/iv_area_loc_icon"
                 android:autofillHints="postalAddress"
                 android:background="@null"
-                android:hint="@string/label_living_area"
+                android:hint="@string/hint_choose_area"
                 android:importantForAutofill="no"
                 android:inputType="textPostalAddress"
-                android:text="@string/sample_living_area"
                 android:textColor="@color/roomie_text_primary"
                 android:textSize="15sp" />
         </RelativeLayout>
@@ -303,10 +300,9 @@
                 android:layout_toEndOf="@id/iv_school_icon"
                 android:autofillHints="none"
                 android:background="@null"
-                android:hint="@string/label_school_workplace"
+                android:hint="@string/hint_choose_school"
                 android:importantForAutofill="no"
                 android:inputType="text"
-                android:text="@string/sample_school_workplace"
                 android:textColor="@color/roomie_text_primary"
                 android:textSize="15sp" />
         </RelativeLayout>
@@ -329,13 +325,12 @@
             android:autofillHints="none"
             android:background="@drawable/bg_edit_text"
             android:gravity="top|start"
-            android:hint="@string/label_about_me"
+            android:hint="@string/hint_bio"
             android:importantForAutofill="no"
             android:inputType="textMultiLine"
             android:lineSpacingExtra="3dp"
             android:minLines="3"
             android:padding="14dp"
-            android:text="@string/sample_about_me"
             android:textColor="@color/roomie_text_primary"
             android:textSize="14sp" />
 
@@ -412,7 +407,7 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:layout_toStartOf="@id/iv_move_in_date_icon"
-                    android:hint="@string/hint_choose"
+                    android:hint="@string/hint_move_in_date"
                     android:textColor="@color/roomie_text_primary"
                     android:textColorHint="@color/roomie_text_secondary"
                     android:textSize="15sp" />

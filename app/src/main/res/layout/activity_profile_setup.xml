@@ -192,12 +192,12 @@
 
                     <TextView
                         android:id="@+id/tv_val_occupation"
+                    android:hint="@string/hint_choose_occupation"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
                         android:layout_marginStart="8dp"
                         android:layout_toEndOf="@id/img_arrow_occ"
-                        android:text="Sinh viên"
                         android:textColor="@color/text_title"
                         android:textSize="14sp" />
 
@@ -254,12 +254,12 @@
 
                     <TextView
                         android:id="@+id/tv_val_location"
+                    android:hint="@string/hint_choose_area"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
                         android:layout_marginStart="8dp"
                         android:layout_toEndOf="@id/img_arrow_loc"
-                        android:text="Quận 10"
                         android:textColor="@color/text_title"
                         android:textSize="14sp" />
 
@@ -324,7 +324,7 @@
                         android:layout_centerVertical="true"
                         android:layout_marginStart="8dp"
                         android:layout_toEndOf="@id/img_arrow_gender"
-                        android:hint="@string/hint_choose"
+                        android:hint="@string/hint_choose_gender"
                         android:textColor="@color/text_title"
                         android:textColorHint="@color/text_subtitle"
                         android:textSize="14sp" />
@@ -387,7 +387,7 @@
                         android:layout_centerVertical="true"
                         android:layout_marginStart="8dp"
                         android:layout_toEndOf="@id/img_arrow_birth"
-                        android:hint="@string/hint_choose"
+                        android:hint="@string/hint_choose_birth_year"
                         android:textColor="@color/text_title"
                         android:textColorHint="@color/text_subtitle"
                         android:textSize="14sp" />

@@ -101,9 +101,9 @@ public class ProfileSetupActivity extends AppCompatActivity {
         String nameExtra = getIntent().getStringExtra(EXTRA_FULL_NAME);
         etDisplayName.setText(nameExtra != null ? nameExtra : "");
         tvValOcc.setText("");
-        tvValOcc.setHint(R.string.hint_choose);
+        tvValOcc.setHint(R.string.hint_choose_occupation);
         tvValLoc.setText("");
-        tvValLoc.setHint(R.string.hint_choose);
+        tvValLoc.setHint(R.string.hint_choose_area);
         etMoveInDate.setText("");
 
         tvChangeAvatarBtn.setOnClickListener(v -> pickAvatar.launch("image/*"));
