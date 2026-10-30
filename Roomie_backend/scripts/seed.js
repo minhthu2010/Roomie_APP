@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const { pool, withTransaction } = require('../src/db');
 const { writeSampleImages } = require('./sampleImages');
 const { importAdminUnits } = require('./importAdminUnits');
+const { importLandmarks } = require('./importLandmarks');
 
 const IDS = {
   admin: '00000000-0000-0000-0000-000000000001',
@@ -70,43 +71,30 @@ const IDS = {
         [id, IDS.owner, title, type, rent, gender, ward, street, lat, lng, `${street}, TP. Hồ Chí Minh`, IDS.admin]);
     }
 
-    // Landmark: gợi ý trường học + địa điểm lân cận (cần migration 002)
-    await c.query(`INSERT INTO landmarks (landmark_type, name, short_name, subtitle, address_text, province_code, latitude, longitude) VALUES
-      ('university', 'Trường Đại học Bách Khoa - ĐHQG TP.HCM', 'ĐH Bách Khoa', NULL, '268 Lý Thường Kiệt', '79', 10.7721, 106.6578),
-      ('university', 'Trường Đại học Kinh tế TP.HCM', 'ĐH Kinh tế', NULL, '59C Nguyễn Đình Chiểu', '79', 10.7831, 106.6948),
-      ('university', 'Trường Đại học Khoa học Tự nhiên - ĐHQG TP.HCM', 'ĐH KHTN', NULL, '227 Nguyễn Văn Cừ, Quận 5', '79', 10.7628, 106.6822),
-      ('university', 'Trường Đại học Kiến trúc TP.HCM', 'ĐH Kiến trúc', NULL, '196 Pasteur, Quận 3', '79', 10.7834, 106.6955),
-      ('supermarket', 'Co.op Mart Lý Thường Kiệt', NULL, 'Mở cửa đến 22:00', '497 Hòa Hảo', '79', 10.7612, 106.6601),
-      ('bus_stop', 'Trạm xe buýt ĐH Bách Khoa', NULL, 'Tuyến 08, 59, 69', 'Lý Thường Kiệt', '79', 10.7730, 106.6590)
-      ON CONFLICT DO NOTHING`);
-    // Địa điểm lân cận cho màn Vị trí phòng (dữ liệu mẫu, tọa độ gần đúng)
-    await c.query(`INSERT INTO landmarks (landmark_type, name, short_name, subtitle, address_text, province_code, latitude, longitude) VALUES
-      ('hospital', 'Bệnh viện Nhân dân 115', 'BV 115', 'Cấp cứu 24/7', 'Thành Thái, Quận 10', '79', 10.7740, 106.6670),
-      ('supermarket', 'Co.op Mart Nguyễn Đình Chiểu', NULL, 'Mở cửa đến 22:00', 'Nguyễn Đình Chiểu, Quận 3', '79', 10.7790, 106.6880),
-      ('bus_stop', 'Trạm xe buýt Hồ Con Rùa', NULL, 'Tuyến 03, 19, 36', 'Công trường Quốc tế, Quận 3', '79', 10.7826, 106.6960),
-      ('hospital', 'Bệnh viện Chợ Rẫy', NULL, 'Cấp cứu 24/7', 'Nguyễn Chí Thanh, Quận 5', '79', 10.7577, 106.6595),
-      ('supermarket', 'Bách Hóa Xanh An Dương Vương', NULL, 'Mở cửa đến 21:30', 'An Dương Vương, Quận 5', '79', 10.7608, 106.6800),
-      ('supermarket', 'Circle K Phan Xích Long', NULL, 'Mở cửa 24/7', 'Phan Xích Long, Phú Nhuận', '79', 10.7985, 106.6880),
-      ('bus_stop', 'Trạm xe buýt Phan Đăng Lưu', NULL, 'Tuyến 24, 104', 'Phan Đăng Lưu, Phú Nhuận', '79', 10.8010, 106.6905),
-      ('supermarket', 'WinMart+ Điện Biên Phủ', NULL, 'Mở cửa đến 22:00', 'Điện Biên Phủ, Bình Thạnh', '79', 10.8015, 106.7090),
-      ('bus_stop', 'Trạm xe buýt Hàng Xanh', NULL, 'Tuyến 10, 52, 55', 'Ngã tư Hàng Xanh, Bình Thạnh', '79', 10.8019, 106.7116)
-      ON CONFLICT DO NOTHING`);
+    // Trường ĐH/CĐ, siêu thị, bệnh viện, trạm xe buýt thật từ OpenStreetMap (data/hcm-landmarks.json)
+    const places = await importLandmarks(c);
+    console.log('Địa điểm thật:', places.byType);
 
-    // Quận (hiển thị + lọc khu vực), trường gần nhất, tiện ích của các phòng mẫu.
+    // Quận (hiển thị + lọc khu vực), trường gần phòng (tìm theo tên không dấu, lấy cơ sở gần phòng nhất),
+    // tiện ích của các phòng mẫu.
     // Dùng UPDATE để chạy lại seed trên DB cũ vẫn bổ sung được. Không đổi address_text/giá...:
     // trigger trg_room_posts_material_reapproval sẽ đưa bài đã duyệt về 'pending'.
     const postDetails = [
-      ['10000000-0000-0000-0000-000000000001', 'Quận 10', 'ĐH Bách Khoa', 'female', ['air_conditioning', 'washing_machine', 'kitchen']],
-      ['10000000-0000-0000-0000-000000000002', 'Quận 3', 'ĐH Kinh tế', 'any', ['air_conditioning', 'kitchen', 'parking', 'balcony']],
+      ['10000000-0000-0000-0000-000000000001', 'Quận 10', 'dai hoc bach khoa', 'female', ['air_conditioning', 'washing_machine', 'kitchen']],
+      ['10000000-0000-0000-0000-000000000002', 'Quận 3', 'dai hoc kinh te', 'any', ['air_conditioning', 'kitchen', 'parking', 'balcony']],
       ['10000000-0000-0000-0000-000000000003', 'Bình Thạnh', null, 'any', ['air_conditioning', 'furnished', 'wifi', 'private_bathroom']],
-      ['10000000-0000-0000-0000-000000000004', 'Quận 5', 'ĐH KHTN', 'any', ['wifi', 'parking']],
+      ['10000000-0000-0000-0000-000000000004', 'Quận 5', 'khoa hoc tu nhien', 'any', ['wifi', 'parking']],
       ['10000000-0000-0000-0000-000000000005', 'Phú Nhuận', null, 'male', ['air_conditioning', 'washing_machine', 'kitchen', 'parking']],
-      ['10000000-0000-0000-0000-000000000006', 'Quận 10', 'ĐH Bách Khoa', 'female', ['washing_machine', 'parking']],
+      ['10000000-0000-0000-0000-000000000006', 'Quận 10', 'dai hoc bach khoa', 'female', ['washing_machine', 'parking']],
     ];
     for (const [postId, district, landmark, gender, amenities] of postDetails) {
       await c.query(
         `UPDATE room_posts SET district_legacy = $2, preferred_gender = $4,
-            landmark_id = (SELECT landmark_id FROM landmarks WHERE short_name = $3)
+            landmark_id = (SELECT l.landmark_id FROM landmarks l
+                            WHERE l.landmark_type = 'university' AND l.is_active
+                              AND immutable_unaccent(l.name) ILIKE '%' || $3::text || '%'
+                            ORDER BY (l.latitude - room_posts.latitude) ^ 2 + (l.longitude - room_posts.longitude) ^ 2
+                            LIMIT 1)
           WHERE post_id = $1`, [postId, district, landmark, gender]);
       await c.query(
         `INSERT INTO room_post_amenities (post_id, amenity_id)
