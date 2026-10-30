@@ -3,6 +3,7 @@ package com.example.roomie.ui.profile;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -15,11 +16,14 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.roomie.R;
 import com.example.roomie.common.BottomNavHelper;
+import com.example.roomie.common.ImageLoader;
+import com.example.roomie.data.accounts.AccountModels;
+import com.example.roomie.data.accounts.AccountsApi;
 import com.example.roomie.data.discovery.DiscoveryApi;
 import com.example.roomie.data.discovery.QuizModels;
 import com.example.roomie.data.remote.ApiCallback;
 import com.example.roomie.data.remote.ApiClient;
-import com.example.roomie.ui.auth.MainActivity;
+import com.example.roomie.ui.auth.AuthFlow;
 import com.example.roomie.ui.quiz.LifestyleReviewActivity;
 import com.example.roomie.ui.quiz.QuizIntroActivity;
 import com.example.roomie.ui.quiz.QuizUi;
@@ -66,12 +70,7 @@ public class ProfileActivity extends AppCompatActivity {
                     .setTitle(R.string.box_logout_confirm_title)
                     .setMessage(R.string.box_logout_confirm_sub)
                     .setNegativeButton(R.string.btn_stay, null)
-                    .setPositiveButton(R.string.btn_logout, (dialog, which) -> {
-                        Intent intent = new Intent(ProfileActivity.this, MainActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-                        finish();
-                    })
+                    .setPositiveButton(R.string.btn_logout, (dialog, which) -> AuthFlow.logout(this))
                     .show());
         }
     }
@@ -79,7 +78,30 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        loadProfile();
         loadHabitsStatus();
+    }
+
+    // Thẻ người dùng: tên, nghề nghiệp · khu vực, ảnh đại diện
+    private void loadProfile() {
+        TextView tvName = findViewById(R.id.tv_profile_name);
+        TextView tvSub = findViewById(R.id.tv_profile_sub);
+        ImageView ivAvatar = findViewById(R.id.iv_profile_avatar);
+        ApiClient.create(this, AccountsApi.class).getMyProfile()
+                .enqueue(new ApiCallback<AccountModels.Profile>(this) {
+                    @Override
+                    public void onSuccess(AccountModels.Profile profile) {
+                        if (profile == null) return;
+                        tvName.setText(profile.displayName);
+                        tvSub.setText(ProfileUi.subtitle(profile));
+                        ImageLoader.load(ivAvatar, profile.avatarUrl, R.drawable.ic_avatar_profile);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        // Giữ thẻ mặc định; lỗi đăng nhập đã được TokenAuthenticator xử lý.
+                    }
+                });
     }
 
     // Thẻ "Hồ sơ thói quen sống": trạng thái + ngày cập nhật lấy từ API (người C)

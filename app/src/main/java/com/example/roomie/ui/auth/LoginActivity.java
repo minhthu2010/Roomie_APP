@@ -3,6 +3,7 @@ package com.example.roomie.ui.auth;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -16,7 +17,10 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.roomie.R;
 import com.example.roomie.common.AppNotificationHelper;
-import com.example.roomie.ui.home.HomeActivity;
+import com.example.roomie.data.accounts.AccountModels;
+import com.example.roomie.data.accounts.AccountsApi;
+import com.example.roomie.data.remote.ApiCallback;
+import com.example.roomie.data.remote.ApiClient;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -40,6 +44,7 @@ public class LoginActivity extends AppCompatActivity {
         AppCompatButton btnDoLogin = findViewById(R.id.btn_do_login);
         TextView tvForgotPassword = findViewById(R.id.tv_forgot_password);
         TextView tvRegisterNow = findViewById(R.id.tv_register_now);
+        View btnGoogleLogin = findViewById(R.id.btn_google_login);
 
         // Password visibility toggle
         if (imgTogglePassword != null && etPassword != null) {
@@ -59,11 +64,11 @@ public class LoginActivity extends AppCompatActivity {
             });
         }
 
-        // Login button click -> navigate to HomeActivity
+        // Đăng nhập bằng email hoặc số điện thoại
         if (btnDoLogin != null) {
             btnDoLogin.setOnClickListener(v -> {
                 String account = etEmailOrPhone != null ? etEmailOrPhone.getText().toString().trim() : "";
-                String password = etPassword != null ? etPassword.getText().toString().trim() : "";
+                String password = etPassword != null ? etPassword.getText().toString() : "";
 
                 if (account.isEmpty()) {
                     AppNotificationHelper.showError(LoginActivity.this, "Vui lòng nhập số điện thoại hoặc email");
@@ -74,11 +79,13 @@ public class LoginActivity extends AppCompatActivity {
                     return;
                 }
 
-                AppNotificationHelper.showSuccess(LoginActivity.this, "Đăng nhập thành công!");
-                Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-                startActivity(intent);
-                finish();
+                login(btnDoLogin, account, password);
             });
+        }
+
+        if (btnGoogleLogin != null) {
+            btnGoogleLogin.setOnClickListener(v ->
+                    AppNotificationHelper.showInfo(LoginActivity.this, "Đăng nhập Google sẽ có trong bản cập nhật tới"));
         }
 
         // Forgot password click
@@ -96,5 +103,29 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(intent);
             });
         }
+    }
+
+    private void login(AppCompatButton button, String account, String password) {
+        button.setEnabled(false);
+        ApiClient.create(this, AccountsApi.class)
+                .login(new AccountModels.LoginRequest(account, password))
+                .enqueue(new ApiCallback<AccountModels.AuthResult>(this) {
+                    @Override
+                    public void onSuccess(AccountModels.AuthResult result) {
+                        AppNotificationHelper.showSuccess(LoginActivity.this, "Đăng nhập thành công!");
+                        AuthFlow.onAuthenticated(LoginActivity.this, result);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        button.setEnabled(true);
+                        if ("EMAIL_NOT_VERIFIED".equals(getErrorCode()) && account.contains("@")) {
+                            // Đăng ký dở dang: gửi mã mới rồi mở màn xác thực
+                            VerifyRegisterActivity.resendAndOpen(LoginActivity.this, account.toLowerCase());
+                        } else {
+                            AppNotificationHelper.showError(LoginActivity.this, message);
+                        }
+                    }
+                });
     }
 }

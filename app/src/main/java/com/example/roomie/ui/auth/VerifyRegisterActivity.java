@@ -1,5 +1,6 @@
 package com.example.roomie.ui.auth;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -19,14 +20,58 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.roomie.R;
 import com.example.roomie.common.AppNotificationHelper;
+import com.example.roomie.data.accounts.AccountModels;
+import com.example.roomie.data.accounts.AccountsApi;
+import com.example.roomie.data.remote.ApiCallback;
+import com.example.roomie.data.remote.ApiClient;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class VerifyRegisterActivity extends AppCompatActivity {
 
+    private static final String EXTRA_EMAIL = "USER_INPUT";
+    private static final String EXTRA_RESEND_AT = "RESEND_AVAILABLE_AT";
+    private static final long DEFAULT_RESEND_MS = 30_000;
+
+    private String email;
+    private AccountsApi api;
     private EditText[] otpBoxes;
     private TextView tvResendCode;
     private CountDownTimer resendTimer;
+
+    /** Mở màn xác thực sau khi đăng ký. challenge null: dùng thời gian chờ mặc định. */
+    public static void open(Activity activity, String email, AccountModels.OtpChallenge challenge) {
+        Intent intent = new Intent(activity, VerifyRegisterActivity.class);
+        intent.putExtra(EXTRA_EMAIL, email);
+        if (challenge != null) intent.putExtra(EXTRA_RESEND_AT, challenge.resendAvailableAt);
+        activity.startActivity(intent);
+    }
+
+    /** Tài khoản đăng ký dở (đăng nhập báo chưa xác thực): gửi mã mới rồi mở màn xác thực. */
+    public static void resendAndOpen(Activity activity, String email) {
+        ApiClient.create(activity, AccountsApi.class)
+                .resendRegisterOtp(new AccountModels.EmailRequest(email))
+                .enqueue(new ApiCallback<AccountModels.OtpChallenge>(activity) {
+                    @Override
+                    public void onSuccess(AccountModels.OtpChallenge challenge) {
+                        AppNotificationHelper.showInfo(activity, "Tài khoản chưa xác thực, mã mới đã được gửi tới email");
+                        open(activity, email, challenge);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        if ("OTP_TOO_SOON".equals(getErrorCode())) {
+                            open(activity, email, null);
+                        } else {
+                            AppNotificationHelper.showError(activity, message);
+                        }
+                    }
+                });
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,19 +85,20 @@ public class VerifyRegisterActivity extends AppCompatActivity {
             return insets;
         });
 
-        String userInput = getIntent().getStringExtra("USER_INPUT");
-        if (userInput == null || userInput.isEmpty()) {
-            userInput = "090 123 4567";
+        email = getIntent().getStringExtra(EXTRA_EMAIL);
+        if (email == null || email.isEmpty()) {
+            finish();
+            return;
         }
+        api = ApiClient.create(this, AccountsApi.class);
 
         ImageButton btnBack = findViewById(R.id.btn_back);
         TextView tvVerifySubtext = findViewById(R.id.tv_verify_subtext);
         tvResendCode = findViewById(R.id.tv_resend_code);
         AppCompatButton btnVerify = findViewById(R.id.btn_verify);
 
-        String maskedInput = maskInput(userInput);
         if (tvVerifySubtext != null) {
-            tvVerifySubtext.setText(getString(R.string.register_verify_subtext, maskedInput));
+            tvVerifySubtext.setText(getString(R.string.register_verify_subtext, maskEmail(email)));
         }
 
         if (btnBack != null) {
@@ -69,7 +115,7 @@ public class VerifyRegisterActivity extends AppCompatActivity {
         };
 
         setupOtpInputs();
-        startResendTimer();
+        startResendTimer(millisUntil(getIntent().getStringExtra(EXTRA_RESEND_AT)));
 
         if (btnVerify != null) {
             btnVerify.setOnClickListener(v -> {
@@ -83,14 +129,48 @@ public class VerifyRegisterActivity extends AppCompatActivity {
                 if (otp.length() < 6) {
                     AppNotificationHelper.showError(VerifyRegisterActivity.this, "Vui lòng nhập đủ 6 số xác thực");
                 } else {
-                    AppNotificationHelper.showSuccess(VerifyRegisterActivity.this, "Đăng ký tài khoản thành công!");
-                    Intent intent = new Intent(VerifyRegisterActivity.this, LoginActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                    finish();
+                    verify(btnVerify, otp);
                 }
             });
         }
+    }
+
+    private void verify(AppCompatButton button, String otp) {
+        button.setEnabled(false);
+        api.verifyRegister(new AccountModels.VerifyOtpRequest(email, otp))
+                .enqueue(new ApiCallback<AccountModels.AuthResult>(this) {
+                    @Override
+                    public void onSuccess(AccountModels.AuthResult result) {
+                        AppNotificationHelper.showSuccess(VerifyRegisterActivity.this, "Đăng ký tài khoản thành công!");
+                        AuthFlow.onAuthenticated(VerifyRegisterActivity.this, result);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        button.setEnabled(true);
+                        AppNotificationHelper.showError(VerifyRegisterActivity.this, message);
+                        clearOtp();
+                    }
+                });
+    }
+
+    private void resend() {
+        if (tvResendCode != null) tvResendCode.setOnClickListener(null);
+        api.resendRegisterOtp(new AccountModels.EmailRequest(email))
+                .enqueue(new ApiCallback<AccountModels.OtpChallenge>(this) {
+                    @Override
+                    public void onSuccess(AccountModels.OtpChallenge challenge) {
+                        AppNotificationHelper.showInfo(VerifyRegisterActivity.this, "Đã gửi lại mã xác thực mới!");
+                        clearOtp();
+                        startResendTimer(millisUntil(challenge.resendAvailableAt));
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        AppNotificationHelper.showError(VerifyRegisterActivity.this, message);
+                        startResendTimer(0);
+                    }
+                });
     }
 
     private void setupOtpInputs() {
@@ -126,14 +206,23 @@ public class VerifyRegisterActivity extends AppCompatActivity {
         }
     }
 
-    private void startResendTimer() {
+    private void clearOtp() {
+        for (EditText box : otpBoxes) {
+            if (box != null) box.setText("");
+        }
+        if (otpBoxes[0] != null) otpBoxes[0].requestFocus();
+    }
+
+    private void startResendTimer(long durationMs) {
         if (resendTimer != null) resendTimer.cancel();
-        resendTimer = new CountDownTimer(24000, 1000) {
+        if (tvResendCode != null) tvResendCode.setOnClickListener(null);
+        resendTimer = new CountDownTimer(durationMs, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
                 long seconds = millisUntilFinished / 1000;
                 if (tvResendCode != null) {
-                    tvResendCode.setText(String.format(Locale.getDefault(), "Chưa nhận được mã? Gửi lại sau %02d:%02d", 0, seconds));
+                    tvResendCode.setText(String.format(Locale.getDefault(),
+                            "Chưa nhận được mã? Gửi lại sau %02d:%02d", seconds / 60, seconds % 60));
                 }
             }
 
@@ -141,24 +230,29 @@ public class VerifyRegisterActivity extends AppCompatActivity {
             public void onFinish() {
                 if (tvResendCode != null) {
                     tvResendCode.setText("Gửi lại mã ngay");
-                    tvResendCode.setOnClickListener(v -> {
-                        AppNotificationHelper.showInfo(VerifyRegisterActivity.this, "Đã gửi lại mã xác thực mới!");
-                        startResendTimer();
-                    });
+                    tvResendCode.setOnClickListener(v -> resend());
                 }
             }
         }.start();
     }
 
-    private String maskInput(String input) {
-        if (input.contains("@")) {
-            int atIndex = input.indexOf("@");
-            if (atIndex > 2) {
-                return input.substring(0, 2) + "•••" + input.substring(atIndex);
-            }
-            return input;
-        } else if (input.length() >= 7) {
-            return input.substring(0, 3) + " ••• " + input.substring(input.length() - 4);
+    /** Thời gian còn lại tới mốc ISO (UTC) server trả về; không đọc được thì dùng mặc định. */
+    private static long millisUntil(String isoUtc) {
+        if (isoUtc == null) return DEFAULT_RESEND_MS;
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        try {
+            Date date = format.parse(isoUtc);
+            return date == null ? DEFAULT_RESEND_MS : Math.max(0, date.getTime() - System.currentTimeMillis());
+        } catch (ParseException e) {
+            return DEFAULT_RESEND_MS;
+        }
+    }
+
+    private String maskEmail(String input) {
+        int atIndex = input.indexOf("@");
+        if (atIndex > 2) {
+            return input.substring(0, 2) + "•••" + input.substring(atIndex);
         }
         return input;
     }

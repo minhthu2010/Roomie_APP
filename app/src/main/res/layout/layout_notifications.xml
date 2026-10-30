@@ -149,301 +149,67 @@
             android:paddingTop="12dp"
             android:paddingBottom="20dp">
 
-            <!-- Section 1: Hôm nay Header Row using RelativeLayout -->
+            <!-- Header: số chưa đọc + "Đọc tất cả" -->
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp">
 
                 <TextView
-                    android:id="@+id/tv_today_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:layout_toStartOf="@id/tv_count_unread"
-                    android:text="@string/section_today"
-                    android:textColor="@color/roomie_text_primary"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
-                <TextView
                     android:id="@+id/tv_count_unread"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
-                    android:text="@string/count_unread"
                     android:textColor="@color/roomie_text_secondary"
                     android:textSize="12sp" />
-            </RelativeLayout>
 
-            <!-- Notification Item 1 using RelativeLayout -->
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:background="@drawable/bg_card_rounded"
-                android:padding="14dp">
-
-                <!-- Left Icon Circle -->
-                <RelativeLayout
-                    android:id="@+id/box_notif1_icon"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_alignParentStart="true"
-                    android:layout_alignParentTop="true"
-                    android:layout_marginEnd="12dp"
-                    android:background="@drawable/bg_location_icon_box">
-
-                    <ImageView
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
-                        android:layout_centerInParent="true"
-                        android:contentDescription="@string/notif1_title"
-                        android:src="@drawable/ic_check_circle"
-                        app:tint="@color/text_button_secondary" />
-                </RelativeLayout>
-
-                <!-- Top Right Time & Red Unread Dot Row -->
-                <LinearLayout
-                    android:id="@+id/box_notif1_time"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentTop="true"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="6dp"
-                        android:text="@string/notif1_time"
-                        android:textColor="@color/text_muted"
-                        android:textSize="12sp" />
-
-                    <View
-                        android:layout_width="8dp"
-                        android:layout_height="8dp"
-                        android:background="@drawable/bg_circle_fab"
-                        android:backgroundTint="#C53030" />
-                </LinearLayout>
-
-                <!-- Notification Content Column -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentTop="true"
-                    android:layout_marginEnd="8dp"
-                    android:layout_toEndOf="@id/box_notif1_icon"
-                    android:layout_toStartOf="@id/box_notif1_time"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="2dp"
-                        android:text="@string/notif1_title"
-                        android:textColor="@color/roomie_text_primary"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:text="@string/notif1_sub"
-                        android:textColor="@color/roomie_text_secondary"
-                        android:textSize="12sp" />
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="12dp"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:text="@string/link_mark_read"
-                            android:textColor="@color/roomie_text_secondary"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:text="@string/link_delete"
-                            android:textColor="@color/color_error_dark"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-                </LinearLayout>
-
-            </RelativeLayout>
-
-            <!-- Notification Item 2 using RelativeLayout -->
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:background="@drawable/bg_card_rounded"
-                android:padding="14dp">
-
-                <!-- Left Icon Circle -->
-                <RelativeLayout
-                    android:id="@+id/box_notif2_icon"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_alignParentStart="true"
-                    android:layout_alignParentTop="true"
-                    android:layout_marginEnd="12dp"
-                    android:background="@drawable/bg_location_icon_box">
-
-                    <ImageView
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
-                        android:layout_centerInParent="true"
-                        android:contentDescription="@string/notif2_title"
-                        android:src="@drawable/ic_warning_circle"
-                        app:tint="@color/text_button_secondary" />
-                </RelativeLayout>
-
-                <!-- Top Right Time & Red Dot Row -->
-                <LinearLayout
-                    android:id="@+id/box_notif2_time"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentTop="true"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="6dp"
-                        android:text="@string/notif2_time"
-                        android:textColor="@color/text_muted"
-                        android:textSize="12sp" />
-
-                    <View
-                        android:layout_width="8dp"
-                        android:layout_height="8dp"
-                        android:background="@drawable/bg_circle_fab"
-                        android:backgroundTint="#C53030" />
-                </LinearLayout>
-
-                <!-- Notification Content Column -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentTop="true"
-                    android:layout_marginEnd="8dp"
-                    android:layout_toEndOf="@id/box_notif2_icon"
-                    android:layout_toStartOf="@id/box_notif2_time"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="2dp"
-                        android:text="@string/notif2_title"
-                        android:textColor="@color/roomie_text_primary"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/notif2_sub"
-                        android:textColor="@color/roomie_text_secondary"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-            </RelativeLayout>
-
-            <!-- Section 2: Trước đó Header -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:text="@string/section_earlier"
-                android:textColor="@color/roomie_text_primary"
-                android:textSize="15sp"
-                android:textStyle="bold" />
-
-            <!-- Notification Item 3 using RelativeLayout -->
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:background="@drawable/bg_card_rounded"
-                android:padding="14dp">
-
-                <!-- Left Icon Circle -->
-                <RelativeLayout
-                    android:id="@+id/box_notif3_icon"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_alignParentStart="true"
-                    android:layout_alignParentTop="true"
-                    android:layout_marginEnd="12dp"
-                    android:background="@drawable/bg_location_icon_box">
-
-                    <ImageView
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
-                        android:layout_centerInParent="true"
-                        android:contentDescription="@string/notif3_title"
-                        android:src="@drawable/ic_heart"
-                        app:tint="@color/text_button_secondary" />
-                </RelativeLayout>
-
-                <!-- Top Right Time -->
                 <TextView
-                    android:id="@+id/tv_notif3_time"
+                    android:id="@+id/btn_mark_all_read"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
-                    android:layout_alignParentTop="true"
-                    android:text="@string/notif3_time"
-                    android:textColor="@color/text_muted"
-                    android:textSize="12sp" />
-
-                <!-- Notification Content Column -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentTop="true"
-                    android:layout_marginEnd="8dp"
-                    android:layout_toEndOf="@id/box_notif3_icon"
-                    android:layout_toStartOf="@id/tv_notif3_time"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="2dp"
-                        android:text="@string/notif3_title"
-                        android:textColor="@color/roomie_text_primary"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/notif3_sub"
-                        android:textColor="@color/roomie_text_secondary"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
+                    android:layout_centerVertical="true"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="4dp"
+                    android:text="@string/link_mark_all_read"
+                    android:textColor="@color/primary_maroon"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
             </RelativeLayout>
+
+            <!-- Thẻ thông báo (item_notification) và tiêu đề nhóm Hôm nay / Trước đó được thêm từ code -->
+            <LinearLayout
+                android:id="@+id/notification_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <TextView
+                android:id="@+id/tv_notifications_empty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="48dp"
+                android:gravity="center"
+                android:text="@string/notifications_empty"
+                android:textColor="@color/roomie_text_secondary"
+                android:textSize="14sp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/btn_load_more_notifications"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:padding="12dp"
+                android:text="@string/load_more"
+                android:textColor="@color/primary_maroon"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

@@ -188,7 +188,7 @@
             android:layout_alignParentStart="true"
             android:layout_marginTop="16dp"
             android:fontFamily="sans-serif-medium"
-            android:text="@string/label_email_or_phone"
+            android:text="@string/label_email"
             android:textColor="@color/text_title"
             android:textSize="14sp"
             android:textStyle="bold" />
@@ -209,7 +209,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:contentDescription="@string/label_email_or_phone"
-                android:src="@drawable/ic_phone" />
+                android:src="@drawable/ic_mail" />
 
             <EditText
                 android:id="@+id/et_phone_or_email"
@@ -219,7 +219,7 @@
                 android:layout_toEndOf="@id/img_icon_phone"
                 android:autofillHints="emailAddress"
                 android:background="@null"
-                android:hint="@string/hint_phone_or_email"
+                android:hint="@string/hint_email_or_phone"
                 android:inputType="textEmailAddress"
                 android:textColor="@color/text_title"
                 android:textColorHint="@color/text_subtitle"
@@ -285,22 +285,82 @@
 
         </RelativeLayout>
 
+        <!-- Confirm Password -->
+        <TextView
+            android:id="@+id/tv_label_confirm_password"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/layout_input_password"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="16dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/label_retype_password"
+            android:textColor="@color/text_title"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <RelativeLayout
+            android:id="@+id/layout_input_confirm_password"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_below="@id/tv_label_confirm_password"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_edittext_outlined"
+            android:paddingHorizontal="14dp">
+
+            <ImageView
+                android:id="@+id/img_icon_lock_confirm"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:contentDescription="@string/label_retype_password"
+                android:src="@drawable/ic_lock" />
+
+            <ImageView
+                android:id="@+id/img_toggle_confirm_password"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:contentDescription="@string/desc_toggle_password"
+                android:src="@drawable/ic_eye_off" />
+
+            <EditText
+                android:id="@+id/et_confirm_password"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="10dp"
+                android:layout_toStartOf="@id/img_toggle_confirm_password"
+                android:layout_toEndOf="@id/img_icon_lock_confirm"
+                android:autofillHints="newPassword"
+                android:background="@null"
+                android:hint="@string/hint_confirm_password"
+                android:inputType="textPassword"
+                android:textColor="@color/text_title"
+                android:textColorHint="@color/text_subtitle"
+                android:textSize="14sp" />
+
+        </RelativeLayout>
+
         <!-- Terms Checkbox Section -->
         <RelativeLayout
             android:id="@+id/layout_terms"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/layout_input_password"
+            android:layout_below="@id/layout_input_confirm_password"
             android:layout_marginTop="16dp">
 
-            <CheckBox
+            <!-- android.widget.CheckBox (không để Material tự đổi thành ô tô màu) -->
+            <android.widget.CheckBox
                 android:id="@+id/cb_terms"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentTop="true"
-                android:buttonTint="@color/primary_maroon"
-                android:checked="true" />
+                android:background="@null"
+                android:button="@drawable/selector_checkbox_tick"
+                android:checked="false" />
 
             <TextView
                 android:id="@+id/tv_terms_text"

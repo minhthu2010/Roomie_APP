@@ -9,5 +9,7 @@ public class ApiResponse<T> {
         public int page;
         public int limit;
         public int total;
+        /** Chỉ có ở GET /notifications */
+        public int unreadCount;
     }
 }

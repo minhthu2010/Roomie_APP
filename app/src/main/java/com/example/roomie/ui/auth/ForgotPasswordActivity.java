@@ -1,6 +1,5 @@
 package com.example.roomie.ui.auth;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -15,6 +14,10 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.roomie.R;
 import com.example.roomie.common.AppNotificationHelper;
+import com.example.roomie.data.accounts.AccountModels;
+import com.example.roomie.data.accounts.AccountsApi;
+import com.example.roomie.data.remote.ApiCallback;
+import com.example.roomie.data.remote.ApiClient;
 
 public class ForgotPasswordActivity extends AppCompatActivity {
 
@@ -51,10 +54,33 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                     return;
                 }
 
-                Intent intent = new Intent(ForgotPasswordActivity.this, VerifyOtpActivity.class);
-                intent.putExtra("USER_INPUT", input);
-                startActivity(intent);
+                sendCode(btnSendCode, input);
             });
         }
+    }
+
+    // Server tìm tài khoản theo email/SĐT rồi gửi mã về email của tài khoản đó
+    private void sendCode(AppCompatButton button, String account) {
+        button.setEnabled(false);
+        ApiClient.create(this, AccountsApi.class)
+                .forgotPassword(new AccountModels.AccountRequest(account))
+                .enqueue(new ApiCallback<AccountModels.OtpChallenge>(this) {
+                    @Override
+                    public void onSuccess(AccountModels.OtpChallenge challenge) {
+                        button.setEnabled(true);
+                        VerifyOtpActivity.open(ForgotPasswordActivity.this, account, challenge);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        button.setEnabled(true);
+                        if ("OTP_TOO_SOON".equals(getErrorCode())) {
+                            // Vừa gửi mã cho tài khoản này: nhập mã đã nhận
+                            VerifyOtpActivity.open(ForgotPasswordActivity.this, account, null);
+                        } else {
+                            AppNotificationHelper.showError(ForgotPasswordActivity.this, message);
+                        }
+                    }
+                });
     }
 }

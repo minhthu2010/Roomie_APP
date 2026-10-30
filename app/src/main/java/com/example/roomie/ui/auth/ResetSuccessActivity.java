@@ -31,8 +31,9 @@ public class ResetSuccessActivity extends AppCompatActivity {
         AppCompatButton btnBackToLogin = findViewById(R.id.btn_back_to_login);
 
         Runnable goToLogin = () -> {
+            // Mật khẩu mới => mọi phiên cũ đã bị thu hồi, bắt đầu lại từ màn đăng nhập
             Intent intent = new Intent(ResetSuccessActivity.this, LoginActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
             finish();
         };
