@@ -53,7 +53,8 @@ function toRoomCard(r, score, isSaved) {
  *   nearLat/nearLng  quanh một địa chỉ đã tra (Photon), trong bán kính radiusKm
  *   wardCode    đúng phường/xã (mã hành chính thật)
  *   minRent, maxRent, roomTypes[], gender (female|male), amenities[] (phải có đủ)
- *   sort        match (mặc định) | newest | price_asc | price_desc | distance
+ *   moveInBy (YYYY-MM-DD), minArea (m²), maxDeposit, minSlots (số người cần), occupation (student|worker)
+ *   sort       match (mặc định) | newest | price_asc | price_desc | distance
  */
 async function searchRooms(userId, f) {
   const where = [];
@@ -67,7 +68,10 @@ async function searchRooms(userId, f) {
       'SELECT landmark_id, name, short_name, latitude, longitude FROM landmarks WHERE landmark_id = $1 AND is_active',
       [f.landmarkId]);
     landmark = rows[0];
-    if (!landmark) throw AppError.notFound('Không tìm thấy trường / địa điểm');
+    // Không còn trường này (dữ liệu nạp lại) mà app có gửi tọa độ thì tìm quanh tọa độ đó
+    if (!landmark && (f.nearLat == null || f.nearLng == null)) throw AppError.notFound('Không tìm thấy trường / địa điểm');
+  }
+  if (landmark) {
     distanceSql = HAVERSINE_KM(p(landmark.latitude), p(landmark.longitude), 'r.latitude', 'r.longitude');
     where.push(`r.latitude IS NOT NULL AND ${distanceSql} <= ${p(f.radiusKm)}`);
   } else if (f.nearLat != null && f.nearLng != null) {
@@ -100,6 +104,13 @@ async function searchRooms(userId, f) {
   if (f.roomTypes.length) where.push(`r.room_type = ANY(${p(f.roomTypes)}::text[])`);
   // "Nữ" = phòng nhận nữ hoặc không giới hạn giới tính
   if (f.gender) where.push(`r.preferred_gender IN ('any', ${p(f.gender)})`);
+  if (f.moveInBy) where.push(`(r.available_from IS NULL OR r.available_from <= ${p(f.moveInBy)}::date)`);
+  // Phòng không ghi diện tích / tiền cọc thì không chắc đạt điều kiện -> loại
+  if (f.minArea != null) where.push(`r.area_m2 >= ${p(f.minArea)}`);
+  if (f.maxDeposit != null) where.push(`r.deposit_amount <= ${p(f.maxDeposit)}`);
+  if (f.minSlots != null) where.push(`r.seeking_roommates >= ${p(f.minSlots)}`);
+  // "Sinh viên" = phòng nhận sinh viên hoặc không giới hạn
+  if (f.occupation) where.push(`r.preferred_occupation IN ('any', ${p(f.occupation)})`);
   if (f.amenities.length) {
     where.push(`NOT EXISTS (
       SELECT 1 FROM amenities a

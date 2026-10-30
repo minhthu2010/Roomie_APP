@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -33,10 +34,14 @@ import com.google.android.material.slider.RangeSlider;
 
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Bộ lọc phòng: khu vực, ngân sách, loại chỗ ở, giới tính, tiện ích.
@@ -59,6 +64,9 @@ public class BoLocActivity extends AppCompatActivity {
     private final Map<Integer, String> roomTypeChips = new LinkedHashMap<>();
     private final Map<Integer, String> genderChips = new LinkedHashMap<>();
     private final Map<Integer, String> amenityChips = new LinkedHashMap<>();
+    /** Tô lại các nhóm chip chọn 1 (bán kính, ngày chuyển vào...) theo criteria */
+    private final List<Runnable> choiceBinders = new ArrayList<>();
+    private TextView tvRadiusNote;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +99,7 @@ public class BoLocActivity extends AppCompatActivity {
         tvArea = findViewById(R.id.tv_filter_area);
         tvBudget = findViewById(R.id.tv_budget_range);
         rangeBudget = findViewById(R.id.range_budget);
+        tvRadiusNote = findViewById(R.id.tv_radius_note);
         rangeBudget.setTickVisible(false);   // bước 500.000đ tạo 20 dấu chấm trên thanh
 
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
@@ -139,7 +148,81 @@ public class BoLocActivity extends AppCompatActivity {
             });
         }
 
+        setupChoiceGroups();
         bindAll();
+    }
+
+    /** Các nhóm chip chọn 1 giá trị (null = "Bất kỳ" / mặc định) */
+    private void setupChoiceGroups() {
+        // 3 km là mặc định của server nên chọn 3 km = để trống
+        setupChoice(R.id.group_radius,
+                new String[]{km(1), km(2), km(3), km(5), km(10)},
+                Arrays.asList(1, 2, null, 5, 10),
+                () -> criteria.radiusKm, v -> criteria.radiusKm = v);
+        setupChoice(R.id.group_occupation,
+                new String[]{getString(R.string.filter_any), getString(R.string.filter_occupation_student),
+                        getString(R.string.filter_occupation_worker)},
+                Arrays.asList(null, "student", "worker"),
+                () -> criteria.occupation, v -> criteria.occupation = v);
+        setupChoice(R.id.group_move_in,
+                new String[]{getString(R.string.filter_any), getString(R.string.filter_move_in_now),
+                        getString(R.string.filter_move_in_2w), getString(R.string.filter_move_in_1m)},
+                Arrays.asList(null, 0, 14, 30),
+                () -> criteria.moveInDays, v -> criteria.moveInDays = v);
+        setupChoice(R.id.group_slots,
+                new String[]{getString(R.string.filter_slots_1), getString(R.string.filter_slots_n, 2),
+                        getString(R.string.filter_slots_n, 3)},
+                Arrays.asList(null, 2, 3),
+                () -> criteria.minSlots, v -> criteria.minSlots = v);
+        setupChoice(R.id.group_area_min,
+                new String[]{getString(R.string.filter_any), getString(R.string.filter_area_m2, 15),
+                        getString(R.string.filter_area_m2, 20), getString(R.string.filter_area_m2, 30)},
+                Arrays.asList(null, 15, 20, 30),
+                () -> criteria.minArea, v -> criteria.minArea = v);
+        setupChoice(R.id.group_deposit,
+                new String[]{getString(R.string.filter_any), getString(R.string.filter_deposit_max, "1"),
+                        getString(R.string.filter_deposit_max, "2"), getString(R.string.filter_deposit_max, "3")},
+                Arrays.asList(null, 1_000_000L, 2_000_000L, 3_000_000L),
+                () -> criteria.maxDeposit, v -> criteria.maxDeposit = v);
+    }
+
+    private String km(int value) {
+        return getString(R.string.filter_radius_km, value);
+    }
+
+    private <T> void setupChoice(int groupId, String[] labels, List<T> values, Supplier<T> getter, Consumer<T> setter) {
+        LinearLayout group = findViewById(groupId);
+        List<TextView> chips = new ArrayList<>();
+        for (int i = 0; i < labels.length; i++) {
+            TextView chip = new TextView(this);
+            chip.setText(labels[i]);
+            chip.setTextSize(14);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            if (i > 0) lp.setMarginStart(dp(10));
+            T value = values.get(i);
+            chip.setOnClickListener(v -> {
+                setter.accept(value);
+                bindChoices();
+            });
+            group.addView(chip, lp);
+            chips.add(chip);
+        }
+        choiceBinders.add(() -> {
+            T current = getter.get();
+            for (int i = 0; i < chips.size(); i++) styleChip(chips.get(i), null, Objects.equals(values.get(i), current));
+        });
+    }
+
+    private void bindChoices() {
+        for (Runnable r : choiceBinders) r.run();
+        tvRadiusNote.setText(criteria.hasDistanceOrigin()
+                ? getString(R.string.filter_radius_note_on, criteria.locationLabel())
+                : getString(R.string.filter_radius_note_off));
+    }
+
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
     private void bindAll() {
@@ -152,6 +235,7 @@ public class BoLocActivity extends AppCompatActivity {
                 criteria.maxRent != null ? (float) criteria.maxRent : BUDGET_MAX);
         tvBudget.setText(RoomFormat.budgetLabel(this, criteria.minRent, criteria.maxRent));
         bindChips();
+        bindChoices();
     }
 
     private void bindChips() {

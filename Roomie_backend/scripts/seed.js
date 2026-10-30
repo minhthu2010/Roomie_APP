@@ -149,6 +149,18 @@ const IDS = {
           WHERE post_id = $1 AND description = 'Phòng mẫu để test.'`,
         [postId, desc, deposit, bills, occupants, expectations]);
     }
+    // Diện tích, tiền cọc, ngày chuyển vào, số người cần tìm khác nhau để thử các bộ lọc
+    await c.query(
+      `UPDATE room_posts rp SET area_m2 = v.area, deposit_amount = v.deposit,
+              available_from = CURRENT_DATE + v.days, seeking_roommates = v.slots
+         FROM (VALUES ('10000000-0000-0000-0000-000000000001'::uuid, 25, 3200000, 14, 1),
+                      ('10000000-0000-0000-0000-000000000002'::uuid, 32, 3800000, 0, 2),
+                      ('10000000-0000-0000-0000-000000000003'::uuid, 28, 4300000, 0, 1),
+                      ('10000000-0000-0000-0000-000000000004'::uuid, 18, 1500000, 30, 1),
+                      ('10000000-0000-0000-0000-000000000005'::uuid, 60, 4100000, 7, 1),
+                      ('10000000-0000-0000-0000-000000000006'::uuid, 16, 1000000, 0, 1))
+              AS v(post_id, area, deposit, days, slots)
+        WHERE rp.post_id = v.post_id`);
     await c.query('ALTER TABLE room_posts ENABLE TRIGGER trg_room_posts_material_reapproval');
 
     // Hồ sơ người đăng (Ngọc Anh) và người tìm (Mai Linh) cho màn hồ sơ công khai

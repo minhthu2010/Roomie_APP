@@ -794,4 +794,47 @@
     <string name="box_logout_confirm_sub">Bạn cần đăng nhập lại để xem phòng đã lưu và quản lý bài đăng. Bài đăng đã xuất bản không bị xóa.</string>
     <string name="btn_stay">Ở lại</string>
     <string name="footer_account_mail">Roomie · Tài khoản Mai Linh</string>
+
+    <!-- Bộ lọc mở rộng: bán kính, đối tượng, ngày chuyển vào, số người, diện tích, tiền cọc -->
+    <string name="filter_radius_title">Bán kính tìm</string>
+    <string name="filter_radius_note_on">Quanh %1$s</string>
+    <string name="filter_radius_note_off">Áp dụng khi tìm gần trường, địa chỉ hoặc vị trí của bạn</string>
+    <string name="filter_radius_km">%1$d km</string>
+    <string name="filter_occupation_title">Phòng nhận</string>
+    <string name="filter_occupation_student">Sinh viên</string>
+    <string name="filter_occupation_worker">Người đi làm</string>
+    <string name="filter_any">Bất kỳ</string>
+    <string name="filter_move_in_title">Ngày chuyển vào</string>
+    <string name="filter_move_in_now">Ở được ngay</string>
+    <string name="filter_move_in_2w">Trong 2 tuần</string>
+    <string name="filter_move_in_1m">Trong 1 tháng</string>
+    <string name="filter_slots_title">Số người đi cùng</string>
+    <string name="filter_slots_1">1 mình tôi</string>
+    <string name="filter_slots_n">%1$d người</string>
+    <string name="filter_area_min_title">Diện tích tối thiểu</string>
+    <string name="filter_area_m2">Từ %1$d m²</string>
+    <string name="filter_deposit_title">Tiền cọc tối đa</string>
+    <string name="filter_deposit_max">≤ %1$s triệu</string>
+    <string name="chip_radius">Trong %1$d km</string>
+    <string name="chip_move_in_now">Ở được ngay</string>
+    <string name="chip_move_in_days">Vào ở trong %1$d ngày</string>
+    <string name="chip_area_min">≥ %1$d m²</string>
+    <string name="chip_deposit_max">Cọc tối đa %1$s triệu</string>
+    <string name="chip_slots">%1$d người</string>
+
+    <!-- Phòng gần tôi -->
+    <string name="search_near_me_title">Phòng gần vị trí của tôi</string>
+    <string name="search_near_me_sub">Dùng định vị của máy, sắp theo khoảng cách</string>
+    <string name="search_near_me_locating">Đang lấy vị trí của bạn…</string>
+    <string name="search_near_me_label">Vị trí của bạn</string>
+    <string name="search_near_me_denied">Cần quyền vị trí để tìm phòng gần bạn</string>
+    <string name="search_near_me_failed">Không lấy được vị trí. Hãy bật GPS / định vị rồi thử lại</string>
+    <string name="search_near_me_outside">Vị trí của bạn đang ở ngoài TP.HCM nên chưa có phòng gần bạn</string>
+    <string name="chip_near_me">Gần vị trí của bạn</string>
+
+    <!-- Không có kết quả: gợi ý tìm rộng hơn -->
+    <string name="feed_empty_radius">Không có phòng nào hợp điều kiện trong %1$d km.\nThử mở rộng bán kính hoặc bỏ bớt bộ lọc.</string>
+    <string name="feed_empty_widen">Mở rộng ra %1$d km</string>
+    <string name="feed_empty_clear_filters">Bỏ bộ lọc</string>
+    <string name="feed_empty_clear_location">Tìm mọi khu vực</string>
 </resources>

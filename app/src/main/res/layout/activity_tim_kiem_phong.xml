@@ -120,6 +120,13 @@
                 android:orientation="vertical"
                 android:visibility="gone" />
 
+            <!-- "Phòng gần vị trí của tôi" (GPS, item_search_suggestion thêm từ code) -->
+            <LinearLayout
+                android:id="@+id/layout_near_me"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
             <!-- Section 2: Tìm kiếm gần đây (lưu trên máy, item_search_suggestion thêm từ code) -->
             <RelativeLayout
                 android:id="@+id/layout_recent_header"

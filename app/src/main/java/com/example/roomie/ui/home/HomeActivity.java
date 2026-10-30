@@ -40,6 +40,9 @@ public class HomeActivity extends AppCompatActivity {
 
     private static final int PAGE_SIZE = 10;
     private static final String STATE_CRITERIA = "criteria";
+    /** Bán kính mặc định của server khi không gửi radiusKm, và mức mở rộng tối đa */
+    private static final int DEFAULT_RADIUS_KM = 3;
+    private static final int MAX_RADIUS_KM = 10;
 
     private DiscoveryApi api;
     private SearchCriteria criteria = new SearchCriteria();
@@ -55,6 +58,7 @@ public class HomeActivity extends AppCompatActivity {
     private TextView tvSortLabel;
     private LinearLayout layoutRooms;
     private TextView tvEmpty;
+    private LinearLayout layoutEmptyActions;
     private TextView btnLoadMore;
 
     private final ActivityResultLauncher<Intent> criteriaLauncher = registerForActivityResult(
@@ -95,6 +99,7 @@ public class HomeActivity extends AppCompatActivity {
         tvSortLabel = findViewById(R.id.tv_sort_label);
         layoutRooms = findViewById(R.id.layout_feed_rooms);
         tvEmpty = findViewById(R.id.tv_feed_empty);
+        layoutEmptyActions = findViewById(R.id.layout_empty_actions);
         btnLoadMore = findViewById(R.id.btn_load_more);
 
         // Filter button click opens "Bộ lọc phòng" screen
@@ -130,6 +135,7 @@ public class HomeActivity extends AppCompatActivity {
         loadedCount = 0;
         layoutRooms.removeAllViews();
         tvEmpty.setVisibility(View.GONE);
+        layoutEmptyActions.setVisibility(View.GONE);
         btnLoadMore.setVisibility(View.GONE);
         tvFeedSubtitle.setText(R.string.feed_loading);
         bindHeader();
@@ -154,11 +160,7 @@ public class HomeActivity extends AppCompatActivity {
                         boolean searching = criteria.hasLocation() || criteria.hasFilters();
                         tvFeedSubtitle.setText(getString(searching ? R.string.feed_count_search : R.string.feed_count, total));
                         btnLoadMore.setVisibility(loadedCount < total ? View.VISIBLE : View.GONE);
-                        if (total == 0) {
-                            tvEmpty.setText(R.string.feed_empty);
-                            tvEmpty.setOnClickListener(null);
-                            tvEmpty.setVisibility(View.VISIBLE);
-                        }
+                        if (total == 0) showEmpty();
                     }
 
                     @Override
@@ -173,6 +175,46 @@ public class HomeActivity extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+    /**
+     * Không có phòng: gợi ý cách tìm rộng hơn thay vì chỉ báo trống.
+     * Đang tìm quanh 1 điểm -> mở rộng bán kính; có bộ lọc -> bỏ bộ lọc; tìm theo khu vực -> mọi khu vực.
+     */
+    private void showEmpty() {
+        layoutEmptyActions.removeAllViews();
+        String text = getString(R.string.feed_empty);
+        if (criteria.hasDistanceOrigin()) {
+            int radius = criteria.radiusKm != null ? criteria.radiusKm : DEFAULT_RADIUS_KM;
+            text = getString(R.string.feed_empty_radius, radius);
+            if (radius < MAX_RADIUS_KM) {
+                int wider = radius < 5 ? 5 : MAX_RADIUS_KM;
+                addEmptyAction(getString(R.string.feed_empty_widen, wider), () -> criteria.radiusKm = wider);
+            }
+        }
+        if (criteria.hasFilters()) {
+            addEmptyAction(getString(R.string.feed_empty_clear_filters), () -> {
+                Integer radius = criteria.radiusKm;   // bán kính thuộc về vị trí, giữ lại
+                criteria.clearFilters();
+                criteria.radiusKm = radius;
+            });
+        } else if (criteria.hasLocation() && !criteria.hasDistanceOrigin()) {
+            addEmptyAction(getString(R.string.feed_empty_clear_location), () -> criteria.clearLocation());
+        }
+        tvEmpty.setText(text);
+        tvEmpty.setOnClickListener(null);
+        tvEmpty.setVisibility(View.VISIBLE);
+        layoutEmptyActions.setVisibility(layoutEmptyActions.getChildCount() > 0 ? View.VISIBLE : View.GONE);
+    }
+
+    private void addEmptyAction(String label, Runnable change) {
+        TextView chip = (TextView) LayoutInflater.from(this).inflate(R.layout.item_filter_chip, layoutEmptyActions, false);
+        chip.setText(label);
+        chip.setOnClickListener(v -> {
+            change.run();
+            reload();
+        });
+        layoutEmptyActions.addView(chip);
     }
 
     // ---------- Hiển thị ----------
@@ -194,6 +236,8 @@ public class HomeActivity extends AppCompatActivity {
         layoutChips.removeAllViews();
         if (criteria.landmarkId != null) {
             addChip(getString(R.string.chip_near, criteria.landmarkName), () -> criteria.clearLocation());
+        } else if (criteria.nearMe) {
+            addChip(getString(R.string.chip_near_me), () -> criteria.clearLocation());
         } else if (criteria.placeName != null) {
             addChip(getString(R.string.chip_near_place, criteria.placeName), () -> criteria.clearLocation());
         } else if (criteria.wardName != null) {
@@ -202,6 +246,9 @@ public class HomeActivity extends AppCompatActivity {
             addChip(criteria.area, () -> criteria.clearLocation());
         } else if (criteria.query != null) {
             addChip(getString(R.string.chip_query, criteria.query), () -> criteria.clearLocation());
+        }
+        if (criteria.radiusKm != null && criteria.hasDistanceOrigin()) {
+            addChip(getString(R.string.chip_radius, criteria.radiusKm), () -> criteria.radiusKm = null);
         }
         if (criteria.minRent != null || criteria.maxRent != null) {
             addChip(RoomFormat.budgetLabel(this, criteria.minRent, criteria.maxRent), () -> {
@@ -218,6 +265,24 @@ public class HomeActivity extends AppCompatActivity {
         }
         if (!criteria.amenities.isEmpty()) {
             addChip(getString(R.string.chip_amenities, criteria.amenities.size()), () -> criteria.amenities.clear());
+        }
+        if (criteria.occupation != null) {
+            addChip(getString("student".equals(criteria.occupation)
+                    ? R.string.filter_occupation_student : R.string.filter_occupation_worker), () -> criteria.occupation = null);
+        }
+        if (criteria.moveInDays != null) {
+            addChip(criteria.moveInDays == 0 ? getString(R.string.chip_move_in_now)
+                    : getString(R.string.chip_move_in_days, criteria.moveInDays), () -> criteria.moveInDays = null);
+        }
+        if (criteria.minSlots != null) {
+            addChip(getString(R.string.chip_slots, criteria.minSlots), () -> criteria.minSlots = null);
+        }
+        if (criteria.minArea != null) {
+            addChip(getString(R.string.chip_area_min, criteria.minArea), () -> criteria.minArea = null);
+        }
+        if (criteria.maxDeposit != null) {
+            addChip(getString(R.string.chip_deposit_max, RoomFormat.millions(criteria.maxDeposit)),
+                    () -> criteria.maxDeposit = null);
         }
         scrollChips.setVisibility(layoutChips.getChildCount() > 0 ? View.VISIBLE : View.GONE);
     }
