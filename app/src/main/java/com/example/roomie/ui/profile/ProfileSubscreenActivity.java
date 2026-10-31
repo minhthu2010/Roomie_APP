@@ -1,15 +1,16 @@
 package com.example.roomie.ui.profile;
 
 import android.app.DatePickerDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.net.Uri;
-import android.provider.Settings;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -32,7 +33,6 @@ import com.example.roomie.data.accounts.AccountsApi;
 import com.example.roomie.data.remote.ApiCallback;
 import com.example.roomie.data.remote.ApiClient;
 import com.example.roomie.data.remote.SessionManager;
-import com.example.roomie.ui.auth.AuthFlow;
 import com.example.roomie.ui.auth.ForgotPasswordActivity;
 
 import java.util.ArrayList;
@@ -118,6 +118,13 @@ public class ProfileSubscreenActivity extends AppCompatActivity {
         if (title != null) {
             title.setText(titleFor(layout));
         }
+        // Dòng nhỏ trên tiêu đề, chỉ màn Đổi mật khẩu có ("BẢO MẬT TÀI KHOẢN")
+        TextView eyebrow = findViewById(R.id.tv_header_eyebrow);
+        if (eyebrow != null) {
+            boolean show = layout == R.layout.layout_change_password;
+            eyebrow.setVisibility(show ? View.VISIBLE : View.GONE);
+            if (show) eyebrow.setText(R.string.eyebrow_account_security);
+        }
         View bottomNavigation = findViewById(R.id.bottomNavigationContainer);
         if (bottomNavigation != null) {
             bottomNavigation.setVisibility(View.VISIBLE);
@@ -131,24 +138,17 @@ public class ProfileSubscreenActivity extends AppCompatActivity {
 
     private int titleFor(int layout) {
         if (layout == R.layout.layout_edit_profile) return R.string.title_edit_profile;
-        if (layout == R.layout.layout_verification_safety) return R.string.title_verification_safety;
         if (layout == R.layout.layout_notifications) return R.string.title_notifications;
         if (layout == R.layout.layout_settings) return R.string.title_settings;
-        if (layout == R.layout.layout_privacy_account) return R.string.title_privacy_account_header;
-        if (layout == R.layout.layout_notification_settings) return R.string.title_notif_settings_header;
         if (layout == R.layout.layout_help_support) return R.string.title_help_header;
-        if (layout == R.layout.layout_send_feedback) return R.string.title_send_feedback_header;
         if (layout == R.layout.layout_change_password) return R.string.menu_change_password;
         return R.string.title_my_profile;
     }
 
     private void hideLegacyBottomBar(View screen) {
         int[] legacyBars = {
-                R.id.bottom_nav_bar_safety,
                 R.id.bottom_nav_bar_notif,
                 R.id.bottom_nav_bar_settings,
-                R.id.bottom_nav_bar_priv,
-                R.id.bottom_nav_bar_notif_set,
                 R.id.bottom_nav_bar_help
         };
         for (int id : legacyBars) {
@@ -159,43 +159,105 @@ public class ProfileSubscreenActivity extends AppCompatActivity {
 
     private void bindScreenActions(View screen) {
         bind(screen, R.id.menu_change_password_item, R.layout.layout_change_password);
-        bind(screen, R.id.menu_notif_settings_item, R.layout.layout_notification_settings);
-        bind(screen, R.id.menu_privacy_account_item, R.layout.layout_privacy_account);
         bind(screen, R.id.menu_help_item, R.layout.layout_help_support);
-        bind(screen, R.id.menu_feedback_item, R.layout.layout_send_feedback);
-        bind(screen, R.id.menu_contact_visibility, R.layout.layout_privacy_account);
-        bind(screen, R.id.menu_change_pass_priv_item, R.layout.layout_change_password);
-        bind(screen, R.id.btn_link_send_feedback, R.layout.layout_send_feedback);
-        bind(screen, R.id.btn_contact_support, R.layout.layout_send_feedback);
 
         bindBack(screen, R.id.btn_cancel_edit_profile);
         bindBack(screen, R.id.btn_cancel_change_pass);
-        bindBack(screen, R.id.btn_cancel_feedback);
         bindEditProfile(screen);
         bindChangePassword(screen);
-        showUnavailable(screen, R.id.btn_submit_feedback_final);
-        showUnavailable(screen, R.id.btn_reverify_phone);
-        showUnavailable(screen, R.id.btn_send_email_code);
         View forgotPass = screen.findViewById(R.id.btn_forgot_pass_link);
         if (forgotPass != null) forgotPass.setOnClickListener(ignored ->
                 startActivity(new Intent(this, ForgotPasswordActivity.class)));
 
-        int attachmentId = screen.getResources().getIdentifier("area_feedback_attachment", "id", getPackageName());
-        if (attachmentId != 0) showUnavailable(screen, attachmentId);
-
-        bindNotificationSettings(screen);
-        confirmLogout(screen, R.id.btn_confirm_logout);
-        confirmLogout(screen, R.id.btn_logout_settings);
-        showUnavailable(screen, R.id.menu_terms_item);
-        showUnavailable(screen, R.id.menu_privacy_policy_item);
-        showUnavailableOnParent(screen, R.id.iv_chevron_faq2);
-        showUnavailableOnParent(screen, R.id.iv_chevron_faq3);
-        showUnavailableOnParent(screen, R.id.iv_chevron_faq4);
-        showUnavailableOnParent(screen, R.id.iv_chevron_faq5);
-        showAccountName(screen);
+        bindReceiveNotifications(screen);
+        bindHelp(screen);
         NotificationsScreen.bind(this, screen);
-        SettingsSwitches.bind(this, screen);
-        bindBack(screen, R.id.btn_stay_logged_in);
+    }
+
+    // ---------- Cài đặt: công tắc "Nhận thông báo" (lưu qua PATCH /me/profile) ----------
+
+    private void bindReceiveNotifications(View root) {
+        View row = root.findViewById(R.id.row_receive_notifications);
+        CompoundButton toggle = root.findViewById(R.id.row_receive_notifications_end);
+        if (row == null || toggle == null) return;
+
+        // Khóa tới khi tải được giá trị thật; bấm cả dòng cũng đổi công tắc
+        row.setOnClickListener(ignored -> {
+            if (toggle.isEnabled()) toggle.toggle();
+        });
+        api.getMyProfile().enqueue(new ApiCallback<AccountModels.Profile>(this) {
+            @Override
+            public void onSuccess(AccountModels.Profile p) {
+                if (p == null) return;
+                toggle.setChecked(p.notificationsEnabled);
+                toggle.setEnabled(true);
+                toggle.setOnCheckedChangeListener((button, checked) -> saveNotificationsEnabled(button, checked));
+            }
+
+            @Override
+            public void onError(String message) {
+                AppNotificationHelper.showError(ProfileSubscreenActivity.this, message);
+            }
+        });
+    }
+
+    private void saveNotificationsEnabled(CompoundButton toggle, boolean enabled) {
+        AccountModels.UpdateProfileRequest body = new AccountModels.UpdateProfileRequest();
+        body.notificationsEnabled = enabled;
+        toggle.setEnabled(false);
+        api.updateMyProfile(body).enqueue(new ApiCallback<AccountModels.Profile>(this) {
+            @Override
+            public void onSuccess(AccountModels.Profile profile) {
+                toggle.setEnabled(true);
+            }
+
+            @Override
+            public void onError(String message) {
+                // Lưu lỗi: trả công tắc về như cũ mà không gọi lại API
+                toggle.setOnCheckedChangeListener(null);
+                toggle.setChecked(!enabled);
+                toggle.setOnCheckedChangeListener((button, checked) -> saveNotificationsEnabled(button, checked));
+                toggle.setEnabled(true);
+                AppNotificationHelper.showError(ProfileSubscreenActivity.this, message);
+            }
+        });
+    }
+
+    // ---------- Trợ giúp: chạm câu hỏi để mở/đóng câu trả lời; Liên hệ hỗ trợ qua email ----------
+
+    private void bindHelp(View root) {
+        int[][] faqs = {
+                {R.id.faq_item_1, R.id.tv_faq_answer_1, R.id.iv_faq_chevron_1},
+                {R.id.faq_item_2, R.id.tv_faq_answer_2, R.id.iv_faq_chevron_2},
+                {R.id.faq_item_3, R.id.tv_faq_answer_3, R.id.iv_faq_chevron_3},
+        };
+        for (int[] ids : faqs) {
+            View item = root.findViewById(ids[0]);
+            View answer = root.findViewById(ids[1]);
+            View chevron = root.findViewById(ids[2]);
+            if (item == null) continue;
+            item.setOnClickListener(ignored -> {
+                boolean open = answer.getVisibility() != View.VISIBLE;
+                answer.setVisibility(open ? View.VISIBLE : View.GONE);
+                chevron.setRotation(open ? 90 : 0);
+            });
+        }
+
+        View contact = root.findViewById(R.id.btn_contact_support);
+        if (contact != null) contact.setOnClickListener(ignored -> {
+            String email = getString(R.string.support_email);
+            if (email.isEmpty()) {
+                AppNotificationHelper.showInfo(this, getString(R.string.support_email_missing));
+                return;
+            }
+            Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + email));
+            intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.support_email_subject));
+            try {
+                startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                AppNotificationHelper.showInfo(this, email);
+            }
+        });
     }
 
     // ---------- Chỉnh sửa hồ sơ (layout_edit_profile) ----------
@@ -380,16 +442,6 @@ public class ProfileSubscreenActivity extends AppCompatActivity {
         });
     }
 
-    // Tên người đang đăng nhập ở màn Xác minh & an toàn và cuối màn Quyền riêng tư
-    private void showAccountName(View root) {
-        String name = new SessionManager(this).getDisplayName();
-        if (name == null) return;
-        TextView verifiedSub = root.findViewById(R.id.tv_verified_sub);
-        if (verifiedSub != null) verifiedSub.setText(getString(R.string.verified_sub_name, name));
-        TextView footer = root.findViewById(R.id.tv_footer_account);
-        if (footer != null) footer.setText(getString(R.string.footer_account_name, name));
-    }
-
     private void stylePill(TextView pill, boolean selected) {
         pill.setBackgroundResource(selected ? R.drawable.bg_pill_selected : R.drawable.bg_pill_unselected);
         pill.setTextColor(getColor(selected ? R.color.text_white : R.color.text_title));
@@ -470,43 +522,5 @@ public class ProfileSubscreenActivity extends AppCompatActivity {
     private void bindBack(View root, int viewId) {
         View view = root.findViewById(viewId);
         if (view != null) view.setOnClickListener(ignored -> onBackPressed());
-    }
-
-    private void showUnavailable(View root, int viewId) {
-        View view = root.findViewById(viewId);
-        if (view != null) view.setOnClickListener(ignored -> new AlertDialog.Builder(this)
-                .setMessage(R.string.profile_action_unavailable)
-                .setPositiveButton(android.R.string.ok, null)
-                .show());
-    }
-
-    private void showUnavailableOnParent(View root, int viewId) {
-        View child = root.findViewById(viewId);
-        if (child != null && child.getParent() instanceof View) {
-            ((View) child.getParent()).setOnClickListener(ignored -> new AlertDialog.Builder(this)
-                    .setMessage(R.string.profile_action_unavailable)
-                    .setPositiveButton(android.R.string.ok, null)
-                    .show());
-        }
-    }
-
-    private void confirmLogout(View root, int viewId) {
-        View view = root.findViewById(viewId);
-        if (view != null) view.setOnClickListener(ignored -> new AlertDialog.Builder(this)
-                .setTitle(R.string.box_logout_confirm_title)
-                .setMessage(R.string.box_logout_confirm_sub)
-                .setNegativeButton(R.string.btn_stay, null)
-                .setPositiveButton(R.string.btn_logout, (dialog, which) -> AuthFlow.logout(this))
-                .show());
-    }
-
-    private void bindNotificationSettings(View root) {
-        View view = root.findViewById(R.id.btn_device_notif_settings);
-        if (view == null) return;
-        view.setOnClickListener(ignored -> {
-            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                    Uri.parse("package:" + getPackageName()));
-            startActivity(intent);
-        });
     }
 }

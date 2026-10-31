@@ -47,8 +47,6 @@ public class ProfileActivity extends AppCompatActivity {
         openSubscreen(R.id.card_user_profile, R.layout.layout_edit_profile);
         openSubscreen(R.id.iv_edit_profile_icon, R.layout.layout_edit_profile);
         openSubscreen(R.id.menu_personal_info, R.layout.layout_edit_profile);
-        openSubscreen(R.id.menu_verification_safety, R.layout.layout_verification_safety);
-        openSubscreen(R.id.menu_notifications, R.layout.layout_notifications);
         openSubscreen(R.id.menu_settings, R.layout.layout_settings);
 
         View cardHabits = findViewById(R.id.card_habits_quiz);

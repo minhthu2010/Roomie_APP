@@ -24,6 +24,9 @@ import com.example.roomie.data.discovery.SearchModels;
 import com.example.roomie.data.remote.ApiCallback;
 import com.example.roomie.data.remote.ApiClient;
 import com.example.roomie.data.remote.SessionManager;
+import com.example.roomie.data.accounts.AccountModels;
+import com.example.roomie.data.accounts.AccountsApi;
+import com.example.roomie.ui.profile.ProfileSubscreenActivity;
 import com.example.roomie.ui.filter.BoLocActivity;
 import com.example.roomie.ui.search.ProvinceStore;
 import com.example.roomie.ui.search.RoomCardBinder;
@@ -367,6 +370,27 @@ public class HomeActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         showGreeting();
+        bindNotificationBell();
+    }
+
+    // Chuông thông báo góc phải (người A): mở màn Thông báo, chấm đỏ khi có thông báo chưa đọc
+    private void bindNotificationBell() {
+        View bell = findViewById(R.id.btn_notifications);
+        View badge = findViewById(R.id.view_notif_badge);
+        if (bell == null) return;
+        bell.setOnClickListener(v -> ProfileSubscreenActivity.open(this, R.layout.layout_notifications));
+        ApiClient.create(this, AccountsApi.class).getUnreadCount()
+                .enqueue(new ApiCallback<AccountModels.UnreadCount>(this) {
+                    @Override
+                    public void onSuccess(AccountModels.UnreadCount data) {
+                        badge.setVisibility(data != null && data.unreadCount > 0 ? View.VISIBLE : View.GONE);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        badge.setVisibility(View.GONE);
+                    }
+                });
     }
 
     // "Chào Linh, tìm tổ ấm nhé" theo tên người đang đăng nhập (người A lưu trong SessionManager)

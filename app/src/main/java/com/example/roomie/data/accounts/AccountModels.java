@@ -126,6 +126,8 @@ public final class AccountModels {
         public String moveInDate;
         public String onboardingGoal;
         public Boolean completeSetup;
+        /** Công tắc "Nhận thông báo" ở màn Cài đặt */
+        public Boolean notificationsEnabled;
     }
 
     // ---------- Response ----------
@@ -140,16 +142,6 @@ public final class AccountModels {
     public static class ResetToken {
         public String resetToken;
         public long expiresIn;
-    }
-
-    /** Dùng cho cả GET (đủ field) và PATCH (chỉ field khác null). */
-    public static class Settings {
-        public Boolean notifyRoomMatches;
-        public Boolean notifyPostActivity;
-        public Boolean notifyPostExpiring;
-        public Boolean notifyTips;
-        public Boolean showProfile;
-        public Boolean showContactOnPosts;
     }
 
     public static class Notification {
@@ -202,5 +194,11 @@ public final class AccountModels {
         public String moveInDate;
         public String preferredGender;
         public String onboardingGoal;
+        public boolean notificationsEnabled;
+    }
+
+    /** GET /notifications/unread-count: chấm đỏ trên chuông ở Home */
+    public static class UnreadCount {
+        public int unreadCount;
     }
 }

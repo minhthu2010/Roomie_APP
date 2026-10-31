@@ -149,36 +149,6 @@
             android:paddingTop="12dp"
             android:paddingBottom="20dp">
 
-            <!-- Header: số chưa đọc + "Đọc tất cả" -->
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp">
-
-                <TextView
-                    android:id="@+id/tv_count_unread"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:textColor="@color/roomie_text_secondary"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:id="@+id/btn_mark_all_read"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:padding="4dp"
-                    android:text="@string/link_mark_all_read"
-                    android:textColor="@color/primary_maroon"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-            </RelativeLayout>
-
             <!-- Thẻ thông báo (item_notification) và tiêu đề nhóm Hôm nay / Trước đó được thêm từ code -->
             <LinearLayout
                 android:id="@+id/notification_list"

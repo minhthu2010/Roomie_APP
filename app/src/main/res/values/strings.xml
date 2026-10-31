@@ -706,7 +706,7 @@
     <string name="sub_notif_settings">Chọn cập nhật bạn muốn nhận</string>
     <string name="menu_privacy_account">Quyền riêng tư &amp; tài khoản</string>
     <string name="sub_privacy_account">Quản lý hiển thị và thông tin cá nhân</string>
-    <string name="header_support_feedback">HỖ TRỢ &amp; PHẢN HỒI</string>
+    <string name="header_support_feedback">HỖ TRỢ</string>
     <string name="menu_help">Trợ giúp</string>
     <string name="sub_help">Câu hỏi thường gặp và hỗ trợ</string>
     <string name="menu_send_feedback">Gửi phản hồi</string>
@@ -858,8 +858,6 @@
     <string name="search_school_rooms">%1$d phòng trong 3km</string>
     <string name="map_my_location_hint">Bản đồ đang ở vị trí của bạn. Muốn lọc phòng quanh đây, chọn “Phòng gần vị trí của tôi” ở ô tìm kiếm.</string>
     <string name="header_greeting_name">Chào %1$s, tìm tổ ấm nhé</string>
-    <string name="verified_sub_name">%1$s · Xác minh giúp kết nối tin cậy hơn.</string>
-    <string name="footer_account_name">Roomie · Tài khoản %1$s</string>
     <string name="area_whole_province">Toàn bộ %1$s</string>
     <string name="area_pick_ward_title">Chọn phường/xã ở %1$s</string>
     <string name="school_pick_title">Chọn trường / nơi làm</string>
@@ -880,4 +878,14 @@
     <!-- Hộp chọn phường/xã (dialog_ward_picker, dùng ở hồ sơ) -->
     <string name="filter_ward_hint">Gõ tên phường, VD: dien hong</string>
     <string name="filter_ward_loading">Đang tải danh sách phường/xã…</string>
+    <string name="setting_receive_notifications">Nhận thông báo</string>
+    <string name="eyebrow_account_security">BẢO MẬT TÀI KHOẢN</string>
+    <string name="box_no_answer_short">Gửi nội dung bạn cần hỗ trợ.</string>
+    <string name="faq3_answer">Vào Bài đăng, chọn bài cần sửa rồi bấm Chỉnh sửa. Muốn tạm ẩn bài thì chọn Quản lý trạng thái → Ẩn bài.</string>
+    <string name="faq4_answer">Ở màn Đăng nhập, bấm Quên mật khẩu, nhập email đã đăng ký rồi làm theo mã 6 số được gửi về email.</string>
+    <string name="support_email">roomieandroidapp@gmail.com</string>
+    <string name="title_faq">Câu hỏi thường gặp</string>
+    <string name="support_email_subject">Roomie - Cần hỗ trợ</string>
+    <string name="support_email_missing">Nhóm chưa cấu hình email hỗ trợ</string>
+    <string name="notif_delete_confirm">Xóa thông báo này?</string>
 </resources>

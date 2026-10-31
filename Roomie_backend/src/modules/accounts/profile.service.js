@@ -39,9 +39,12 @@ async function getMyProfile(userId) {
             up.budget_min, up.budget_max, to_char(up.move_in_date, 'YYYY-MM-DD') AS move_in_date,
             COALESCE(up.preferred_gender, 'any') AS preferred_gender, up.onboarding_goal, up.profile_completed_at,
             l.name AS landmark_name, l.short_name AS landmark_short_name,
-            p.province_name AS living_province_name, w.ward_name AS living_ward_name
+            p.province_name AS living_province_name, w.ward_name AS living_ward_name,
+            COALESCE(us.notify_room_matches OR us.notify_post_activity OR us.notify_post_expiring, TRUE)
+              AS notifications_enabled
        FROM users u
        LEFT JOIN user_profiles up ON up.user_id = u.user_id
+       LEFT JOIN user_settings us ON us.user_id = u.user_id
        LEFT JOIN landmarks l ON l.landmark_id = up.landmark_id
        LEFT JOIN provinces p ON p.province_code = up.living_province_code
        LEFT JOIN wards w ON w.ward_code = up.living_ward_code
@@ -78,7 +81,20 @@ async function getMyProfile(userId) {
     preferredGender: u.preferred_gender,
     onboardingGoal: u.onboarding_goal,
     profileCompleted: u.profile_completed_at !== null,
+    // Công tắc "Nhận thông báo" ở màn Cài đặt
+    notificationsEnabled: u.notifications_enabled,
   };
+}
+
+// Bật/tắt chung các loại thông báo người dùng tùy chọn (phòng phù hợp, hoạt động bài đăng, sắp hết hạn, mẹo).
+// Thông báo hệ thống / kết quả duyệt bài vẫn luôn được gửi (common/notify.js chỉ lọc 4 loại trên).
+async function setNotificationsEnabled(userId, enabled, c) {
+  await c.query('INSERT INTO user_settings (user_id) VALUES ($1) ON CONFLICT DO NOTHING', [userId]);
+  await c.query(
+    `UPDATE user_settings
+        SET notify_room_matches = $2, notify_post_activity = $2, notify_post_expiring = $2,
+            notify_tips = CASE WHEN $2 THEN notify_tips ELSE FALSE END
+      WHERE user_id = $1`, [userId, enabled]);
 }
 
 function buildSet(input, fields, startIndex) {
@@ -135,6 +151,7 @@ async function updateMyProfile(userId, input) {
   await db.withTransaction(async (c) => {
     await normalizeArea(input, c);
     await normalizeLandmark(input, c);
+    if (input.notificationsEnabled !== undefined) await setNotificationsEnabled(userId, input.notificationsEnabled, c);
     const user = buildSet(input, USER_FIELDS, 1);
     if (user.sets.length) {
       await c.query(`UPDATE users SET ${user.sets.join(', ')} WHERE user_id = $1`, [userId, ...user.values]);
