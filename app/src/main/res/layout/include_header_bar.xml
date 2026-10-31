@@ -22,15 +22,31 @@
             android:src="@drawable/ic_back_arrow" />
     </RelativeLayout>
 
-    <TextView
-        android:id="@+id/tv_header_title"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginStart="14dp"
         android:layout_toEndOf="@+id/btn_back"
-        android:text="@string/title_report_post"
-        android:textColor="@color/text_primary"
-        android:textSize="20sp"
-        android:textStyle="bold" />
+        android:orientation="vertical">
+
+        <!-- Dòng nhỏ phía trên tiêu đề (vd "BẢO MẬT TÀI KHOẢN"), chỉ hiện khi màn cần -->
+        <TextView
+            android:id="@+id/tv_header_eyebrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/primary_maroon"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tv_header_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/title_report_post"
+            android:textColor="@color/text_primary"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 </RelativeLayout>

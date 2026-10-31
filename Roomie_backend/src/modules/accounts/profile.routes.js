@@ -35,6 +35,7 @@ const updateProfileBody = z.object({
   preferredGender: z.enum(['any', 'female', 'male']).optional(),
   onboardingGoal: z.enum(['find_room', 'find_roommate', 'both']).nullable().optional(),
   completeSetup: z.boolean().optional(),
+  notificationsEnabled: z.boolean().optional(),
 }).refine((b) => b.budgetMin == null || b.budgetMax == null || b.budgetMin <= b.budgetMax,
   { message: 'Ngân sách tối thiểu phải nhỏ hơn tối đa', path: ['budgetMin'] });
 

@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.roomie.R;
@@ -23,7 +24,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
-/** Màn Thông báo (layout_notifications): danh sách, đánh dấu đã đọc, đọc tất cả, xóa. */
+/** Màn Thông báo (layout_notifications, mở từ chuông ở Home): chạm để đánh dấu đã đọc, nhấn giữ để xóa. */
 final class NotificationsScreen {
 
     private static final int PAGE_SIZE = 20;
@@ -31,11 +32,9 @@ final class NotificationsScreen {
     private final AppCompatActivity activity;
     private final AccountsApi api;
     private final LinearLayout list;
-    private final TextView tvUnread;
     private final TextView tvEmpty;
     private final TextView btnLoadMore;
     private int page = 1;
-    private int unreadCount;
     private int shownCount;
     /** Nhóm đang thêm vào: 0 = chưa có, 1 = Hôm nay, 2 = Trước đó */
     private int currentSection;
@@ -44,10 +43,8 @@ final class NotificationsScreen {
         this.activity = activity;
         this.api = ApiClient.create(activity, AccountsApi.class);
         this.list = root.findViewById(R.id.notification_list);
-        this.tvUnread = root.findViewById(R.id.tv_count_unread);
         this.tvEmpty = root.findViewById(R.id.tv_notifications_empty);
         this.btnLoadMore = root.findViewById(R.id.btn_load_more_notifications);
-        root.findViewById(R.id.btn_mark_all_read).setOnClickListener(v -> markAllRead());
         btnLoadMore.setOnClickListener(v -> load(page + 1));
     }
 
@@ -74,8 +71,6 @@ final class NotificationsScreen {
                         shownCount += items.size();
 
                         int total = getMeta() != null ? getMeta().total : shownCount;
-                        unreadCount = getMeta() != null ? getMeta().unreadCount : 0;
-                        updateUnread();
                         tvEmpty.setVisibility(shownCount == 0 ? View.VISIBLE : View.GONE);
                         btnLoadMore.setVisibility(shownCount < total ? View.VISIBLE : View.GONE);
                     }
@@ -103,48 +98,35 @@ final class NotificationsScreen {
         ((ImageView) card.findViewById(R.id.iv_notif_icon)).setImageResource(iconFor(n.type));
 
         View dot = card.findViewById(R.id.view_unread_dot);
-        View markRead = card.findViewById(R.id.btn_mark_notification_read);
         dot.setVisibility(n.isRead ? View.GONE : View.VISIBLE);
-        markRead.setVisibility(n.isRead ? View.GONE : View.VISIBLE);
 
-        Runnable markReadAction = () -> {
+        // Chạm: đánh dấu đã đọc (chấm đỏ biến mất)
+        card.setOnClickListener(v -> {
             if (n.isRead) return;
             n.isRead = true;
             dot.setVisibility(View.GONE);
-            markRead.setVisibility(View.GONE);
-            unreadCount = Math.max(0, unreadCount - 1);
-            updateUnread();
             api.markNotificationRead(n.notificationId).enqueue(silent());
-        };
-        markRead.setOnClickListener(v -> markReadAction.run());
-        card.setOnClickListener(v -> markReadAction.run());
+        });
 
-        card.findViewById(R.id.btn_delete_notification).setOnClickListener(v -> {
-            api.deleteNotification(n.notificationId).enqueue(new ApiCallback<Object>(activity) {
-                @Override
-                public void onSuccess(Object data) {
-                    list.removeView(card);
-                    if (!n.isRead) unreadCount = Math.max(0, unreadCount - 1);
-                    shownCount--;
-                    updateUnread();
-                    if (shownCount == 0) load(1);
-                }
-
-                @Override
-                public void onError(String message) {
-                    AppNotificationHelper.showError(activity, message);
-                }
-            });
+        // Nhấn giữ: hỏi rồi xóa
+        card.setOnLongClickListener(v -> {
+            new AlertDialog.Builder(activity)
+                    .setMessage(R.string.notif_delete_confirm)
+                    .setNegativeButton(R.string.btn_cancel, null)
+                    .setPositiveButton(R.string.link_delete, (d, w) -> delete(n, card))
+                    .show();
+            return true;
         });
         list.addView(card);
     }
 
-    private void markAllRead() {
-        if (unreadCount == 0) return;
-        api.markAllNotificationsRead().enqueue(new ApiCallback<Object>(activity) {
+    private void delete(AccountModels.Notification n, View card) {
+        api.deleteNotification(n.notificationId).enqueue(new ApiCallback<Object>(activity) {
             @Override
             public void onSuccess(Object data) {
-                load(1);
+                list.removeView(card);
+                shownCount--;
+                if (shownCount == 0) load(1);
             }
 
             @Override
@@ -152,12 +134,6 @@ final class NotificationsScreen {
                 AppNotificationHelper.showError(activity, message);
             }
         });
-    }
-
-    private void updateUnread() {
-        tvUnread.setText(unreadCount > 0
-                ? activity.getString(R.string.count_unread_format, unreadCount)
-                : activity.getString(R.string.count_all_read));
     }
 
     private TextView sectionHeader(int textRes) {

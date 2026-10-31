@@ -58,15 +58,6 @@ public interface AccountsApi {
     @POST("auth/password/reset")
     Call<ApiResponse<Object>> resetPassword(@Body AccountModels.ResetPasswordRequest body);
 
-    // ---------- Cài đặt ----------
-
-    @GET("me/settings")
-    Call<ApiResponse<AccountModels.Settings>> getSettings();
-
-    /** Chỉ gửi switch vừa đổi (field khác null). */
-    @PATCH("me/settings")
-    Call<ApiResponse<AccountModels.Settings>> updateSettings(@Body AccountModels.Settings body);
-
     // ---------- Thông báo ----------
 
     @GET("notifications")
@@ -75,6 +66,9 @@ public interface AccountsApi {
 
     @PATCH("notifications/{id}/read")
     Call<ApiResponse<AccountModels.Notification>> markNotificationRead(@Path("id") String notificationId);
+
+    @GET("notifications/unread-count")
+    Call<ApiResponse<AccountModels.UnreadCount>> getUnreadCount();
 
     @POST("notifications/read-all")
     Call<ApiResponse<Object>> markAllNotificationsRead();

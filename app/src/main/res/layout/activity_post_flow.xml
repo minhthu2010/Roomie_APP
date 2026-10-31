@@ -238,9 +238,11 @@
             android:id="@+id/layout_edit_prof"
             layout="@layout/layout_edit_profile" />
 
-        <include
+        <!-- Màn đã bỏ (layout_verification_safety): giữ chỗ để không lệch số thứ tự của ViewFlipper -->
+        <View
             android:id="@+id/layout_verification"
-            layout="@layout/layout_verification_safety" />
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
         <include
             android:id="@+id/layout_settings_screen"
@@ -250,21 +252,27 @@
             android:id="@+id/layout_change_pass"
             layout="@layout/layout_change_password" />
 
-        <include
+        <!-- Màn đã bỏ (layout_notification_settings): giữ chỗ để không lệch số thứ tự của ViewFlipper -->
+        <View
             android:id="@+id/layout_notif_set"
-            layout="@layout/layout_notification_settings" />
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
         <include
             android:id="@+id/layout_help_screen"
             layout="@layout/layout_help_support" />
 
-        <include
+        <!-- Màn đã bỏ (layout_send_feedback): giữ chỗ để không lệch số thứ tự của ViewFlipper -->
+        <View
             android:id="@+id/layout_feedback"
-            layout="@layout/layout_send_feedback" />
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
-        <include
+        <!-- Màn đã bỏ (layout_privacy_account): giữ chỗ để không lệch số thứ tự của ViewFlipper -->
+        <View
             android:id="@+id/layout_priv_account"
-            layout="@layout/layout_privacy_account" />
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
     </ViewFlipper>
 

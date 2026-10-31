@@ -142,37 +142,21 @@ public class PostFlowActivity extends AppCompatActivity {
         btnContinueDraft2 = findViewById(R.id.btn_continue_draft2);
 
         cardUserProfile = findViewById(R.id.card_user_profile);
-        menuVerificationSafety = findViewById(R.id.menu_verification_safety);
-        menuNotifications = findViewById(R.id.menu_notifications);
         menuSettings = findViewById(R.id.menu_settings);
         btnLogoutRow = findViewById(R.id.btn_logout_row);
 
         btnCancelEditProfile = findViewById(R.id.btn_cancel_edit_profile);
         btnSaveProfileChanges = findViewById(R.id.btn_save_profile_changes);
 
-        btnReverifyPhone = findViewById(R.id.btn_reverify_phone);
-        btnSendEmailCode = findViewById(R.id.btn_send_email_code);
 
         menuChangePasswordItem = findViewById(R.id.menu_change_password_item);
-        menuNotifSettingsItem = findViewById(R.id.menu_notif_settings_item);
-        menuPrivacyAccountItem = findViewById(R.id.menu_privacy_account_item);
         menuHelpItem = findViewById(R.id.menu_help_item);
-        menuFeedbackItem = findViewById(R.id.menu_feedback_item);
-        btnLogoutSettings = findViewById(R.id.btn_logout_settings);
 
         btnCancelChangePass = findViewById(R.id.btn_cancel_change_pass);
         btnSavePassword = findViewById(R.id.btn_save_password);
 
-        btnDeviceNotifSettings = findViewById(R.id.btn_device_notif_settings);
-        btnContactSupport = findViewById(R.id.btn_contact_support);
-        btnLinkSendFeedback = findViewById(R.id.btn_link_send_feedback);
 
-        btnCancelFeedback = findViewById(R.id.btn_cancel_feedback);
-        btnSubmitFeedbackFinal = findViewById(R.id.btn_submit_feedback_final);
 
-        menuChangePassPrivItem = findViewById(R.id.menu_change_pass_priv_item);
-        btnStayLoggedIn = findViewById(R.id.btn_stay_logged_in);
-        btnConfirmLogout = findViewById(R.id.btn_confirm_logout);
     }
 
     private void setupBottomNavListeners() {
@@ -181,11 +165,8 @@ public class PostFlowActivity extends AppCompatActivity {
             R.id.nav_item_profile_2,
             R.id.nav_item_profile_4,
             R.id.nav_item_profile_5,
-            R.id.nav_item_profile_6,
             R.id.nav_item_profile_7,
-            R.id.nav_item_profile_8,
-            R.id.nav_item_profile_9,
-            R.id.nav_item_profile_10
+            R.id.nav_item_profile_9
         };
         for (int id : profileNavIds) {
             View navProfile = findViewById(id);
@@ -202,11 +183,8 @@ public class PostFlowActivity extends AppCompatActivity {
             R.id.nav_item_posts_2,
             R.id.nav_item_posts_4,
             R.id.nav_item_posts_5,
-            R.id.nav_item_posts_6,
             R.id.nav_item_posts_7,
-            R.id.nav_item_posts_8,
-            R.id.nav_item_posts_9,
-            R.id.nav_item_posts_10
+            R.id.nav_item_posts_9
         };
         for (int id : postsNavIds) {
             View navPosts = findViewById(id);

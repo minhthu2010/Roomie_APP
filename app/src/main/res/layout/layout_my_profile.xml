@@ -22,6 +22,15 @@
             android:paddingTop="12dp"
             android:paddingBottom="20dp">
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="14dp"
+                android:text="@string/title_my_profile"
+                android:textColor="@color/text_primary"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
             <!-- User Profile Card using RelativeLayout -->
             <RelativeLayout
                 android:id="@+id/card_user_profile"
@@ -215,94 +224,6 @@
                     android:layout_toEndOf="@id/iv_menu_personal"
                     android:layout_toStartOf="@id/iv_chevron_personal"
                     android:text="@string/menu_personal_info"
-                    android:textColor="@color/roomie_text_primary"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-            </RelativeLayout>
-
-            <!-- Menu Item 2: Xác minh & an toàn -->
-            <RelativeLayout
-                android:id="@+id/menu_verification_safety"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:background="@drawable/bg_status_option_unselected"
-                android:clickable="true"
-                android:focusable="true"
-                android:padding="16dp">
-
-                <ImageView
-                    android:id="@+id/iv_menu_safety"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="12dp"
-                    android:contentDescription="@string/menu_verification_safety"
-                    android:src="@drawable/ic_shield"
-                    app:tint="@color/text_button_secondary" />
-
-                <ImageView
-                    android:id="@+id/iv_chevron_safety"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:contentDescription="@string/menu_verification_safety"
-                    android:src="@drawable/ic_chevron_right" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="12dp"
-                    android:layout_toEndOf="@id/iv_menu_safety"
-                    android:layout_toStartOf="@id/iv_chevron_safety"
-                    android:text="@string/menu_verification_safety"
-                    android:textColor="@color/roomie_text_primary"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-            </RelativeLayout>
-
-            <!-- Menu Item 3: Thông báo -->
-            <RelativeLayout
-                android:id="@+id/menu_notifications"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:background="@drawable/bg_status_option_unselected"
-                android:clickable="true"
-                android:focusable="true"
-                android:padding="16dp">
-
-                <ImageView
-                    android:id="@+id/iv_menu_notif"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="12dp"
-                    android:contentDescription="@string/menu_notifications"
-                    android:src="@drawable/ic_bell"
-                    app:tint="@color/text_button_secondary" />
-
-                <ImageView
-                    android:id="@+id/iv_chevron_notif"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:contentDescription="@string/menu_notifications"
-                    android:src="@drawable/ic_chevron_right" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="12dp"
-                    android:layout_toEndOf="@id/iv_menu_notif"
-                    android:layout_toStartOf="@id/iv_chevron_notif"
-                    android:text="@string/menu_notifications"
                     android:textColor="@color/roomie_text_primary"
                     android:textSize="15sp"
                     android:textStyle="bold" />
