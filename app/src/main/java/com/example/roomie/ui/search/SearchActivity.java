@@ -32,6 +32,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.roomie.R;
+import com.example.roomie.common.BottomNavHelper;
 import com.example.roomie.common.AppNotificationHelper;
 import com.example.roomie.data.discovery.DiscoveryApi;
 import com.example.roomie.data.discovery.PlaceModels;
@@ -96,6 +97,7 @@ public class SearchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_tim_kiem_phong);
+        BottomNavHelper.bind(this);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_root), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -120,7 +122,6 @@ public class SearchActivity extends AppCompatActivity {
         layoutPopular = findViewById(R.id.layout_popular);
 
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
-        findViewById(R.id.btn_search_room).setOnClickListener(v -> searchByText());
         findViewById(R.id.btn_clear_history).setOnClickListener(v -> {
             recentStore.clear();
             renderRecent();
@@ -159,6 +160,7 @@ public class SearchActivity extends AppCompatActivity {
                     if (typedSchoolsCall != null) typedSchoolsCall.cancel();
                     return;
                 }
+                renderKeywordRow(q);
                 pendingSuggest = () -> {
                     loadTypedSchools(q);
                     loadPlaces(q);
@@ -427,6 +429,20 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     // ---------- Đang gõ: gợi ý gộp phường/xã, trường học, địa chỉ ----------
+
+    /**
+     * Dòng đầu danh sách gợi ý: tìm phòng có đúng chữ đang gõ (tiêu đề, mô tả, đường...).
+     * Chọn gợi ý thì tìm ngay, nên không cần nút "Tìm phòng"; phím tìm kiếm trên bàn phím cũng làm việc này.
+     */
+    private void renderKeywordRow(String q) {
+        LinearLayout container = findViewById(R.id.layout_typed_keyword);
+        container.removeAllViews();
+        View row = inflateRow(container, getString(R.string.search_keyword_title, q),
+                getString(R.string.search_keyword_sub, ProvinceStore.shortName(ProvinceStore.get(this).name)),
+                R.drawable.ic_search);
+        row.setOnClickListener(v -> searchByText());
+        container.addView(row);
+    }
 
     /** Phường/xã (trong tỉnh đang chọn) và địa chỉ cụ thể (Photon, ưu tiên gần tỉnh đang chọn) */
     private void loadPlaces(String q) {
