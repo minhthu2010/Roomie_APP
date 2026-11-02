@@ -3,6 +3,7 @@ const { pool, withTransaction } = require('../src/db');
 const { writeSampleImages } = require('./sampleImages');
 const { importAdminUnits } = require('./importAdminUnits');
 const { importLandmarks } = require('./importLandmarks');
+const { seedSampleRooms } = require('./sampleRooms');
 
 const IDS = {
   admin: '00000000-0000-0000-0000-000000000001',
@@ -265,6 +266,10 @@ const IDS = {
         await c.query(answerSql('post_lifestyle_answers', 'post_id'), [postId, questionKey, optionKey]);
       }
     }
+
+    // 18 phòng mẫu gần trường thật ở TP.HCM, Hà Nội, Đà Nẵng, Cần Thơ, Huế + 5 chủ phòng (host1..5@roomie.test)
+    const more = await seedSampleRooms(c, { passwordHash: hash, adminId: IDS.admin });
+    console.log(`Phòng mẫu thêm: ${more.rooms} phòng, ${more.hosts} chủ phòng`);
   });
 
   console.log('Seed xong. Đăng nhập test: *@roomie.test / Roomie@123');
