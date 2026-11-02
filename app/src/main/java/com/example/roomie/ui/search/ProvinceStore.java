@@ -33,6 +33,9 @@ public final class ProvinceStore {
     private static final String KEY_NAME = "name";
     private static final String KEY_LAT = "lat";
     private static final String KEY_LNG = "lng";
+    /** Tài khoản đang dùng tỉnh này, và tỉnh trong hồ sơ lần đồng bộ trước */
+    private static final String KEY_OWNER = "owner";
+    private static final String KEY_PROFILE_CODE = "profile_code";
 
     // Mặc định: TP.HCM, tâm hành chính theo OpenStreetMap
     private static final String DEFAULT_CODE = "79";
@@ -58,26 +61,46 @@ public final class ProvinceStore {
     }
 
     /**
-     * Lần đầu mở app: đặt tỉnh theo hồ sơ (khu vực / trường); hồ sơ chưa có thì theo vị trí GPS
-     * gần đúng (chỉ khi đã có quyền vị trí, không hỏi quyền ở đây). Xong thì gọi onSet.
+     * Đồng bộ tỉnh đang chọn với hồ sơ (gọi mỗi khi vào Home). Tỉnh lưu trên máy nên phải biết
+     * nó thuộc tài khoản nào và lấy từ tỉnh nào trong hồ sơ:
+     *  - đăng nhập tài khoản khác: bỏ tỉnh của tài khoản trước;
+     *  - tỉnh trong hồ sơ mới đặt hoặc vừa đổi (thiết lập / sửa hồ sơ): dùng tỉnh đó;
+     *  - hồ sơ không đổi: giữ tỉnh người dùng tự chọn ở Home;
+     *  - hồ sơ chưa có tỉnh và máy chưa có tỉnh: theo vị trí GPS gần đúng (chỉ khi đã có quyền).
+     * Tỉnh đổi thì gọi onChanged.
      */
-    public static void initDefault(Activity activity, Runnable onSet) {
-        if (isSet(activity)) return;
+    public static void syncWithProfile(Activity activity, Runnable onChanged) {
         DiscoveryApi api = ApiClient.create(activity, DiscoveryApi.class);
         api.getSearchDefaults().enqueue(new ApiCallback<PlaceModels.SearchDefaults>(activity) {
             @Override
             public void onSuccess(PlaceModels.SearchDefaults data) {
-                if (data != null && data.province != null) {
+                if (data == null) return;
+                SharedPreferences p = prefs(activity);
+                boolean changed = false;
+                String owner = p.getString(KEY_OWNER, null);
+                if (data.userId != null && !data.userId.equals(owner)) {
+                    changed = isSet(activity);
+                    p.edit().clear().putString(KEY_OWNER, data.userId).apply();
+                    // Tìm kiếm gần đây của tài khoản trước cũng không thuộc về tài khoản này
+                    if (owner != null) new RecentSearchStore(activity).clear();
+                }
+                String profileCode = data.province != null ? data.province.code : null;
+                if (profileCode != null && !profileCode.equals(p.getString(KEY_PROFILE_CODE, null))) {
                     save(activity, data.province);
-                    onSet.run();
-                } else {
-                    fromLocation(activity, api, onSet);
+                    p.edit().putString(KEY_PROFILE_CODE, profileCode).apply();
+                    onChanged.run();
+                } else if (!isSet(activity)) {
+                    if (changed) onChanged.run();   // về mặc định TP.HCM
+                    fromLocation(activity, api, onChanged);
+                } else if (changed) {
+                    onChanged.run();
                 }
             }
 
             @Override
             public void onError(String message) {
-                fromLocation(activity, api, onSet);
+                // Chưa đăng nhập / mất mạng: giữ tỉnh đang có
+                if (!isSet(activity)) fromLocation(activity, api, onChanged);
             }
         });
     }

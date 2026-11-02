@@ -42,6 +42,7 @@ public final class PlaceModels {
 
     /** GET /me/search-defaults: tỉnh / phường / trường trong hồ sơ (null nếu hồ sơ chưa có) */
     public static class SearchDefaults {
+        public String userId;
         public Province province;
         public Ward ward;
         public SearchModels.Landmark school;

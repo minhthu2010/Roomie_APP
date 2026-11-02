@@ -159,9 +159,11 @@ public class ProfileSetupActivity extends AppCompatActivity {
         btnPillFindRoom.setOnClickListener(v -> selectGoal(true));
         btnPillFindRoommate.setOnClickListener(v -> selectGoal(false));
 
-        tvNextQuizTitle.setOnClickListener(v -> startActivity(new Intent(this, QuizIntroActivity.class)));
+        // "Tiếp đến: bài kiểm tra" cũng phải lưu hồ sơ trước (khu vực vừa chọn...), không thì Home
+        // vẫn dùng tỉnh cũ. Lưu xong mới mở bài test.
+        tvNextQuizTitle.setOnClickListener(v -> save(btnSaveProfile, true));
 
-        btnSaveProfile.setOnClickListener(v -> save(btnSaveProfile));
+        btnSaveProfile.setOnClickListener(v -> save(btnSaveProfile, false));
 
         loadProfile();
     }
@@ -211,7 +213,8 @@ public class ProfileSetupActivity extends AppCompatActivity {
         });
     }
 
-    private void save(AppCompatButton button) {
+    /** openQuiz: bấm "Tiếp đến: bài kiểm tra" thì lưu xong mở bài test (kể cả không phải lần đầu) */
+    private void save(AppCompatButton button, boolean openQuiz) {
         String displayName = etDisplayName.getText().toString().trim();
         if (displayName.isEmpty()) {
             AppNotificationHelper.showError(this, "Vui lòng nhập tên hiển thị");
@@ -249,7 +252,7 @@ public class ProfileSetupActivity extends AppCompatActivity {
                 AppNotificationHelper.showSuccess(ProfileSetupActivity.this, "Đã lưu hồ sơ thành công!");
                 new SessionManager(ProfileSetupActivity.this).saveDisplayName(profile.displayName);
                 button.setEnabled(true);
-                if (getIntent().getBooleanExtra(EXTRA_FIRST_SETUP, false)) {
+                if (openQuiz || getIntent().getBooleanExtra(EXTRA_FIRST_SETUP, false)) {
                     // Giữ màn này dưới bài test để nút quay lại ở bước 3 trở về đây
                     startActivity(new Intent(ProfileSetupActivity.this, QuizIntroActivity.class));
                 } else {

@@ -107,8 +107,6 @@ public class HomeActivity extends AppCompatActivity {
             if (criteria.wardCode != null || criteria.area != null) criteria.clearLocation();
             reload();
         }));
-        // Lần đầu: tỉnh theo hồ sơ hoặc GPS (đổi xong thì tải lại danh sách)
-        ProvinceStore.initDefault(this, this::reload);
         tvSearchText = findViewById(R.id.tv_search_text);
         scrollChips = findViewById(R.id.scroll_active_chips);
         layoutChips = findViewById(R.id.layout_active_chips);
@@ -371,6 +369,12 @@ public class HomeActivity extends AppCompatActivity {
         super.onResume();
         showGreeting();
         bindNotificationBell();
+        // Tỉnh theo hồ sơ của tài khoản đang đăng nhập (mới thiết lập / vừa sửa hồ sơ / đổi tài khoản)
+        ProvinceStore.syncWithProfile(this, () -> {
+            // Phường / quận đang tìm thuộc tỉnh cũ -> bỏ
+            if (criteria.wardCode != null || criteria.area != null) criteria.clearLocation();
+            reload();
+        });
     }
 
     // Chuông thông báo góc phải (người A): mở màn Thông báo, chấm đỏ khi có thông báo chưa đọc

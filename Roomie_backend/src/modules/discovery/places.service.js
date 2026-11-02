@@ -242,6 +242,8 @@ async function searchDefaults(userId) {
   const wd = ward.rows[0];
   const sc = school.rows[0];
   return {
+    // App lưu tỉnh đang chọn trên máy; userId để biết đã đổi sang tài khoản khác
+    userId,
     province: pr ? { code: pr.province_code, name: pr.province_name, latitude: pr.center_lat, longitude: pr.center_lng } : null,
     ward: wd ? { code: wd.ward_code, name: wd.ward_name, provinceCode: wd.province_code } : null,
     school: sc ? { id: sc.landmark_id, name: sc.name, shortName: sc.short_name,
