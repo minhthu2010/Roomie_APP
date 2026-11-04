@@ -120,9 +120,9 @@
     <string name="label_looking_for">Bạn đang muốn tìm gì?</string>
     <string name="opt_find_room">Tìm phòng ở ghép</string>
     <string name="opt_find_roommate">Tìm bạn cùng phòng</string>
-    <string name="next_quiz_intro">Tiếp đến: Giới thiệu bài kiểm tra →</string>
+    <string name="next_quiz_intro">Tiếp theo: Bài kiểm tra thói quen sống</string>
     <string name="quiz_subtext">Vài câu hỏi ngắn giúp gợi ý người có nhịp sống hợp với bạn.</string>
-    <string name="btn_save_and_explore">Lưu &amp; khám phá thói quen</string>
+    <string name="btn_save_and_explore">Lưu &amp; tiếp tục</string>
 
     <!-- Quiz Intro Strings -->
     <string name="quiz_intro_step">BƯỚC 3 · TƯƠNG THÍCH</string>
@@ -888,4 +888,5 @@
     <string name="support_email_subject">Roomie - Cần hỗ trợ</string>
     <string name="support_email_missing">Nhóm chưa cấu hình email hỗ trợ</string>
     <string name="notif_delete_confirm">Xóa thông báo này?</string>
+    <string name="password_rule_hint">Ít nhất 8 ký tự, có chữ hoa, chữ thường và số</string>
 </resources>
