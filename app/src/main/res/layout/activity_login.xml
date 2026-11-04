@@ -298,14 +298,26 @@
 
         </RelativeLayout>
 
+        <!-- Đăng nhập Google không có ô tick: bấm tiếp tục nghĩa là đồng ý -->
+        <TextView
+            android:id="@+id/tv_google_policy_notice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/btn_google_login"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:text="@string/google_policy_notice"
+            android:textColor="@color/text_subtitle"
+            android:textSize="12sp" />
+
         <!-- Bottom Footer Text (Chưa có tài khoản? Đăng ký ngay) -->
         <LinearLayout
             android:id="@+id/layout_footer_register"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/btn_google_login"
+            android:layout_below="@id/tv_google_policy_notice"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="24dp"
             android:layout_marginBottom="16dp"
             android:orientation="horizontal">
 

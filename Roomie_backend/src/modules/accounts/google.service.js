@@ -3,7 +3,7 @@ const db = require('../../db');
 const env = require('../../config/env');
 const AppError = require('../../common/AppError');
 const tokens = require('./tokens');
-const { getUserSummary } = require('./auth.service');
+const { getUserSummary, recordPolicyAcceptance } = require('./auth.service');
 
 const client = new OAuth2Client();
 
@@ -71,6 +71,7 @@ async function loginWithGoogle({ idToken, deviceLabel }) {
     await c.query(
       `INSERT INTO user_roles (user_id, role_id)
        SELECT $1, role_id FROM roles WHERE role_code = 'user' ON CONFLICT DO NOTHING`, [userId]);
+    await recordPolicyAcceptance(userId, c);
     await c.query('UPDATE users SET last_login_at = NOW() WHERE user_id = $1', [userId]);
 
     const { tokens: t } = await tokens.issueTokens(userId, deviceLabel, c);

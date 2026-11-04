@@ -46,6 +46,7 @@ public class LoginActivity extends AppCompatActivity {
         TextView tvForgotPassword = findViewById(R.id.tv_forgot_password);
         TextView tvRegisterNow = findViewById(R.id.tv_register_now);
         View btnGoogleLogin = findViewById(R.id.btn_google_login);
+        PolicyLinks.bind(findViewById(R.id.tv_google_policy_notice));
 
         // Password visibility toggle
         if (imgTogglePassword != null && etPassword != null) {

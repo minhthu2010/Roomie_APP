@@ -5,7 +5,7 @@ const otp = require('./otp.service');
 const tokens = require('./tokens');
 const { sendOtpEmail } = require('./mailer');
 
-const POLICY_VERSION = '2025-10';
+const POLICY_VERSION = '2026-11';
 
 // Thông tin tài khoản gọn, trả kèm token sau khi đăng nhập / đăng ký
 async function getUserSummary(userId, client = db) {
@@ -26,6 +26,14 @@ async function getUserSummary(userId, client = db) {
     profileCompleted: u.profile_completed_at !== null,
     createdAt: u.created_at,
   };
+}
+
+// Ghi nhận người dùng đồng ý Điều khoản và Chính sách (đăng ký, đăng nhập Google)
+async function recordPolicyAcceptance(userId, client = db) {
+  await client.query(
+    `INSERT INTO policy_acceptances (user_id, policy_type, policy_version)
+     VALUES ($1, 'terms_of_service', $2), ($1, 'privacy_policy', $2) ON CONFLICT DO NOTHING`,
+    [userId, POLICY_VERSION]);
 }
 
 async function findActiveUserByEmail(email, client = db) {
@@ -58,10 +66,7 @@ async function register({ fullName, email, password }) {
          VALUES ($1, $2, $3, $3) RETURNING user_id`, [email, passwordHash, fullName]);
       userId = rows[0].user_id;
     }
-    await c.query(
-      `INSERT INTO policy_acceptances (user_id, policy_type, policy_version)
-       VALUES ($1, 'terms_of_service', $2), ($1, 'privacy_policy', $2) ON CONFLICT DO NOTHING`,
-      [userId, POLICY_VERSION]);
+    await recordPolicyAcceptance(userId, c);
     return otp.createChallenge({ userId, email, purpose: 'signup' }, c);
   });
   return sendOtp(created, 'signup');
@@ -114,7 +119,7 @@ async function login({ email, password, deviceLabel }) {
 }
 
 module.exports = {
-  register, resendSignupOtp, verifySignup, login, getUserSummary,
+  register, resendSignupOtp, verifySignup, login, getUserSummary, recordPolicyAcceptance,
   refresh: tokens.rotateRefreshToken,
   logout: tokens.revokeRefreshToken,
 };
