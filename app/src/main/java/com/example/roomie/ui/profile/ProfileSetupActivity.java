@@ -94,7 +94,6 @@ public class ProfileSetupActivity extends AppCompatActivity {
         etMoveInDate = findViewById(R.id.et_move_in_date);
         btnPillFindRoom = findViewById(R.id.btn_pill_find_room);
         btnPillFindRoommate = findViewById(R.id.btn_pill_find_roommate);
-        TextView tvNextQuizTitle = findViewById(R.id.tv_next_quiz_title);
         AppCompatButton btnSaveProfile = findViewById(R.id.btn_save_profile);
 
         // Bỏ dữ liệu mẫu trong layout, chờ hồ sơ thật từ API
@@ -159,11 +158,7 @@ public class ProfileSetupActivity extends AppCompatActivity {
         btnPillFindRoom.setOnClickListener(v -> selectGoal(true));
         btnPillFindRoommate.setOnClickListener(v -> selectGoal(false));
 
-        // "Tiếp đến: bài kiểm tra" cũng phải lưu hồ sơ trước (khu vực vừa chọn...), không thì Home
-        // vẫn dùng tỉnh cũ. Lưu xong mới mở bài test.
-        tvNextQuizTitle.setOnClickListener(v -> save(btnSaveProfile, true));
-
-        btnSaveProfile.setOnClickListener(v -> save(btnSaveProfile, false));
+        btnSaveProfile.setOnClickListener(v -> save(btnSaveProfile));
 
         loadProfile();
     }
@@ -213,8 +208,7 @@ public class ProfileSetupActivity extends AppCompatActivity {
         });
     }
 
-    /** openQuiz: bấm "Tiếp đến: bài kiểm tra" thì lưu xong mở bài test (kể cả không phải lần đầu) */
-    private void save(AppCompatButton button, boolean openQuiz) {
+    private void save(AppCompatButton button) {
         String displayName = etDisplayName.getText().toString().trim();
         if (displayName.isEmpty()) {
             AppNotificationHelper.showError(this, "Vui lòng nhập tên hiển thị");
@@ -252,7 +246,7 @@ public class ProfileSetupActivity extends AppCompatActivity {
                 AppNotificationHelper.showSuccess(ProfileSetupActivity.this, "Đã lưu hồ sơ thành công!");
                 new SessionManager(ProfileSetupActivity.this).saveDisplayName(profile.displayName);
                 button.setEnabled(true);
-                if (openQuiz || getIntent().getBooleanExtra(EXTRA_FIRST_SETUP, false)) {
+                if (getIntent().getBooleanExtra(EXTRA_FIRST_SETUP, false)) {
                     // Giữ màn này dưới bài test để nút quay lại ở bước 3 trở về đây
                     startActivity(new Intent(ProfileSetupActivity.this, QuizIntroActivity.class));
                 } else {
