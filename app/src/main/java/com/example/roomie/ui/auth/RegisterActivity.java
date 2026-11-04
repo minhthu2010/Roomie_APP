@@ -82,10 +82,8 @@ public class RegisterActivity extends AppCompatActivity {
         imgTogglePassword.setOnClickListener(togglePassword);
         imgToggleConfirm.setOnClickListener(togglePassword);
 
-        // Bấm vào dòng chữ điều khoản cũng tick/bỏ tick
-        if (tvTerms != null && cbTerms != null) {
-            tvTerms.setOnClickListener(v -> cbTerms.toggle());
-        }
+        // Bấm vào tên điều khoản / chính sách để đọc nội dung; tick ở ô bên cạnh
+        if (tvTerms != null) PolicyLinks.bind(tvTerms);
 
         // Handle Register click
         if (btnRegister != null) {

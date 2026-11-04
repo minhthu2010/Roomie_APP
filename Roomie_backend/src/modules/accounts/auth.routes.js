@@ -63,7 +63,13 @@ router.post('/logout', validate({ body: refreshBody }), async (req, res) => {
 
 // "Tiếp tục với Google" (LoginActivity): app gửi idToken lấy từ Credential Manager
 router.post('/google',
-  validate({ body: z.object({ idToken: z.string().min(100).max(4096), deviceLabel }) }),
+  validate({
+    body: z.object({
+      idToken: z.string().min(100).max(4096),
+      deviceLabel,
+      acceptTerms: z.literal(true, 'Vui lòng đồng ý với Điều khoản sử dụng'),
+    }),
+  }),
   async (req, res) => {
     ok(res, await google.loginWithGoogle(req.valid.body));
   });

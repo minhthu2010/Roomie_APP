@@ -59,6 +59,8 @@ public final class AccountModels {
 
     public static class GoogleLoginRequest {
         public final String idToken;
+        /** Người dùng đã thấy dòng đồng ý ngay dưới nút Google */
+        public final boolean acceptTerms = true;
         public final String deviceLabel = deviceLabel();
 
         public GoogleLoginRequest(String idToken) {
