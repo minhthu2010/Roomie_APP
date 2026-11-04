@@ -8,7 +8,6 @@ const password = require('./password.service');
 const google = require('./google.service');
 const { email, otpCode, strongPassword } = require('./schemas');
 
-const signupPassword = z.string().min(6, 'Mật khẩu tối thiểu 6 ký tự').max(72, 'Mật khẩu tối đa 72 ký tự');
 const deviceLabel = z.string().trim().max(120).optional();
 const refreshBody = z.object({ refreshToken: z.string().min(20).max(200) });
 
@@ -18,7 +17,7 @@ router.post('/register',
     body: z.object({
       fullName: z.string().trim().min(2, 'Vui lòng nhập họ và tên').max(150),
       email,
-      password: signupPassword,
+      password: strongPassword,
       acceptTerms: z.literal(true, 'Vui lòng đồng ý với Điều khoản sử dụng'),
     }),
   }),

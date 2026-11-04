@@ -102,8 +102,12 @@ public class RegisterActivity extends AppCompatActivity {
                     AppNotificationHelper.showError(RegisterActivity.this, "Vui lòng nhập email hợp lệ");
                     return;
                 }
-                if (password.length() < 6) {
-                    AppNotificationHelper.showError(RegisterActivity.this, "Vui lòng nhập mật khẩu tối thiểu 6 ký tự");
+                if (password.length() < 8) {
+                    AppNotificationHelper.showError(RegisterActivity.this, "Mật khẩu phải có ít nhất 8 ký tự");
+                    return;
+                }
+                if (!password.matches(".*[a-z].*") || !password.matches(".*[A-Z].*") || !password.matches(".*\\d.*")) {
+                    AppNotificationHelper.showError(RegisterActivity.this, "Mật khẩu cần có chữ hoa, chữ thường và số");
                     return;
                 }
                 if (!password.equals(etConfirmPassword.getText().toString())) {

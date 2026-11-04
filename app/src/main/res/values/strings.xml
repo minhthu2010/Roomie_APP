@@ -120,9 +120,9 @@
     <string name="label_looking_for">Bạn đang muốn tìm gì?</string>
     <string name="opt_find_room">Tìm phòng ở ghép</string>
     <string name="opt_find_roommate">Tìm bạn cùng phòng</string>
-    <string name="next_quiz_intro">Tiếp đến: Giới thiệu bài kiểm tra →</string>
+    <string name="next_quiz_intro">Tiếp theo: Bài kiểm tra thói quen sống</string>
     <string name="quiz_subtext">Vài câu hỏi ngắn giúp gợi ý người có nhịp sống hợp với bạn.</string>
-    <string name="btn_save_and_explore">Lưu &amp; khám phá thói quen</string>
+    <string name="btn_save_and_explore">Lưu &amp; tiếp tục</string>
 
     <!-- Quiz Intro Strings -->
     <string name="quiz_intro_step">BƯỚC 3 · TƯƠNG THÍCH</string>
@@ -890,4 +890,5 @@
     <string name="search_near_me_approx">Bạn đang cho phép vị trí gần đúng (sai số khoảng %1$s km) nên đã tìm trong 5 km. Bật Vị trí chính xác cho Roomie để kết quả sát hơn.</string>
     <string name="search_keyword_title">Tìm phòng có chữ “%1$s”</string>
     <string name="search_keyword_sub">Trong tiêu đề, mô tả, tên đường · %1$s</string>
+    <string name="password_rule_hint">Ít nhất 8 ký tự, có chữ hoa, chữ thường và số</string>
 </resources>
