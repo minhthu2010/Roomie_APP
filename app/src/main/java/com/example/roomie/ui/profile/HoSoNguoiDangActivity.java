@@ -18,6 +18,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.roomie.R;
+import com.example.roomie.common.BottomNavHelper;
 import com.example.roomie.common.AppNotificationHelper;
 import com.example.roomie.common.ImageLoader;
 import com.example.roomie.data.discovery.DiscoveryApi;
@@ -44,6 +45,7 @@ public class HoSoNguoiDangActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_ho_so_nguoi_dang);
+        BottomNavHelper.bind(this);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_root), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());

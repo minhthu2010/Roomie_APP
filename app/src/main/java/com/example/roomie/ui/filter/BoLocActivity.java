@@ -17,6 +17,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.roomie.R;
+import com.example.roomie.common.BottomNavHelper;
 import com.example.roomie.ui.search.RoomFormat;
 import com.example.roomie.ui.search.SearchCriteria;
 import com.google.android.material.slider.RangeSlider;
@@ -56,6 +57,7 @@ public class BoLocActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_bo_loc);
+        BottomNavHelper.bind(this);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_root), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());

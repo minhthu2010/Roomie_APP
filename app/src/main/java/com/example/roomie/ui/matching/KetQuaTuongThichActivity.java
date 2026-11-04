@@ -15,6 +15,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.roomie.R;
+import com.example.roomie.common.BottomNavHelper;
 import com.example.roomie.data.discovery.DiscoveryApi;
 import com.example.roomie.data.discovery.MatchingModels;
 import com.example.roomie.data.remote.ApiCallback;
@@ -47,6 +48,7 @@ public class KetQuaTuongThichActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_ket_qua_tuong_thich);
+        BottomNavHelper.bind(this);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_root), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());

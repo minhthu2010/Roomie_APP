@@ -8,6 +8,7 @@ import android.graphics.Typeface;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -31,6 +32,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.roomie.R;
+import com.example.roomie.common.BottomNavHelper;
 import com.example.roomie.common.AppNotificationHelper;
 import com.example.roomie.data.discovery.DiscoveryApi;
 import com.example.roomie.data.discovery.PlaceModels;
@@ -54,6 +56,8 @@ public class SearchActivity extends AppCompatActivity {
     private static final int MIN_TYPED = 2;
     private static final long FRESH_LOCATION_MS = 5 * 60 * 1000;
     private static final long LOCATE_TIMEOUT_MS = 15 * 1000;
+    /** Sai số lớn hơn mức này coi là "vị trí gần đúng" (Android chỉ cho quyền Approximate) */
+    private static final float APPROX_ACCURACY_M = 1000f;
     // Khung bao Việt Nam (gồm Hoàng Sa, Trường Sa): ngoài khung này thì chưa có phòng
     private static final double VN_MIN_LAT = 7.5, VN_MAX_LAT = 23.5;
     private static final double VN_MIN_LNG = 102.1, VN_MAX_LNG = 117.5;
@@ -93,6 +97,7 @@ public class SearchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_tim_kiem_phong);
+        BottomNavHelper.bind(this);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_root), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -117,7 +122,6 @@ public class SearchActivity extends AppCompatActivity {
         layoutPopular = findViewById(R.id.layout_popular);
 
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
-        findViewById(R.id.btn_search_room).setOnClickListener(v -> searchByText());
         findViewById(R.id.btn_clear_history).setOnClickListener(v -> {
             recentStore.clear();
             renderRecent();
@@ -156,6 +160,7 @@ public class SearchActivity extends AppCompatActivity {
                     if (typedSchoolsCall != null) typedSchoolsCall.cancel();
                     return;
                 }
+                renderKeywordRow(q);
                 pendingSuggest = () -> {
                     loadTypedSchools(q);
                     loadPlaces(q);
@@ -316,17 +321,22 @@ public class SearchActivity extends AppCompatActivity {
     private void locate() {
         if (locationListener != null) return;   // đang lấy vị trí
         LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
-        Location last = null;
-        for (String provider : lm.getProviders(true)) {
+        // getProviders(true): chỉ các nguồn đang bật và app được phép dùng
+        List<String> providers = lm.getProviders(true);
+        Location last = null;        // vị trí mới nhất (dự phòng khi không lấy được vị trí mới)
+        Location freshBest = null;   // trong 5 phút gần đây, chính xác nhất
+        for (String provider : providers) {
             Location l = lm.getLastKnownLocation(provider);
-            if (l != null && (last == null || l.getTime() > last.getTime())) last = l;
+            if (l == null) continue;
+            if (last == null || l.getTime() > last.getTime()) last = l;
+            boolean fresh = System.currentTimeMillis() - l.getTime() < FRESH_LOCATION_MS;
+            if (fresh && (freshBest == null || l.getAccuracy() < freshBest.getAccuracy())) freshBest = l;
         }
-        if (last != null && System.currentTimeMillis() - last.getTime() < FRESH_LOCATION_MS) {
-            searchNear(last);
+        if (freshBest != null) {
+            searchNear(freshBest);
             return;
         }
-        String provider = lm.isProviderEnabled(LocationManager.GPS_PROVIDER) ? LocationManager.GPS_PROVIDER
-                : lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER) ? LocationManager.NETWORK_PROVIDER : null;
+        String provider = pickProvider(providers);
         if (provider == null) {
             if (last != null) searchNear(last);
             else AppNotificationHelper.showInfo(this, getString(R.string.search_near_me_failed));
@@ -351,13 +361,38 @@ public class SearchActivity extends AppCompatActivity {
             @Override
             public void onProviderDisabled(String p) {}
         };
-        lm.requestLocationUpdates(provider, 0, 0, locationListener, Looper.getMainLooper());
+        try {
+            lm.requestLocationUpdates(provider, 0, 0, locationListener, Looper.getMainLooper());
+        } catch (SecurityException | IllegalArgumentException e) {
+            // Nguồn vị trí vừa bị tắt / thu hồi quyền: dùng vị trí cũ nếu có
+            locationListener = null;
+            tvNearMeSub.setText(R.string.search_near_me_sub);
+            if (fallback != null) searchNear(fallback);
+            else AppNotificationHelper.showInfo(this, getString(R.string.search_near_me_failed));
+            return;
+        }
         locateTimeout = () -> {
             stopLocating();
             if (fallback != null) searchNear(fallback);
             else AppNotificationHelper.showInfo(this, getString(R.string.search_near_me_failed));
         };
         handler.postDelayed(locateTimeout, LOCATE_TIMEOUT_MS);
+    }
+
+    /**
+     * Nguồn để xin 1 lần định vị mới: "fused" (Android 12+, gộp GPS + mạng, nhanh và đỡ tốn pin),
+     * rồi GPS (chỉ khi có quyền vị trí chính xác), rồi mạng. Người dùng chỉ cho "vị trí gần đúng"
+     * thì không xin GPS, tránh lỗi quyền.
+     */
+    private String pickProvider(List<String> providers) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && providers.contains(LocationManager.FUSED_PROVIDER)) {
+            return LocationManager.FUSED_PROVIDER;
+        }
+        boolean precise = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED;
+        if (precise && providers.contains(LocationManager.GPS_PROVIDER)) return LocationManager.GPS_PROVIDER;
+        if (providers.contains(LocationManager.NETWORK_PROVIDER)) return LocationManager.NETWORK_PROVIDER;
+        return null;
     }
 
     private void stopLocating() {
@@ -384,10 +419,30 @@ public class SearchActivity extends AppCompatActivity {
         criteria.centerLat = lat;
         criteria.centerLng = lng;
         criteria.sort = SearchCriteria.SORT_DISTANCE;
+        // Người dùng chỉ cho "vị trí gần đúng" (sai số ~1-3 km): nới bán kính và báo cho họ biết
+        if (location.hasAccuracy() && location.getAccuracy() > APPROX_ACCURACY_M) {
+            if (criteria.radiusKm == null || criteria.radiusKm < 5) criteria.radiusKm = 5;
+            AppNotificationHelper.showInfo(this, getString(R.string.search_near_me_approx,
+                    RoomFormat.km(location.getAccuracy() / 1000.0)));
+        }
         finishWithCriteria();
     }
 
     // ---------- Đang gõ: gợi ý gộp phường/xã, trường học, địa chỉ ----------
+
+    /**
+     * Dòng đầu danh sách gợi ý: tìm phòng có đúng chữ đang gõ (tiêu đề, mô tả, đường...).
+     * Chọn gợi ý thì tìm ngay, nên không cần nút "Tìm phòng"; phím tìm kiếm trên bàn phím cũng làm việc này.
+     */
+    private void renderKeywordRow(String q) {
+        LinearLayout container = findViewById(R.id.layout_typed_keyword);
+        container.removeAllViews();
+        View row = inflateRow(container, getString(R.string.search_keyword_title, q),
+                getString(R.string.search_keyword_sub, ProvinceStore.shortName(ProvinceStore.get(this).name)),
+                R.drawable.ic_search);
+        row.setOnClickListener(v -> searchByText());
+        container.addView(row);
+    }
 
     /** Phường/xã (trong tỉnh đang chọn) và địa chỉ cụ thể (Photon, ưu tiên gần tỉnh đang chọn) */
     private void loadPlaces(String q) {

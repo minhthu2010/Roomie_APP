@@ -121,6 +121,13 @@
                 android:orientation="vertical"
                 android:visibility="gone">
 
+                <!-- Dòng đầu: tìm theo đúng chữ đang gõ (thay cho nút "Tìm phòng") -->
+                <LinearLayout
+                    android:id="@+id/layout_typed_keyword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+
                 <LinearLayout
                     android:id="@+id/layout_typed_wards"
                     android:layout_width="match_parent"
@@ -234,25 +241,6 @@
                 android:orientation="vertical" />
             </LinearLayout>
 
-            <!-- Primary Action Button: Tìm phòng -->
-            <RelativeLayout
-                android:id="@+id/btn_search_room"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="24dp"
-                android:background="@drawable/bg_btn_submit"
-                android:clickable="true"
-                android:focusable="true">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:text="@string/btn_search_room"
-                    android:textColor="@color/white"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-            </RelativeLayout>
 
         </LinearLayout>
     </ScrollView>

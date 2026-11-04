@@ -244,7 +244,6 @@
     <string name="school_1_subtitle">Cơ sở Nguyễn Đình Chiểu, Quận 3</string>
     <string name="school_2_title">ĐH Kiến trúc TP.HCM</string>
     <string name="school_2_subtitle">Quận 3, TP. Hồ Chí Minh</string>
-    <string name="btn_search_room">Tìm phòng</string>
     <string name="title_room_detail">Chi tiết phòng</string>
     <string name="btn_view_all_photos">Xem tất cả 8 ảnh phòng</string>
     <string name="room_detail_price">3.800.000đ</string>
@@ -888,5 +887,8 @@
     <string name="support_email_subject">Roomie - Cần hỗ trợ</string>
     <string name="support_email_missing">Nhóm chưa cấu hình email hỗ trợ</string>
     <string name="notif_delete_confirm">Xóa thông báo này?</string>
+    <string name="search_near_me_approx">Bạn đang cho phép vị trí gần đúng (sai số khoảng %1$s km) nên đã tìm trong 5 km. Bật Vị trí chính xác cho Roomie để kết quả sát hơn.</string>
+    <string name="search_keyword_title">Tìm phòng có chữ “%1$s”</string>
+    <string name="search_keyword_sub">Trong tiêu đề, mô tả, tên đường · %1$s</string>
     <string name="password_rule_hint">Ít nhất 8 ký tự, có chữ hoa, chữ thường và số</string>
 </resources>
