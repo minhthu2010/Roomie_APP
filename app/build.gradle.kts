@@ -7,11 +7,24 @@ plugins {
 // Địa chỉ API: mặc định cho máy ảo (10.0.2.2 = localhost của máy tính).
 // Điện thoại thật: thêm vào local.properties dòng
 //   roomie.apiBaseUrl=http://192.168.1.x:3000/api/v1/
+
+// Địa chỉ API:
+// Debug: mặc định dùng Android Emulator.
+// Release: sử dụng địa chỉ backend production.
 val localProps = Properties().apply {
     val file = rootProject.file("local.properties")
     if (file.exists()) file.inputStream().use { load(it) }
 }
-val apiBaseUrl: String = localProps.getProperty("roomie.apiBaseUrl", "http://10.0.2.2:3000/api/v1/")
+val debugApiBaseUrl = localProps.getProperty(
+    "roomie.debugApiBaseUrl",
+    "http://10.0.2.2:3000/api/v1/"
+)
+
+val releaseApiBaseUrl = localProps.getProperty(
+    "roomie.releaseApiBaseUrl",
+    "https://your-domain.example/api/v1/"
+)
+//val apiBaseUrl: String = localProps.getProperty("roomie.apiBaseUrl", "http://10.0.2.2:3000/api/v1/")
 // User giả lập khi chưa có đăng nhập thật (backend bật AUTH_DEV_BYPASS). Mặc định: seeker trong seed.
 val devUserId: String = localProps.getProperty("roomie.devUserId", "00000000-0000-0000-0000-000000000003")
 // Đăng nhập Google: Web client ID trên Google Cloud (cùng giá trị GOOGLE_CLIENT_IDS ở backend .env)
@@ -33,16 +46,38 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "BASE_URL", "\"$apiBaseUrl\"")
+        //buildConfigField("String", "BASE_URL", "\"$apiBaseUrl\"")
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"$googleWebClientId\"")
     }
 
     buildTypes {
         debug {
-            buildConfigField("String", "DEV_USER_ID", "\"$devUserId\"")
+            buildConfigField(
+                "String",
+                "BASE_URL",
+                "\"$debugApiBaseUrl\""
+            )
+
+            buildConfigField(
+                "String",
+                "DEV_USER_ID",
+                "\"$devUserId\""
+            )
         }
+
         release {
-            buildConfigField("String", "DEV_USER_ID", "\"\"")
+            buildConfigField(
+                "String",
+                "BASE_URL",
+                "\"$releaseApiBaseUrl\""
+            )
+
+            buildConfigField(
+                "String",
+                "DEV_USER_ID",
+                "\"\""
+            )
+
             optimization {
                 enable = false
             }
