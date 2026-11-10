@@ -40,6 +40,9 @@ import java.util.Locale;
 public class ChiTietPhongActivity extends AppCompatActivity {
 
     public static final String EXTRA_POST_ID = "POST_ID";
+    /** Thời gian hiệu ứng mở màn (~300ms) */
+    private static final long OPEN_ANIMATION_MS = 320;
+    private boolean firstResume = true;
 
     public static Intent intent(Context context, String postId) {
         return new Intent(context, ChiTietPhongActivity.class).putExtra(EXTRA_POST_ID, postId);
@@ -118,7 +121,15 @@ public class ChiTietPhongActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        loadCompatibility();
+        // Lần đầu mở màn: % phù hợp tải sau hiệu ứng mở màn, để không dựng 2 khối nội dung cùng lúc giữa hiệu ứng
+        if (firstResume) {
+            firstResume = false;
+            getWindow().getDecorView().postDelayed(() -> {
+                if (!isFinishing()) loadCompatibility();
+            }, OPEN_ANIMATION_MS);
+        } else {
+            loadCompatibility();
+        }
     }
 
     // ---------- Chi tiết ----------

@@ -43,6 +43,8 @@ public class PhongDaLuuActivity extends AppCompatActivity {
     private final List<RoomModels.SavedRoom> rooms = new ArrayList<>();
     private int filter = FILTER_ALL;
     private String topDistrict;
+    /** Danh sách lần tải trước (signatureOf), null = chưa tải / lỗi */
+    private String lastSignature;
 
     private LinearLayout layoutRooms;
     private TextView tvEmpty;
@@ -86,6 +88,10 @@ public class PhongDaLuuActivity extends AppCompatActivity {
                 .enqueue(new ApiCallback<List<RoomModels.SavedRoom>>(this) {
                     @Override
                     public void onSuccess(List<RoomModels.SavedRoom> data) {
+                        // Quay lại tab mà danh sách không đổi thì giữ nguyên, không dựng lại (ảnh không nháy)
+                        String signature = signatureOf(data);
+                        if (signature.equals(lastSignature)) return;
+                        lastSignature = signature;
                         rooms.clear();
                         if (data != null) rooms.addAll(data);
                         render();
@@ -93,12 +99,25 @@ public class PhongDaLuuActivity extends AppCompatActivity {
 
                     @Override
                     public void onError(String message) {
+                        lastSignature = null;
                         layoutRooms.removeAllViews();
                         tvEmpty.setVisibility(View.VISIBLE);
                         tvEmpty.setText(getString(R.string.feed_error, message));
                         tvEmpty.setOnClickListener(v -> load());
                     }
                 });
+    }
+
+    /** Những gì hiện trên thẻ: đổi một trong các giá trị này thì mới vẽ lại danh sách */
+    private static String signatureOf(List<RoomModels.SavedRoom> data) {
+        if (data == null) return "";
+        StringBuilder sb = new StringBuilder();
+        for (RoomModels.SavedRoom r : data) {
+            sb.append(r.id).append('|').append(r.title).append('|').append(r.monthlyRent).append('|')
+                    .append(r.matchPercent).append('|').append(r.coverImageUrl).append('|')
+                    .append(r.listingStatus).append('|').append(r.canContact).append(';');
+        }
+        return sb.toString();
     }
 
     private void setFilter(int f) {
