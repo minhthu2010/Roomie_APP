@@ -22,7 +22,8 @@
         <!-- Splash Activity (Launcher) -->
         <activity
             android:name=".ui.auth.SplashActivity"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.Roomie.Starting">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
