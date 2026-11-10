@@ -15,4 +15,12 @@
     </style>
 
     <style name="Theme.Roomie" parent="Base.Theme.Roomie" />
+
+    <!-- Màn chờ lúc mở app (SplashActivity): dùng màn chờ của hệ thống (Android 12+ luôn hiện màn này),
+         nên không vẽ thêm màn chờ riêng. Chờ xong thì đổi sang Theme.Roomie. -->
+    <style name="Theme.Roomie.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/white</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="postSplashScreenTheme">@style/Theme.Roomie</item>
+    </style>
 </resources>
