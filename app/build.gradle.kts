@@ -27,9 +27,14 @@ val releaseApiBaseUrl = localProps.getProperty(
 //val apiBaseUrl: String = localProps.getProperty("roomie.apiBaseUrl", "http://10.0.2.2:3000/api/v1/")
 // User giả lập khi chưa có đăng nhập thật (backend bật AUTH_DEV_BYPASS). Mặc định: seeker trong seed.
 val devUserId: String = localProps.getProperty("roomie.devUserId", "00000000-0000-0000-0000-000000000003")
-// Đăng nhập Google: Web client ID trên Google Cloud (cùng giá trị GOOGLE_CLIENT_IDS ở backend .env)
-//   roomie.googleWebClientId=xxxx.apps.googleusercontent.com
-val googleWebClientId: String = localProps.getProperty("roomie.googleWebClientId", "")
+// Đăng nhập Google: Web client ID của nhóm trên Google Cloud (cùng giá trị GOOGLE_CLIENT_IDS ở backend .env).
+// Không phải bí mật (nằm sẵn trong APK) nên ghi mặc định ở đây để ai build cũng có.
+// Muốn dùng client khác thì thêm roomie.googleWebClientId=... vào local.properties.
+// Lưu ý: SHA-1 của máy/khóa build vẫn phải được khai báo thành client Android trên Google Cloud.
+val googleWebClientId: String = localProps.getProperty(
+    "roomie.googleWebClientId",
+    "989092068165-c2o7b5sq45ctpurg0ifljlmvftkb1re2.apps.googleusercontent.com"
+)
 
 android {
     namespace = "com.example.roomie"
