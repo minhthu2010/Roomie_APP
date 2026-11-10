@@ -61,6 +61,7 @@ import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -80,6 +81,8 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
 
     private static final double DEFAULT_ZOOM = 13.0;
     private static final long RELOAD_DELAY_MS = 400;
+    /** Khoảng thời gian hiệu ứng mở màn (~300ms); tải phòng sau đó */
+    private static final long FIRST_LOAD_DELAY_MS = 320;
     private static final int HIGH_MATCH = 80;
     /** Bán kính mặc định của server khi không gửi radiusKm, và mức mở rộng tối đa */
     private static final int DEFAULT_RADIUS_KM = 3;
@@ -92,6 +95,8 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
     private MapView map;
     private MyLocationNewOverlay myLocation;
     private final List<Marker> roomMarkers = new ArrayList<>();
+    /** Ảnh nhãn giá đã vẽ, theo "chữ|nổi bật" */
+    private final Map<String, Drawable> labelCache = new HashMap<>();
     private SearchModels.RoomCard selected;
     private Marker searchPin;
     private Marker selectedMarker;
@@ -322,7 +327,8 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
         map.getController().setCenter(new GeoPoint(province.latitude, province.longitude));
         // Có địa chỉ / trường / phường đang tìm thì nhảy tới đó
         moveToSearchLocation();
-        scheduleReload(0);
+        // Chờ hiệu ứng mở màn xong mới tải và vẽ nhãn giá, để lúc chuyển màn không bị giật
+        scheduleReload(FIRST_LOAD_DELAY_MS);
     }
 
     /**
@@ -467,33 +473,68 @@ public class BanDoGiaPhongActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Vẽ nhãn giá cho các phòng trong vùng đang xem. Kéo bản đồ thì tải lại liên tục, nên giữ nguyên
+     * marker của phòng vẫn còn (cùng giá, cùng % phù hợp), chỉ bỏ phòng đã ra ngoài và thêm phòng mới.
+     */
     private void showRooms(List<SearchModels.RoomCard> rooms) {
-        map.getOverlays().removeAll(roomMarkers);
-        roomMarkers.clear();
+        Map<String, Marker> kept = new HashMap<>();
+        for (Marker m : roomMarkers) {
+            SearchModels.RoomCard old = (SearchModels.RoomCard) m.getRelatedObject();
+            kept.put(markerKey(old), m);
+        }
+        List<Marker> next = new ArrayList<>();
         selectedMarker = null;
         for (SearchModels.RoomCard room : rooms) {
             if (room.latitude == null || room.longitude == null) continue;
+            boolean isSelected = selected != null && selected.id.equals(room.id);
+            Marker reuse = kept.remove(markerKey(room));
+            if (reuse != null) {
+                reuse.setRelatedObject(room);
+                if (isSelected) {
+                    selectedMarker = reuse;
+                    reuse.setIcon(priceIcon(room, true));
+                }
+                next.add(reuse);
+                continue;
+            }
             Marker marker = new Marker(map);
             marker.setPosition(new GeoPoint(room.latitude, room.longitude));
             marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
             marker.setRelatedObject(room);
-            boolean isSelected = selected != null && selected.id.equals(room.id);
             marker.setIcon(priceIcon(room, isSelected));
             marker.setOnMarkerClickListener((m, mapView) -> {
                 selectRoom(m);
                 return true;
             });
             if (isSelected) selectedMarker = marker;
-            roomMarkers.add(marker);
+            next.add(marker);
         }
-        map.getOverlays().addAll(roomMarkers);
+        // Phòng không còn trong vùng xem
+        map.getOverlays().removeAll(kept.values());
+        for (Marker m : next) if (!roomMarkers.contains(m)) map.getOverlays().add(m);
+        roomMarkers.clear();
+        roomMarkers.addAll(next);
         map.invalidate();
     }
 
-    // Phòng đang chọn hoặc phù hợp ≥ 80% có nhãn nền đỏ đậm
+    /** Cùng phòng, cùng nội dung nhãn thì dùng lại marker */
+    private static String markerKey(SearchModels.RoomCard r) {
+        return r.id + '|' + r.monthlyRent + '|' + r.matchPercent;
+    }
+
+    // Phòng đang chọn hoặc phù hợp ≥ 80% có nhãn nền đỏ đậm.
+    // Nhãn là ảnh vẽ từ TextView (tốn công trên luồng giao diện) nên vẽ mỗi kiểu nhãn một lần rồi dùng lại.
     private Drawable priceIcon(SearchModels.RoomCard room, boolean isSelected) {
         boolean highlight = isSelected || (room.matchPercent != null && room.matchPercent >= HIGH_MATCH);
-        return MapSupport.priceLabel(this, getString(R.string.map_price_label, RoomFormat.millions(room.monthlyRent)), highlight);
+        String text = getString(R.string.map_price_label, RoomFormat.millions(room.monthlyRent));
+        String key = text + '|' + highlight;
+        Drawable label = labelCache.get(key);
+        if (label == null) {
+            label = MapSupport.priceLabel(this, text, highlight);
+            labelCache.put(key, label);
+        }
+        return label.getConstantState() != null ? label.getConstantState().newDrawable(getResources()) : label;
     }
 
     // ---------- Thẻ phòng ----------

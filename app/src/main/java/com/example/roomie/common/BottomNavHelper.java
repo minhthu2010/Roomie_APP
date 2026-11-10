@@ -1,12 +1,15 @@
 package com.example.roomie.common;
 
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.graphics.Typeface;
+import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.roomie.R;
@@ -46,6 +49,35 @@ public final class BottomNavHelper {
         setClick(activity, R.id.nav_saved, PhongDaLuuActivity.class);
         setClick(activity, R.id.nav_post, BaiDangCuaToiActivity.class);
         setClick(activity, R.id.nav_profile, ProfileActivity.class);
+        bindBack(activity);
+    }
+
+    /**
+     * Nút quay lại ở 4 tab chính: các tab đều nằm trong cùng ngăn xếp (REORDER_TO_FRONT) nên mặc định
+     * "quay lại" sẽ nhảy lần lượt qua các tab đã mở. Ở Đã lưu / Bài đăng / Hồ sơ thì về Khám phá,
+     * ở Khám phá thì đưa app về nền (như thoát app) thay vì lộ ra tab mở trước đó.
+     */
+    private static void bindBack(AppCompatActivity activity) {
+        Class<?> type = activity.getClass();
+        boolean home = type == HomeActivity.class;
+        boolean otherTab = type == PhongDaLuuActivity.class || type == BaiDangCuaToiActivity.class
+                || type == ProfileActivity.class;
+        if (!home && !otherTab) return;
+        activity.getOnBackPressedDispatcher().addCallback(activity, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (home) activity.moveTaskToBack(true);
+                else open(activity, HomeActivity.class);
+            }
+        });
+    }
+
+    /** Mở tab: dùng lại màn đã mở (giữ nguyên nội dung, không tải lại), hiện dần thay vì trượt cả màn hình */
+    private static void open(AppCompatActivity activity, Class<?> destination) {
+        Intent intent = new Intent(activity, destination);
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        Bundle options = ActivityOptions.makeCustomAnimation(activity, R.anim.tab_fade_in, R.anim.tab_hold).toBundle();
+        activity.startActivity(intent, options);
     }
 
     public static void bindCustomBar(AppCompatActivity activity) {
@@ -64,9 +96,7 @@ public final class BottomNavHelper {
         if (tab == null) return;
         tab.setOnClickListener(view -> {
             if (activity.getClass() == destination) return;
-            Intent intent = new Intent(activity, destination);
-            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            activity.startActivity(intent);
+            open(activity, destination);
         });
     }
 }

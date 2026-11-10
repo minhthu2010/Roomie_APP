@@ -52,6 +52,8 @@ import retrofit2.Call;
 public class SearchActivity extends AppCompatActivity {
 
     private static final long SUGGEST_DELAY_MS = 300;
+    /** Thời gian hiệu ứng mở màn (~300ms) */
+    private static final long OPEN_ANIMATION_MS = 320;
     /** Gõ từ 2 ký tự trở lên mới hiện gợi ý (thay phần lối tắt) */
     private static final int MIN_TYPED = 2;
     private static final long FRESH_LOCATION_MS = 5 * 60 * 1000;
@@ -169,11 +171,16 @@ public class SearchActivity extends AppCompatActivity {
             }
         });
 
-        loadTopWards();
-
         renderNearMe();
         renderRecent();
-        loadSchools(null);
+        // Gợi ý từ server (khu vực quan tâm, trường, lối tắt hồ sơ) dựng sau khi hiệu ứng mở màn xong:
+        // server trả rất nhanh nên nếu dựng ngay thì chen vào giữa hiệu ứng, màn hình bị giật
+        handler.postDelayed(() -> {
+            if (isFinishing()) return;
+            loadTopWards();
+            loadSchools(null);
+            loadProfileShortcuts(findViewById(R.id.layout_near_me));
+        }, OPEN_ANIMATION_MS);
     }
 
     @Override
@@ -270,7 +277,6 @@ public class SearchActivity extends AppCompatActivity {
                     Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION});
         });
         container.addView(row);
-        loadProfileShortcuts(container);
     }
 
     /**
