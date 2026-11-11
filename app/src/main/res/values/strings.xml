@@ -231,7 +231,7 @@
     <string name="title_search_room">Tìm kiếm phòng</string>
     <string name="search_where_title">Bạn muốn ở đâu?</string>
     <string name="search_sample_query">ĐH Bách Khoa</string>
-    <string name="search_sub_hint">Gõ tên phường, trường, tên đường hoặc số nhà</string>
+    <string name="search_sub_hint">Gõ tên phường, trường hoặc tên đường</string>
     <string name="recent_search_title">Tìm kiếm gần đây</string>
     <string name="clear_history">Xóa lịch sử</string>
     <string name="recent_1_title">ĐH Bách Khoa TP.HCM</string>
@@ -638,7 +638,7 @@
     <string name="places_addresses_title">Địa chỉ</string>
     <string name="places_ward_sub">%1$s · %2$d phòng</string>
     <string name="places_searching">Đang tìm địa chỉ…</string>
-    <string name="places_empty">Không tìm thấy địa chỉ phù hợp. Thử gõ tên đường kèm số nhà hoặc tên phường.</string>
+    <string name="places_empty">Không tìm thấy địa chỉ phù hợp. Thử gõ tên đường, tên trường hoặc tên phường.</string>
     <string name="places_source">Địa chỉ từ OpenStreetMap (Photon)</string>
     <string name="search_recent_place_sub">Địa chỉ · bán kính 3km</string>
     <string name="search_recent_ward_sub">Phường/xã · %1$s</string>
