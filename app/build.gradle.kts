@@ -22,7 +22,7 @@ val debugApiBaseUrl = localProps.getProperty(
 
 val releaseApiBaseUrl = localProps.getProperty(
     "roomie.releaseApiBaseUrl",
-    "https://your-domain.example/api/v1/"
+    "https://180-93-37-88.sslip.io/api/v1/"
 )
 //val apiBaseUrl: String = localProps.getProperty("roomie.apiBaseUrl", "http://10.0.2.2:3000/api/v1/")
 // User giả lập khi chưa có đăng nhập thật (backend bật AUTH_DEV_BYPASS). Mặc định: seeker trong seed.
