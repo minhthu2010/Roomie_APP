@@ -93,6 +93,9 @@ public class SearchActivity extends AppCompatActivity {
     private Call<?> suggestCall;
     private Call<?> typedSchoolsCall;
     private Call<?> placesCall;
+    /** Gợi ý địa chỉ đầu tiên của lần gõ gần nhất (topAddressQuery) để phím tìm kiếm nhảy tới */
+    private PlaceModels.Address topAddress;
+    private String topAddressQuery;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,7 +139,7 @@ public class SearchActivity extends AppCompatActivity {
         }
         edtSearch.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                searchByText();
+                searchFromKeyboard();
                 return true;
             }
             return false;
@@ -194,6 +197,44 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     // ---------- Chọn điều kiện ----------
+
+    /**
+     * Phím tìm kiếm: gõ dạng địa chỉ ("15 Nguyễn Huệ", "hẻm 51 Lý Thường Kiệt") thì nhảy tới địa chỉ khớp nhất
+     * như khi chọn gợi ý; còn lại tìm phòng theo chữ.
+     */
+    private void searchFromKeyboard() {
+        String text = edtSearch.getText().toString().trim();
+        if (!looksLikeAddress(text)) {
+            searchByText();
+            return;
+        }
+        if (topAddress != null && text.equals(topAddressQuery)) {
+            choosePlace(topAddress);
+            return;
+        }
+        // Gợi ý chưa về kịp: hỏi thẳng, không có kết quả thì tìm theo chữ
+        if (pendingSuggest != null) handler.removeCallbacks(pendingSuggest);
+        if (placesCall != null) placesCall.cancel();
+        Call<ApiResponse<PlaceModels.Suggest>> call = api.suggestPlaces(text, ProvinceStore.code(this));
+        placesCall = call;
+        call.enqueue(new ApiCallback<PlaceModels.Suggest>(this) {
+            @Override
+            public void onSuccess(PlaceModels.Suggest data) {
+                if (data != null && !data.addresses.isEmpty()) choosePlace(data.addresses.get(0));
+                else searchByText();
+            }
+
+            @Override
+            public void onError(String message) {
+                searchByText();
+            }
+        });
+    }
+
+    /** Bắt đầu bằng số nhà / hẻm / ngõ / kiệt */
+    static boolean looksLikeAddress(String text) {
+        return text.matches("(?iu)^(s[oố]\\s*)?((h[eẻ]m|ng[oõ]|ki[eệ]t|ng[aá]ch)\\s+)?\\d+[a-z]?(/\\d+[a-z]?)*\\s*,?\\s+\\D.*");
+    }
 
     private void searchByText() {
         String text = edtSearch.getText().toString().trim();
@@ -473,6 +514,8 @@ public class SearchActivity extends AppCompatActivity {
                         layoutTypedWards.addView(row);
                     }
                 }
+                topAddress = data.addresses.isEmpty() ? null : data.addresses.get(0);
+                topAddressQuery = q;
                 if (!data.addresses.isEmpty()) {
                     layoutTypedAddresses.addView(sectionTitle(getString(R.string.places_addresses_title)));
                     for (PlaceModels.Address a : data.addresses) {
