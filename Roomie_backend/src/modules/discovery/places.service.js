@@ -75,25 +75,66 @@ async function provinceBias(provinceCode) {
   return p && p.center_lat != null ? { lat: p.center_lat, lon: p.center_lng } : DEFAULT_BIAS;
 }
 
-// Gợi ý địa chỉ (số nhà, đường, địa danh) trong Việt Nam, ưu tiên gần tỉnh đang chọn
+/**
+ * "15 Nguyễn Huệ", "số 1 Đại Cồ Việt", "hẻm 51 Lý Thường Kiệt", "12/3 Lê Lợi" -> { prefix, number, street }.
+ * Không phải dạng "số nhà + tên đường" thì null.
+ */
+function parseStreetAddress(q) {
+  const m = String(q).trim().match(
+    /^(?:s[oố]\s*)?((?:h[eẻ]m|ng[oõ]|ki[eệ]t|ng[aá]ch)\s+)?(\d+[a-z]?(?:\/\d+[a-z]?)*)\s*,?\s+(\D.{1,})$/iu);
+  if (!m) return null;
+  return { prefix: m[1] ? m[1].trim() : '', number: m[2], street: m[3].replace(/,.*$/, '').trim() };
+}
+
+// Gợi ý địa chỉ (số nhà, đường, địa danh) trong Việt Nam, ưu tiên trong / gần tỉnh đang chọn.
+// Photon tìm theo tên địa điểm, không hiểu "số nhà + tên đường" (OSM ở VN rất ít số nhà): "15 Nguyễn Huệ"
+// sẽ ra "Đường số 15 ..." ở tỉnh khác. Nên với dạng này: tìm riêng tên đường, đặt vị trí theo đường đó
+// (ghi rõ là gần đúng), và nếu OSM có đúng số nhà thì đưa lên đầu.
 async function searchAddresses(q, { limit = 5, provinceCode } = {}) {
-  const key = `addr:${normalize(q)}:${limit}:${provinceCode || ''}`;
+  const key = `addr2:${normalize(q)}:${limit}:${provinceCode || ''}`;
   return cached(key, async () => {
-    const bias = await provinceBias(provinceCode);
-    const data = await photon('/api/', { q, limit: limit + 3, bbox: VN_BBOX, lat: bias.lat, lon: bias.lon });
+    const [bias, provinceName] = await Promise.all([provinceBias(provinceCode), provinceNameOf(provinceCode)]);
+    const inProvince = (f) => provinceName != null
+      && [f.properties.city, f.properties.state].some((x) => x && normalize(x) === normalize(provinceName));
+    const vn = (data) => data.features.filter((f) => f.properties.countrycode === 'VN');
+    const base = { bbox: VN_BBOX, lat: bias.lat, lon: bias.lon };
+    const parsed = parseStreetAddress(q);
+
+    const general = vn(await photon('/api/', { q, limit: limit + 3, ...base }));
+    let ranked;
+    if (parsed) {
+      const street = normalize(parsed.street);
+      const streets = vn(await photon('/api/', { q: parsed.street, limit: 8, layer: 'street', ...base }))
+        .filter((f) => normalize(f.properties.name || '').includes(street));
+      // OSM có đúng số nhà trên đường đó
+      const exact = general.filter((f) => normalize(f.properties.housenumber || '') === normalize(parsed.number)
+        && normalize(f.properties.street || '').includes(street))
+        .sort((a, b) => inProvince(b) - inProvince(a)).map(toPlace);
+      // Vị trí theo tên đường: mỗi phường một kết quả, đường trong tỉnh đang chọn lên trước
+      const label = `${parsed.prefix ? `${parsed.prefix[0].toUpperCase()}${parsed.prefix.slice(1)} ` : ''}${parsed.number}`;
+      const byStreet = [...streets].sort((a, b) => inProvince(b) - inProvince(a)).map((f) => {
+        const p = toPlace(f);
+        return { ...p, title: `${label} ${f.properties.name}`, subtitle: `${p.subtitle} · vị trí gần đúng theo tên đường` };
+      });
+      ranked = [...exact, ...byStreet, ...general.map(toPlace)];
+    } else {
+      ranked = [...general].sort((a, b) => inProvince(b) - inProvince(a)).map(toPlace);
+    }
     const seen = new Set();
-    return data.features
-      .filter((f) => f.properties.countrycode === 'VN')
-      .map(toPlace)
-      // bỏ kết quả trùng tên + dòng phụ (OSM chia 1 con đường thành nhiều đoạn)
-      .filter((p) => {
-        const k = `${normalize(p.title)}|${normalize(p.subtitle)}`;
-        if (seen.has(k)) return false;
-        seen.add(k);
-        return true;
-      })
-      .slice(0, limit);
+    // bỏ kết quả trùng (OSM chia 1 con đường thành nhiều đoạn): cùng tên + cùng phường
+    return ranked.filter((p) => {
+      const k = `${normalize(p.title)}|${normalize(p.subtitle).split(',')[0]}`;
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    }).slice(0, limit);
   });
+}
+
+async function provinceNameOf(provinceCode) {
+  if (!provinceCode) return null;
+  const { rows } = await db.query('SELECT province_name FROM provinces WHERE province_code = $1', [provinceCode]);
+  return rows[0] ? rows[0].province_name : null;
 }
 
 // ---------- Đơn vị hành chính (dữ liệu thật, bảng provinces / wards) ----------
